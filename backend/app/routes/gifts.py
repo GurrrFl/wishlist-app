@@ -1,94 +1,141 @@
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
 
-from app.database import get_db
-from app.schemas.gift import GiftCreate, GiftRead, GiftUpdate
+from app.dependencies import get_current_user, get_db
+from app.models.user import User
+from app.schemas.gift import GiftCreate, GiftRead, GiftShort, GiftUpdate
 from app.services.gift_service import GiftService
 
-router = APIRouter(prefix="/gifts", tags=["gifts"])
 
-@router.post("/", response_model=GiftRead, status_code=status.HTTP_201_CREATED)
-def create_gift(owner_id: int, gift_data: GiftCreate, db: Session = Depends(get_db)):
-    """Create a new gift in a wishlist"""
+router = APIRouter(prefix="/gifts", tags=["Gifts"])
+
+
+@router.post(
+    "/",
+    response_model=GiftRead,
+    status_code=status.HTTP_201_CREATED,
+    description="Создать новый подарок в вишлисте"
+)
+def create_gift(
+    data: GiftCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     service = GiftService(db)
     try:
-        gift = service.create_for_user(owner_id, gift_data)
+        gift = service.create_for_user(current_user.user_id, data)
         return gift
-    except (ValueError, PermissionError) as e:
-        raise HTTPException(status_code=400 if isinstance(e, ValueError) else 403, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
-@router.get("/{gift_id}")
-def get_gift(gift_id: int, owner_id: int, db: Session = Depends(get_db)):
-    """Get a gift by ID for the owner"""
-    service = GiftService(db)
-    try:
-        gift = service.get_for_owner(gift_id, owner_id)
-        return gift
-    except (ValueError, PermissionError) as e:
-        raise HTTPException(status_code=404 if isinstance(e, ValueError) else 403, detail=str(e))
 
-@router.get("/wishlist/{wishlist_id}")
-def list_wishlist_gifts(
-    owner_id: int,
+@router.get(
+    "/wishlist/{wishlist_id}",
+    response_model=List[GiftShort],
+    description="Получить все подарки вишлиста"
+)
+def list_gifts_in_wishlist(
     wishlist_id: int,
     offset: int = 0,
     limit: int = 50,
-    status: str = None,
-    search: str = None,
-    db: Session = Depends(get_db)
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """List gifts in a wishlist"""
     service = GiftService(db)
     try:
         gifts = service.list_for_wishlist(
-            owner_id=owner_id,
+            owner_id=current_user.user_id,
             wishlist_id=wishlist_id,
             offset=offset,
             limit=limit,
             status=status,
-            search=search
+            search=search,
         )
         return gifts
-    except (ValueError, PermissionError) as e:
-        raise HTTPException(status_code=404 if isinstance(e, ValueError) else 403, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
-@router.put("/{gift_id}")
+
+@router.get(
+    "/{gift_id}",
+    response_model=GiftRead,
+    description="Получить подарок по ID"
+)
+def get_gift_by_id(
+    gift_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = GiftService(db)
+    try:
+        gift = service.get_for_owner(gift_id, current_user.user_id)
+        return gift
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+
+@router.patch(
+    "/{gift_id}",
+    response_model=GiftRead,
+    description="Обновить подарок"
+)
 def update_gift(
     gift_id: int,
-    owner_id: int,
-    gift_data: GiftUpdate,
-    db: Session = Depends(get_db)
+    data: GiftUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """Update a gift"""
     service = GiftService(db)
     try:
-        gift = service.update_for_owner(gift_id, owner_id, gift_data)
-        return gift
-    except (ValueError, PermissionError) as e:
-        raise HTTPException(status_code=404 if isinstance(e, ValueError) else 403, detail=str(e))
+        updated = service.update_for_owner(gift_id, current_user.user_id, data)
+        return updated
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
-@router.delete("/{gift_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_gift(gift_id: int, owner_id: int, db: Session = Depends(get_db)):
-    """Delete a gift"""
+
+@router.delete(
+    "/{gift_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Удалить подарок"
+)
+def delete_gift(
+    gift_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     service = GiftService(db)
     try:
-        service.delete_for_owner(gift_id, owner_id)
-        return
-    except (ValueError, PermissionError) as e:
-        raise HTTPException(status_code=404 if isinstance(e, ValueError) else 403, detail=str(e))
+        service.delete_for_owner(gift_id, current_user.user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
 
-@router.post("/{gift_id}/status")
+
+@router.patch(
+    "/{gift_id}/status",
+    response_model=GiftRead,
+    description="Изменить статус подарка вручную"
+)
 def change_gift_status(
     gift_id: int,
-    owner_id: int,
     new_status: str,
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """Change gift status"""
     service = GiftService(db)
     try:
-        gift = service.change_status_for_owner(gift_id, owner_id, new_status)
+        gift = service.change_status_for_owner(
+            gift_id=gift_id,
+            owner_id=current_user.user_id,
+            new_status=new_status,
+        )
         return gift
-    except (ValueError, PermissionError) as e:
-        raise HTTPException(status_code=404 if isinstance(e, ValueError) else 403, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
