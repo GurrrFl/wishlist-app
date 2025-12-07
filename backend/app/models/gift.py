@@ -16,5 +16,6 @@ class Gift(Base):
     status = Column(String, default="available", server_default="available")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relationship with Wishlist
+  
     wishlist = relationship("Wishlist", back_populates="gifts")
+    reservations = relationship("Reservation", back_populates="gift", cascade="all, delete-orphan")

@@ -15,7 +15,5 @@ class Wishlist(Base):
     unique_link = Column(String, unique=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # Relationship with User
     user = relationship("User", back_populates="wishlists")
-    # Relationship with Gifts
     gifts = relationship("Gift", back_populates="wishlist", cascade="all, delete-orphan")
