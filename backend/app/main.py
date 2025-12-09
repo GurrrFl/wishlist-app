@@ -9,7 +9,7 @@ app = FastAPI(
 	title= settings.app_name,
 	debug= True,
 	docs_url='/api/docs',
-	redoc_url='/api/redoc'
+	redoc_url='/api/redoc',
 )
 app.add_middleware(
 		CORSMiddleware,
@@ -19,9 +19,23 @@ app.add_middleware(
 		allow_headers=["*"]
 )
 
-@app.get('/')
+app.include_router(users_router)
+app.include_router(wishlists_router)
+app.include_router(gifts_router)
+app.include_router(reservation_router)
+
+@app.on_event('startup')
+def on_startup():
+    init_db()
+
+
+@app.get("/", tags=["Root"])
 def root():
-	return {
-		"message": 'Wellcome!!!!!!!!!!!!!!!',
+    return {"message": "Wishlist API is running",
 		"docs": "api/docs",
-	}
+        }
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
