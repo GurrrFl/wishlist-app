@@ -89,6 +89,8 @@ def get_wishlist_by_id(
     try:
         wishlist = service.get_for_owner(wishlist_id, current_user.user_id)
         return wishlist
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
@@ -112,6 +114,8 @@ def update_wishlist(
             data=data,
         )
         return updated
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
@@ -129,6 +133,8 @@ def delete_wishlist(
     service = WishlistService(db)
     try:
         service.delete_for_user(wishlist_id, current_user.user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 

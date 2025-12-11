@@ -74,6 +74,8 @@ def get_gift_by_id(
     try:
         gift = service.get_for_owner(gift_id, current_user.user_id)
         return gift
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
@@ -93,6 +95,8 @@ def update_gift(
     try:
         updated = service.update_for_owner(gift_id, current_user.user_id, data)
         return updated
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 

@@ -10,8 +10,8 @@ CREATE TABLE users (
     user_id     INTEGER PRIMARY KEY AUTOINCREMENT,
     login       TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    email       TEXT UNIQUE NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    email       TEXT UNIQUE NOT NULL
+		created_at  TEXT NOT NULL 
 );
 
 CREATE INDEX idx_users_login ON users(login);
@@ -24,13 +24,12 @@ CREATE TABLE wishlists (
     event_date  DATE NOT NULL,
     is_private  INTEGER DEFAULT 0,
     unique_link TEXT UNIQUE,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at  TEXT NOT NULL ,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_wishlists_user_id ON wishlists(user_id);
 CREATE INDEX idx_wishlists_unique_link ON wishlists(unique_link);
-
 
 CREATE TABLE gifts (
     gift_id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +39,7 @@ CREATE TABLE gifts (
     price       REAL,
     store_link  TEXT,
     status      TEXT DEFAULT 'available' CHECK (status IN ('available','reserved')),
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at  TEXT NOT NULL ,
     FOREIGN KEY (wishlist_id) REFERENCES wishlists(wishlist_id) ON DELETE CASCADE
 );
 
@@ -51,8 +50,8 @@ CREATE TABLE reservations (
     reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id        INTEGER NOT NULL,
     gift_id        INTEGER NOT NULL,
-    reserved_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    cancelled_at   TIMESTAMP,
+    reserved_date TEXT NOT NULL ,
+    cancelled_at TEXT NOT NULL ,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (gift_id) REFERENCES gifts(gift_id) ON DELETE CASCADE,
     UNIQUE(user_id, gift_id)
@@ -66,7 +65,7 @@ CREATE TABLE logs (
     user_id    INTEGER,
     action_type TEXT NOT NULL,
     details    TEXT,
-    timestamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp  TEXT NOT NULL ,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

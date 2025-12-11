@@ -1,7 +1,12 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
-from sqlalchemy.sql import func
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+
+def now_str() -> str:
+    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
 
 class User(Base):
     __tablename__ = "users"
@@ -10,6 +15,7 @@ class User(Base):
     login = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(Text, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    # Relationship with Wishlists
+    created_at = Column(String, nullable=False, default=now_str)
     wishlists = relationship("Wishlist", back_populates="user", cascade="all, delete-orphan")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    reservations = relationship("Reservation", back_populates="user", cascade="all, delete-orphan")
+    

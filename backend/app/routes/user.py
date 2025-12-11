@@ -125,4 +125,7 @@ def delete_current_user(
     db: Session = Depends(get_db),
 ):
     service = UserService(db)
-    service.delete_user(current_user.user_id)
+    try:
+        service.delete_user(current_user.user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

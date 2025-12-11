@@ -30,7 +30,7 @@ class GiftService:
 
     def get_for_owner(self, gift_id: int, owner_id: int) -> Gift:
         gift = self.gift_repo.get_by_id(gift_id)
-        if gift is None:
+        if not gift:
             raise ValueError("Gift not found")
         self._ensure_wishlist_owner(gift.wishlist_id, owner_id)
         return gift

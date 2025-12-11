@@ -72,6 +72,8 @@ def get_reservation_by_id(
     try:
         reservation = service.get_for_user(reservation_id, current_user.user_id)
         return reservation
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
@@ -99,6 +101,8 @@ def get_gift_reservations(
             only_active=only_active,
         )
         return reservations
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
@@ -120,6 +124,8 @@ def cancel_reservation(
             user_id=current_user.user_id,
         )
         return cancelled
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
 
@@ -135,4 +141,7 @@ def delete_reservation(
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
-    service.admin_delete(reservation_id)
+    try:
+        service.admin_delete(reservation_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

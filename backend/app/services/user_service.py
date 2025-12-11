@@ -6,7 +6,7 @@ from ..repositories.user_repository import UserRepository
 from ..schemas.user import UserCreate, UserUpdate
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
 
 class UserService:
