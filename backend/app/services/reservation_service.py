@@ -39,12 +39,25 @@ class ReservationService:
             raise ValueError("Cannot reserve your own gift")
 
         existing = self.reservation_repo.get_by_user_and_gift(user_id, gift_id)
-        if existing is not None and existing.cancelled_at is None:
-            raise ValueError("Gift is already reserved by this user")
+
+        if existing:
+            if existing.cancelled_at is None:
+                raise ValueError("Gift is already reserved by this user")
+
+            return self.reservation_repo.reactivate(existing)
 
         data = ReservationCreate(user_id=user_id, gift_id=gift_id)
-        reservation = self.reservation_repo.create(data)
-        return reservation
+        return self.reservation_repo.create(data)
+
+    def cancel_for_user(self, reservation_id: int, user_id: int) -> Reservation:
+        reservation = self.reservation_repo.get_by_id(reservation_id)
+        if reservation is None:
+            raise ValueError("Reservation not found")
+        if reservation.user_id != user_id:
+            raise PermissionError("Access denied to reservation")
+        if reservation.cancelled_at is not None:
+            return reservation 
+        return self.reservation_repo.cancel(reservation, datetime.utcnow())
 
     def get_for_user(
         self,
@@ -96,19 +109,7 @@ class ReservationService:
             only_active=only_active,
         )
 
-    def cancel_for_user(
-        self,
-        reservation_id: int,
-        user_id: int,
-    ) -> Reservation:
-        reservation = self.get_for_user(reservation_id, user_id)
-        if reservation.cancelled_at is not None:
-            return reservation
-        cancelled = self.reservation_repo.cancel(
-            reservation,
-            cancelled_at=datetime.utcnow(),
-        )
-        return cancelled
+
 
     def admin_delete(self, reservation_id: int) -> None:
         reservation = self.reservation_repo.get_by_id(reservation_id)

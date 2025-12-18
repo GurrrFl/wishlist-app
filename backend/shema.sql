@@ -10,7 +10,7 @@ CREATE TABLE users (
     user_id     INTEGER PRIMARY KEY AUTOINCREMENT,
     login       TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    email       TEXT UNIQUE NOT NULL
+    email       TEXT UNIQUE NOT NULL,
 		created_at  TEXT NOT NULL 
 );
 
@@ -51,7 +51,7 @@ CREATE TABLE reservations (
     user_id        INTEGER NOT NULL,
     gift_id        INTEGER NOT NULL,
     reserved_date TEXT NOT NULL ,
-    cancelled_at TEXT NOT NULL ,
+    cancelled_at TEXT,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (gift_id) REFERENCES gifts(gift_id) ON DELETE CASCADE,
     UNIQUE(user_id, gift_id)
@@ -59,6 +59,7 @@ CREATE TABLE reservations (
 
 CREATE INDEX idx_reservations_user_id ON reservations(user_id);
 CREATE INDEX idx_reservations_gift_id ON reservations(gift_id);
+CREATE INDEX idx_reservations_cancelled_at ON reservations(cancelled_at);
 
 CREATE TABLE logs (
     log_id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,9 +70,11 @@ CREATE TABLE logs (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+
 CREATE TRIGGER trigger_reserve_gift
 BEFORE INSERT ON reservations
 FOR EACH ROW
+WHEN NEW.cancelled_at IS NULL 
 BEGIN
     SELECT
         CASE
@@ -79,25 +82,44 @@ BEGIN
             THEN RAISE(ABORT, 'Gift is already reserved')
         END;
 
+
     UPDATE gifts
     SET status = 'reserved'
     WHERE gift_id = NEW.gift_id;
 END;
 
+
 CREATE TRIGGER trigger_cancel_reservation
 AFTER UPDATE OF cancelled_at ON reservations
 FOR EACH ROW
-WHEN NEW.cancelled_at IS NOT NULL AND OLD.cancelled_at IS NULL
+WHEN NEW.cancelled_at IS NOT NULL AND OLD.cancelled_at IS NULL 
 BEGIN
     UPDATE gifts
     SET status = 'available'
     WHERE gift_id = OLD.gift_id;
 END;
 
+CREATE TRIGGER trigger_reactivate_reservation
+AFTER UPDATE OF cancelled_at ON reservations
+FOR EACH ROW
+WHEN NEW.cancelled_at IS NULL AND OLD.cancelled_at IS NOT NULL  
+BEGIN
+    SELECT
+        CASE
+            WHEN (SELECT status FROM gifts WHERE gift_id = NEW.gift_id) != 'available'
+            THEN RAISE(ABORT, 'Gift is already reserved by someone else')
+        END;
+
+    UPDATE gifts
+    SET status = 'reserved'
+    WHERE gift_id = NEW.gift_id;
+END;
+
 CREATE TRIGGER trigger_log_reservation
 AFTER INSERT ON reservations
 FOR EACH ROW
+WHEN NEW.cancelled_at IS NULL  
 BEGIN
-    INSERT INTO logs (user_id, action_type, details)
-    VALUES (NEW.user_id, 'RESERVE_GIFT', 'Gift ID: ' || NEW.gift_id);
+    INSERT INTO logs (user_id, action_type, details, timestamp)
+    VALUES (NEW.user_id, 'RESERVE_GIFT', 'Gift ID: ' || NEW.gift_id, datetime('now'));
 END;

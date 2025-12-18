@@ -17,7 +17,7 @@ class Reservation(Base):
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False, index=True)
     gift_id = Column(Integer, ForeignKey("gifts.gift_id"), nullable=False, index=True)
     reserved_date = Column(String, nullable=False, default=now_str)
-    cancelled_at = Column(String, nullable=False, default=now_str)
+    cancelled_at = Column(String, nullable=True)
 
     user = relationship("User", back_populates="reservations")
     gift = relationship("Gift", back_populates="reservations")

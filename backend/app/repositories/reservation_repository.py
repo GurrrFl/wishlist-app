@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import Select, and_, select
 from sqlalchemy.orm import Session
 
 from app.models.reservation import Reservation
@@ -12,17 +11,15 @@ class ReservationRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def _base_query(self) -> Select:
-        return select(Reservation)
-
     def get_by_id(self, reservation_id: int) -> Optional[Reservation]:
-        return self.db.get(Reservation, reservation_id)
+        return self.db.query(Reservation).filter(Reservation.reservation_id == reservation_id).first()
 
     def get_by_user_and_gift(self, user_id: int, gift_id: int) -> Optional[Reservation]:
-        stmt = self._base_query().where(
-            and_(Reservation.user_id == user_id, Reservation.gift_id == gift_id)
-        )
-        return self.db.execute(stmt).scalars().first()
+        """Получить резервацию (любую: активную или отменённую)"""
+        return self.db.query(Reservation).filter(
+            Reservation.user_id == user_id,
+            Reservation.gift_id == gift_id,
+        ).first()
 
     def list_by_user(
         self,
@@ -31,11 +28,10 @@ class ReservationRepository:
         limit: int = 50,
         only_active: bool = False,
     ) -> List[Reservation]:
-        stmt = self._base_query().where(Reservation.user_id == user_id)
+        query = self.db.query(Reservation).filter(Reservation.user_id == user_id)
         if only_active:
-            stmt = stmt.where(Reservation.cancelled_at.is_(None))
-        stmt = stmt.offset(offset).limit(limit)
-        return list(self.db.execute(stmt).scalars().all())
+            query = query.filter(Reservation.cancelled_at.is_(None))  # Только активные
+        return query.offset(offset).limit(limit).all()
 
     def list_by_gift(
         self,
@@ -44,39 +40,41 @@ class ReservationRepository:
         limit: int = 50,
         only_active: bool = False,
     ) -> List[Reservation]:
-        stmt = self._base_query().where(Reservation.gift_id == gift_id)
+        query = self.db.query(Reservation).filter(Reservation.gift_id == gift_id)
         if only_active:
-            stmt = stmt.where(Reservation.cancelled_at.is_(None))
-        stmt = stmt.offset(offset).limit(limit)
-        return list(self.db.execute(stmt).scalars().all())
+            query = query.filter(Reservation.cancelled_at.is_(None))  # Только активные
+        return query.offset(offset).limit(limit).all()
 
     def create(self, data: ReservationCreate) -> Reservation:
+        """Создать новую активную резервацию (cancelled_at = NULL)"""
         reservation = Reservation(
             user_id=data.user_id,
             gift_id=data.gift_id,
+            # cancelled_at по умолчанию NULL (активная)
         )
         self.db.add(reservation)
         self.db.commit()
         self.db.refresh(reservation)
         return reservation
 
-    def update(self, reservation: Reservation, data: ReservationUpdate) -> Reservation:
-        if data.cancelled_at is not None:
-            reservation.cancelled_at = data.cancelled_at
+    def cancel(self, reservation: Reservation, cancelled_at: datetime) -> Reservation:
+        """Soft delete: пометить резервацию как отменённую"""
+        reservation.cancelled_at = cancelled_at
+        self.db.add(reservation)
         self.db.commit()
         self.db.refresh(reservation)
         return reservation
 
-    def cancel(
-        self,
-        reservation: Reservation,
-        cancelled_at: Optional[datetime] = None,
-    ) -> Reservation:
-        reservation.cancelled_at = cancelled_at or datetime.utcnow()
+    def reactivate(self, reservation: Reservation) -> Reservation:
+        """Реактивировать отменённую резервацию (cancelled_at = NULL)"""
+        reservation.cancelled_at = None
+        reservation.reserved_date = datetime.utcnow()  # Обновляем дату
+        self.db.add(reservation)
         self.db.commit()
         self.db.refresh(reservation)
         return reservation
 
     def delete(self, reservation: Reservation) -> None:
+        """Hard delete: физически удалить запись (админ-операция)"""
         self.db.delete(reservation)
         self.db.commit()
