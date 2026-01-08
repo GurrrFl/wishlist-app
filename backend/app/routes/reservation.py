@@ -3,7 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_user, get_db
+from app.dependencies import get_db
+from app.services.auth_service import get_current_user_from_token
 from app.models.user import User
 from app.schemas.reservation import ReservationRead
 from app.services.reservation_service import ReservationService
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/reservations", tags=["Reservations"])
 )
 def reserve_gift(
     gift_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
@@ -45,7 +46,7 @@ def get_my_reservations(
     offset: int = 0,
     limit: int = 50,
     only_active: bool = False,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
@@ -65,7 +66,7 @@ def get_my_reservations(
 )
 def get_reservation_by_id(
     reservation_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
@@ -88,7 +89,7 @@ def get_gift_reservations(
     offset: int = 0,
     limit: int = 50,
     only_active: bool = False,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
@@ -114,7 +115,7 @@ def get_gift_reservations(
 )
 def cancel_reservation(
     reservation_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
@@ -137,7 +138,7 @@ def cancel_reservation(
 )
 def delete_reservation(
     reservation_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = ReservationService(db)
