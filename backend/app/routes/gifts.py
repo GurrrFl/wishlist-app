@@ -3,7 +3,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_user, get_db
+from app.dependencies import get_db
+from app.services.auth_service import get_current_user_from_token
 from app.models.user import User
 from app.schemas.gift import GiftCreate, GiftRead, GiftShort, GiftUpdate
 from app.services.gift_service import GiftService
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/gifts", tags=["Gifts"])
 )
 def create_gift(
     data: GiftCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = GiftService(db)
@@ -42,7 +43,7 @@ def list_gifts_in_wishlist(
     limit: int = 50,
     status: Optional[str] = None,
     search: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = GiftService(db)
@@ -67,7 +68,7 @@ def list_gifts_in_wishlist(
 )
 def get_gift_by_id(
     gift_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = GiftService(db)
@@ -88,7 +89,7 @@ def get_gift_by_id(
 def update_gift(
     gift_id: int,
     data: GiftUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = GiftService(db)
@@ -108,7 +109,7 @@ def update_gift(
 )
 def delete_gift(
     gift_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = GiftService(db)
@@ -128,7 +129,7 @@ def delete_gift(
 def change_gift_status(
     gift_id: int,
     new_status: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = GiftService(db)

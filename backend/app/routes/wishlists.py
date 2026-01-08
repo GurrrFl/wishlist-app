@@ -3,7 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_user, get_db
+from app.dependencies import get_db
+from app.services.auth_service import get_current_user_from_token
 from app.models.user import User
 from app.schemas.wishlist import WishlistCreate, WishlistRead, WishlistShort, WishlistUpdate
 from app.services.wishlist_service import WishlistService
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/wishlists", tags=["Wishlists"])
 )
 def create_wishlist(
     data: WishlistCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
@@ -42,7 +43,7 @@ def get_my_wishlists(
     limit: int = 50,
     include_private: bool = True,
     search: str = None,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
@@ -82,7 +83,7 @@ def get_wishlist_by_link(
 )
 def get_wishlist_by_id(
     wishlist_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
@@ -103,7 +104,7 @@ def get_wishlist_by_id(
 def update_wishlist(
     wishlist_id: int,
     data: WishlistUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
@@ -127,7 +128,7 @@ def update_wishlist(
 )
 def delete_wishlist(
     wishlist_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
@@ -146,7 +147,7 @@ def delete_wishlist(
 )
 def regenerate_wishlist_link(
     wishlist_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
@@ -166,7 +167,7 @@ def regenerate_wishlist_link(
 )
 def clear_wishlist_link(
     wishlist_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_from_token),
     db: Session = Depends(get_db),
 ):
     service = WishlistService(db)
