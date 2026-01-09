@@ -17,7 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/token")
 
 @router.post(
     "/register",
-    response_model=UserRead,
+    response_model= UserShort,
     status_code=status.HTTP_201_CREATED,
     description="Регистрация нового пользователя"
 )
@@ -48,7 +48,6 @@ def login_for_access_token(
         return {
             "access_token": access_token,
             "token_type": "bearer",
-            "user": UserShort.model_validate(user)
         }
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
