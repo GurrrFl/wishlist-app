@@ -51,7 +51,7 @@ import java.time.format.DateTimeFormatter
 fun WishlistDetailsScreen(
     navController: NavHostController,
     wishlistId: Int,
-    viewModel: WishlistViewModel = WishlistViewModel()
+    viewModel: WishlistViewModel
 ) {
     val context = LocalContext.current
     val wishlist = viewModel.getWishlist(wishlistId) ?: return

@@ -7,6 +7,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
 // http://10.0.2.2:8000/
 val appModule = module {
 
@@ -24,5 +25,6 @@ val appModule = module {
     single { SessionManager(androidContext()) }
 
     single { AuthRepository(get(), get()) }
+
 
 }

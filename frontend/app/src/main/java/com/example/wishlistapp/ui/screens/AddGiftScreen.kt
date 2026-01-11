@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -26,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,34 +38,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.data.model.Gift
+import com.example.wishlistapp.viewmodel.WishlistViewModel
 import kotlinx.coroutines.launch
-
-data class WishlistOption(
-    val id: Int,
-    val name: String
-)
+import org.koin.androidx.compose.koinViewModel
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddGiftScreen(navController: NavHostController) {
+fun AddGiftScreen(
+    navController: NavHostController,
+    viewModel: WishlistViewModel = koinViewModel()
+) {
 
     var giftName by remember { mutableStateOf(TextFieldValue("")) }
     var giftPrice by remember { mutableStateOf(TextFieldValue("")) }
     var giftLink by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedWishlistId by remember { mutableStateOf<Int?>(null) }
-    var expanded by remember { mutableStateOf(false) } // Для DropdownMenu
     var giftDescription by remember { mutableStateOf(TextFieldValue("")) }
+
+    var selectedWishlistId by remember { mutableStateOf<Int?>(null) }
+    var expanded by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-
-    val userWishlists = listOf(
-        WishlistOption(1, "День Рождения 2024"),
-        WishlistOption(2, "Новый Год"),
-        WishlistOption(3, "Годовщина"),
-        WishlistOption(4, "Путешествие")
-    )
+    val wishlists = viewModel.getWishlists()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -79,133 +76,153 @@ fun AddGiftScreen(navController: NavHostController) {
                             contentDescription = "Назад"
                         )
                     }
-                },
-                actions = {
-                    TextButton(onClick = {
-                        if (giftName.text.isBlank()) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar("Укажите название желания")
-                            }
-                            return@TextButton
-                        }
-                        if (selectedWishlistId == null) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar("Выберите вишлист")
-                            }
-                            return@TextButton
-                        }
-
-                        navController.navigateUp()
-                    }) {
-                        Text("Готово")
-                    }
                 }
             )
         },
-        content = { paddingValues ->
-
-           Column(
+        bottomBar = {
+            Button(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
-                    .padding(horizontal = 24.dp)
-                    .background(MaterialTheme.colorScheme.surface),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+                onClick = {
 
+                    if (giftName.text.isBlank()) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Укажите название желания")
+                        }
+                        return@Button
+                    }
 
-                Text("Название", style = MaterialTheme.typography.bodySmall)
-                OutlinedTextField(
-                    value = giftName,
-                    onValueChange = { giftName = it },
-                    placeholder = { Text("Напишите название вашего желания") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    isError = giftName.text.isBlank()
-                )
+                    if (selectedWishlistId == null) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Выберите вишлист")
+                        }
+                        return@Button
+                    }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-
-                Text("Цена", style = MaterialTheme.typography.bodySmall)
-                OutlinedTextField(
-                    value = giftPrice,
-                    onValueChange = { giftPrice = it },
-                    placeholder = { Text("Напишите примерную стоимость подарка") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text("Ссылка", style = MaterialTheme.typography.bodySmall)
-                OutlinedTextField(
-                    value = giftLink,
-                    onValueChange = { giftLink = it },
-                    placeholder = { Text("Добавьте ссылку") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-
-                Text("Вишлист", style = MaterialTheme.typography.bodySmall)
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = userWishlists.find { it.id == selectedWishlistId }?.name ?: "",
-                        onValueChange = { },
-                        readOnly = true,
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                        },
-                        placeholder = { Text("Выберите вишлист") },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        isError = selectedWishlistId == null
+                    val newGift = Gift(
+                        id = 0,
+                        wishlistId = selectedWishlistId!!,
+                        name = giftName.text,
+                        price = giftPrice.text,
+                        description = giftDescription.text,
+                        link = giftLink.text.ifBlank { null },
+                        created = LocalDate.now(),
+                        ownerName = "Aleksandra Petrova"
                     )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        userWishlists.forEach { option ->
+
+                    viewModel.addGift(newGift)
+                    navController.navigateUp()
+                }
+            ) {
+                Text("Готово")
+            }
+        }
+    ) { paddingValues ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+                .padding(horizontal = 24.dp)
+                .background(MaterialTheme.colorScheme.surface),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Название", style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(
+                value = giftName,
+                onValueChange = { giftName = it },
+                placeholder = { Text("Напишите название вашего желания") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                isError = giftName.text.isBlank()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("Цена", style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(
+                value = giftPrice,
+                onValueChange = { giftPrice = it },
+                placeholder = { Text("Напишите примерную стоимость подарка") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("Ссылка", style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(
+                value = giftLink,
+                onValueChange = { giftLink = it },
+                placeholder = { Text("Добавьте ссылку") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("Вишлист", style = MaterialTheme.typography.bodySmall)
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+
+                OutlinedTextField(
+                    value = wishlists.find { it.id == selectedWishlistId }?.title ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    placeholder = { Text("Выберите вишлист") },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    isError = selectedWishlistId == null
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    wishlists.forEach { wishlist ->
+                        if (wishlist.id != 3) {
                             DropdownMenuItem(
-                                text = { Text(option.name) },
+                                text = { Text(wishlist.title) },
                                 onClick = {
-                                    selectedWishlistId = option.id
+                                    selectedWishlistId = wishlist.id
                                     expanded = false
                                 }
                             )
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-
-                Text("Описание", style = MaterialTheme.typography.bodySmall)
-                OutlinedTextField(
-                    value = giftDescription,
-                    onValueChange = { giftDescription = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 100.dp),
-                    maxLines = 5,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("Описание", style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(
+                value = giftDescription,
+                onValueChange = { giftDescription = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 100.dp),
+                maxLines = 5,
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(80.dp))
         }
-    )
+    }
 }

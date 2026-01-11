@@ -37,7 +37,7 @@ import com.example.wishlistapp.viewmodel.WishlistViewModel
 
 
 @Composable
-fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistViewModel = WishlistViewModel()) {
+fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistViewModel ) {
 
     val wishlists = wishViewModel.getWishlists()
 
@@ -106,13 +106,15 @@ fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistVi
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(wishlists) { wishlist ->
-                WishlistCard(
-                    title = wishlist.title,
-                    date = wishlist.eventDate.toString()
-                ) {
-                    navController.navigate(
-                        Screen.WishlistDetails.createRoute(wishlist.id)
-                    )
+                if(wishlist.id != 4) {
+                    WishlistCard(
+                        title = wishlist.title,
+                        date = wishlist.eventDate.toString()
+                    ) {
+                        navController.navigate(
+                            Screen.WishlistDetails.createRoute(wishlist.id)
+                        )
+                    }
                 }
             }
         }

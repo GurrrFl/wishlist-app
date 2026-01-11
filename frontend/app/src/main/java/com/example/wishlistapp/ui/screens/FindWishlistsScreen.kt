@@ -46,6 +46,7 @@ import androidx.navigation.NavHostController
 import com.example.wishlistapp.data.model.Gift
 import com.example.wishlistapp.data.model.GiftStatus
 import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.ui.components.generateRandomColor
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -114,7 +115,7 @@ fun FindWishlistScreen(
                                         brush = Brush.verticalGradient(
                                             colors = listOf(
                                                 Color(0xFFBA68C8),
-                                                Color(0xFFEC407A)
+                                                generateRandomColor()
                                             )
                                         ),
                                         shape = CircleShape

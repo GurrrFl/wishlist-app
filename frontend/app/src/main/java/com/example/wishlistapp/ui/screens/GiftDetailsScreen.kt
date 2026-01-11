@@ -19,15 +19,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,37 +44,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.data.model.GiftStatus
+import com.example.wishlistapp.ui.components.generateRandomColor
+import com.example.wishlistapp.viewmodel.WishlistViewModel
+import org.koin.androidx.compose.koinViewModel
 
-data class GiftDetail(
-    val id: Int,
-    val name: String,
-    val price: String,
-    val imageUrl: Int? = null,
-    val status: String = "available",
-    val ownerName: String,
-    val description: String,
-    val link: String,
-    val addedAt: String
-)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GiftDetailsScreen(
     navController: NavHostController,
     giftId: Int,
-    isNotYours: Boolean
+    viewModel: WishlistViewModel = koinViewModel()
 ) {
+    val gift = viewModel.getGift(giftId) ?: return
 
-    val gift = GiftDetail(
-        id = 12,
-        name = "Умные часы Apple Watch Series 9",
-        price = "44 990 ₽",
-        imageUrl = R.drawable.ic_launcher_foreground,
-        status = if (isNotYours) "available" else "reserved",
-        ownerName = "Елена Смирнова",
-        description = "GPS, 45мм, алюминиевый корпус, спортивный ремешок. Цвет: темная ночь.",
-        link = "https://www.apple.com/ru/shop/buy-watch/apple-watch",
-        addedAt = "5 декабря 2024 г. в 09:15"
-    )
+    val isNotYours = gift.ownerName != "Aleksandra Petrova"
+
+    val iconBackgroundColor = remember {
+        generateRandomColor().copy(alpha = 0.65f)
+    }
 
     Column(
         modifier = Modifier
@@ -86,46 +74,39 @@ fun GiftDetailsScreen(
     ) {
 
         TopAppBar(
-            title = { Text("День Рождения 2024") },
+            title = { Text("Подарок",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 68.dp))},
             navigationIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.ArrowBackIosNew,
+                        imageVector = Icons.Default.ArrowBackIosNew,
                         contentDescription = "Назад"
                     )
                 }
             }
         )
 
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .clip(RoundedCornerShape(16.dp))
+                .background(iconBackgroundColor),
             contentAlignment = Alignment.Center
         ) {
-            if (gift.imageUrl != null) {
-                Image(
-                    painter = painterResource(id = gift.imageUrl),
-                    contentDescription = gift.name,
-                    modifier = Modifier.size(120.dp)
-                )
-            } else {
-                Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.CardGiftcard,
-                    contentDescription = gift.name,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.free_icon_gift),
+                contentDescription = gift.name,
+                modifier = Modifier.size(120.dp)
+            )
         }
 
-        // Название и цена
         Text(
             text = gift.name,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
@@ -136,188 +117,124 @@ fun GiftDetailsScreen(
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.Start
-            ) {
+
+            Column {
                 Text("Статус", style = MaterialTheme.typography.bodySmall)
                 if (isNotYours) {
-                Text(
-                    text = gift.status,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (gift.status == "available") MaterialTheme.colorScheme.tertiaryFixedDim else Color.Gray
-                )}
-                else {
                     Text(
-                        text = "Скрыто",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                        text = if (gift.status == GiftStatus.AVAILABLE) "Доступен" else "Забронирован",
+                        color = if (gift.status == GiftStatus.AVAILABLE)
+                            MaterialTheme.colorScheme.tertiary
+                        else Color.Gray
                     )
+                } else {
+                    Text("Скрыто", color = Color.Gray)
                 }
             }
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Владелец", style = MaterialTheme.typography.bodySmall)
-                Text(
-                    text = gift.ownerName,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(gift.ownerName)
             }
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.End
-            ) {
+
+            Column(horizontalAlignment = Alignment.End) {
                 Text("ID", style = MaterialTheme.typography.bodySmall)
-                Text(
-                    text = "#${gift.id}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text("#${gift.id}")
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 8.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.Info,
-                        contentDescription = "Описание",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Описание", style = MaterialTheme.typography.bodyMedium)
+        Card {
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Описание")
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = gift.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+                Spacer(Modifier.height(8.dp))
+                Text(gift.description)
             }
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(8.dp, 16.dp, 16.dp, 8.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.Link,
-                        contentDescription = "Ссылка",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Ссылка", style = MaterialTheme.typography.bodyMedium)
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = gift.link,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable {
-                        // Открыть ссылку в браузере
+        gift.link?.let {
+            Card {
+                Column(Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Ссылка")
                     }
-                )
-            }
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(8.dp, 16.dp, 16.dp, 8.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.CalendarToday,
-                        contentDescription = "Дата добавления",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        modifier = Modifier.size(18.dp)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { }
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Дата добавления", style = MaterialTheme.typography.bodyMedium)
                 }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = gift.addedAt,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Card {
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Добавлен")
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(gift.created.toString())
+            }
+        }
 
+        Spacer(Modifier.height(24.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
             Button(
-                onClick = { /* Открыть магазин */ },
+                onClick = { },
+                modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceDim),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                modifier = Modifier.weight(1f)
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
             ) {
-//                Icon(
-//                    imageVector = androidx.compose.material.icons.Icons.Default.LocalGroceryStore,
-//                    contentDescription = "Открыть магазин",
-//                    tint = MaterialTheme.colorScheme.primary
-//                )
-                Spacer(modifier = Modifier.width(4.dp))
                 Text("Открыть магазин")
             }
 
             if (isNotYours) {
-                if (gift.status == "available") {
-                    // Кнопка "Забронировать" для чужого подарка
+                if (gift.status == GiftStatus.AVAILABLE) {
                     Button(
-                        onClick = { /* Логика бронирования */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            viewModel.reserveGift(gift.wishlistId, gift.id, "Вы")
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Забронировать")
                     }
                 } else {
                     Button(
-                        onClick = { /* Логика отмены бронирования */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            viewModel.cancelReservation(gift.id)
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Отменить бронь")
                     }
                 }
             } else {
-                // Кнопка "Удалить" для своего подарка
                 Button(
-                    onClick = { /* Логика удаления */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.weight(1f)
+                    onClick = {
+                        viewModel.deleteGift(gift.id)
+                        navController.navigateUp()
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Удалить подарок", color = Color.White)
+                    Text("Удалить", color = Color.White)
                 }
             }
         }

@@ -54,7 +54,9 @@ fun ProfileScreen(navController: NavHostController) {
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 120.dp)
             )
         }
     ) { paddingValues ->
@@ -108,8 +110,8 @@ fun ProfileScreen(navController: NavHostController) {
                     .padding(horizontal = 32.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                StatItem(count = "4", label = "Вишлистов")
-                StatItem(count = "24", label = "Желаний")
+                StatItem(count = "3", label = "Вишлиста")
+                StatItem(count = "14", label = "Желаний")
 
             }
 
@@ -137,7 +139,7 @@ fun ProfileScreen(navController: NavHostController) {
                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                 ProfileMenuItem(
                     icon = Icons.Default.CardGiftcard,
-                    title = "Все желания",
+                    title = "Наити вишлист по ссылке",
                     onClick = { /* navigate to following */ }
                 )
 

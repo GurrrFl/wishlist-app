@@ -55,7 +55,8 @@ fun AppNavGraph(   navController: NavHostController){
             WishlistDetailsScreen(navController = navController, wishlistId,wishViewModel)
         }
         composable(route = Screen.AddWishlist.route) {
-            AddWishlistScreen(navController = navController)
+            val  wishViewModel: WishlistViewModel  = koinViewModel()
+            AddWishlistScreen(navController = navController, wishViewModel)
         }
 
         composable(
@@ -70,10 +71,9 @@ fun AppNavGraph(   navController: NavHostController){
             GiftDetailsScreen(
                 navController = navController,
                 giftId = giftId,
-                isNotYours = false
             )
         }
-        composable(route = Screens.ADD_GIFT_SCREEN.route) {
+        composable(route = Screen.AddGift.route) {
             AddGiftScreen(navController = navController)
         }
         composable(
@@ -95,7 +95,8 @@ fun AppNavGraph(   navController: NavHostController){
         }
 
         composable(route = Screens.RESERVE_GIFTS_SCREEN.route) {
-            ReserveGiftsScreen(navController = navController)
+            val  wishViewModel: WishlistViewModel  = koinViewModel()
+            ReserveGiftsScreen(navController = navController, wishViewModel)
         }
 
         composable(route = Screen.Settings.route) {
