@@ -1,5 +1,6 @@
 package com.example.wishlistapp.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,12 +66,12 @@ fun GiftCardNew(
                     .background(iconBackgroundColor),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+               Image(
                     painter = painterResource(id = R.drawable.free_icon_gift),
                     contentDescription = gift.name,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(32.dp)
-                )
+                    modifier = Modifier.size(36.dp),
+                    contentScale = ContentScale.Fit
+)
             }
 
             Spacer(modifier = Modifier.width(16.dp))

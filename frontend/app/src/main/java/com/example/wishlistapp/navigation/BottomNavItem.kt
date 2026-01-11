@@ -26,7 +26,7 @@ sealed class BottomNavItem(
     )
 
     object FindWishlist : BottomNavItem(
-        route = Screens.SEARCH_SCREEN.route,
+        route = Screen.Search.route,
         title = "Поиск",
         icon = Icons.Default.CardGiftcard
     )
@@ -38,7 +38,7 @@ sealed class BottomNavItem(
     )
 
     object Settings : BottomNavItem(
-        route = Screens.SETTINGS_SCREEN.route,
+        route = Screen.Settings.route,
         title = "Настройки",
         icon = Icons.Default.Settings
     )

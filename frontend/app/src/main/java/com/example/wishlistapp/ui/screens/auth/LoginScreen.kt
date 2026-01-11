@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.navigation.Screens
+import com.example.wishlistapp.viewmodel.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

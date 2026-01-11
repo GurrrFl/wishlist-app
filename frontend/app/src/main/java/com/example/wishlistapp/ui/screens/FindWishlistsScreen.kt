@@ -1,4 +1,5 @@
 package com.example.wishlistapp.ui.screens
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,50 +43,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.data.model.Gift
+import com.example.wishlistapp.data.model.GiftStatus
+import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.viewmodel.WishlistViewModel
+import org.koin.androidx.compose.koinViewModel
 
-data class GiftItem(
-    val id: Int,
-    val name: String,
-    val price: String,
-    val status: GiftStatus,
-    val reservedBy: String? = null,
-    val color: Color
-)
-
-enum class GiftStatus {
-    AVAILABLE,
-    RESERVED
-}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FindWishlistScreen(navController: NavHostController) {
-    val giftItems = remember {
-        listOf(
-            GiftItem(
-                id = 1,
-                name = "Книга из классики",
-                price = "1990 ₽",
-                status = GiftStatus.AVAILABLE,
-                color = Color(0xFFE3F2FD)
-            ),
-            GiftItem(
-                id = 2,
-                name = "AirPods Pro 2",
-                price = "24 990 ₽",
-                status = GiftStatus.RESERVED,
-                reservedBy = "Иван П.",
-                color = Color(0xFFFFF3E0)
-            ),
-            GiftItem(
-                id = 3,
-                name = "Настрольная игра \"Манчкин\"",
-                price = "4490 ₽",
-                status = GiftStatus.RESERVED,
-                reservedBy = "Вами",
-                color = Color(0xFFF3E5F5)
-            )
-        )
-    }
+fun FindWishlistScreen(
+    navController: NavHostController,
+    wishlistId: Int,
+    viewModel: WishlistViewModel = koinViewModel()
+) {
+    val wishlist = viewModel.getWishlist(wishlistId) ?: return
 
     Scaffold(
         topBar = {
@@ -94,7 +64,10 @@ fun FindWishlistScreen(navController: NavHostController) {
                 title = {
                     Text(
                         "Вишлист по ссылке",
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 58.dp)
                     )
                 },
                 navigationIcon = {
@@ -111,6 +84,7 @@ fun FindWishlistScreen(navController: NavHostController) {
             )
         }
     ) { paddingValues ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -118,12 +92,10 @@ fun FindWishlistScreen(navController: NavHostController) {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item {
-                // Карточка вишлиста
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -131,13 +103,10 @@ fun FindWishlistScreen(navController: NavHostController) {
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Аватар
+                    Column(modifier = Modifier.padding(16.dp)) {
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+
                             Box(
                                 modifier = Modifier
                                     .size(48.dp)
@@ -156,13 +125,12 @@ fun FindWishlistScreen(navController: NavHostController) {
 
                             Column {
                                 Text(
-                                    text = "День Рождения",
+                                    text = wishlist.title,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Каte Fashion",
+                                    text = wishlist.ownerName,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
@@ -172,16 +140,14 @@ fun FindWishlistScreen(navController: NavHostController) {
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Мой день рождения 15 марта! Буду рада любому подарку из списка 🎁",
+                            text = wishlist.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
                             lineHeight = 20.sp
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -191,30 +157,35 @@ fun FindWishlistScreen(navController: NavHostController) {
                     Text(
                         text = "Подарки",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            items(giftItems) { gift ->
-                GiftItemCard(gift = gift)
+            items(wishlist.gifts) { gift ->
+                GiftItemCard(
+                    gift = gift,
+                    onDetailsClick = {
+                        navController.navigate(
+                            Screen.GiftDetails.createRoute(gift.id)
+                        )
+                    }
+                )
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
-
-
 @Composable
-private fun GiftItemCard(gift: GiftItem) {
+private fun GiftItemCard(
+    gift: Gift,
+    onDetailsClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -222,6 +193,7 @@ private fun GiftItemCard(gift: GiftItem) {
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -233,7 +205,7 @@ private fun GiftItemCard(gift: GiftItem) {
                 modifier = Modifier
                     .size(64.dp)
                     .background(
-                        color = gift.color,
+                        color = Color(0xFFEDE7F6),
                         shape = RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -241,21 +213,18 @@ private fun GiftItemCard(gift: GiftItem) {
                 Icon(
                     imageVector = Icons.Default.CardGiftcard,
                     contentDescription = null,
-                    tint = Color.Black.copy(alpha = 0.7f),
                     modifier = Modifier.size(32.dp)
                 )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
+
                 Text(
                     text = gift.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -271,16 +240,14 @@ private fun GiftItemCard(gift: GiftItem) {
 
                 when (gift.status) {
                     GiftStatus.AVAILABLE -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 contentDescription = null,
                                 tint = Color(0xFF4CAF50),
                                 modifier = Modifier.size(16.dp)
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Доступен",
                                 style = MaterialTheme.typography.bodySmall,
@@ -288,17 +255,16 @@ private fun GiftItemCard(gift: GiftItem) {
                             )
                         }
                     }
+
                     GiftStatus.RESERVED -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = null,
                                 tint = Color(0xFFFF9800),
                                 modifier = Modifier.size(16.dp)
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Забронировано ${gift.reservedBy}",
                                 style = MaterialTheme.typography.bodySmall,
@@ -306,25 +272,19 @@ private fun GiftItemCard(gift: GiftItem) {
                             )
                         }
                     }
-
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
             if (gift.status == GiftStatus.AVAILABLE) {
                 Button(
-                    onClick = { /* забронировать */ },
+                    onClick = onDetailsClick,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF9C27B0)
                     ),
                     shape = RoundedCornerShape(16.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text(
-                        text = "Детали и бронь",
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Text("Детали и бронь")
                 }
             }
         }

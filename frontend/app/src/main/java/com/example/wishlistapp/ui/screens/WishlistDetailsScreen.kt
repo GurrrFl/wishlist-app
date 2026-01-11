@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.data.model.Gift
 import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.ui.components.GiftCardNew
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import java.time.format.DateTimeFormatter
 
@@ -63,7 +64,11 @@ fun WishlistDetailsScreen(
     ) {
 
         TopAppBar(
-            title = { Text(wishlist.title) },
+            title = { Text(wishlist.title,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 26.dp)
+            ) },
             navigationIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(Icons.Default.ArrowBackIosNew, contentDescription = null)
@@ -151,7 +156,7 @@ fun WishlistDetailsScreen(
         else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(wishlist.gifts) { gift ->
-                    GiftCard(gift) {
+                    GiftCardNew(gift) {
                         navController.navigate(
                             Screen.GiftDetails.createRoute(gift.id)
                         )

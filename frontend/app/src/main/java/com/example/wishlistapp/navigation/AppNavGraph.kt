@@ -16,17 +16,18 @@ import com.example.wishlistapp.ui.screens.SearchScreen
 import com.example.wishlistapp.ui.screens.SettingsScreen
 import com.example.wishlistapp.ui.screens.WishlistDetailsScreen
 import com.example.wishlistapp.ui.screens.WishlistsScreen
-import com.example.wishlistapp.ui.screens.auth.AuthViewModel
 import com.example.wishlistapp.ui.screens.auth.LoginScreen
 import com.example.wishlistapp.ui.screens.auth.RegisterScreen
+import com.example.wishlistapp.viewmodel.AuthViewModel
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(   navController: NavHostController){
     NavHost(
         navController = navController,
-        startDestination = Screens.LOGIN_SCREEN.route
+        startDestination = Screen.Search.route
+                //startDestination = Screens.LOGIN_SCREEN.route
     ) {
         composable(route = Screens.LOGIN_SCREEN.route) {
             val     viewModel: AuthViewModel = koinViewModel()
@@ -57,17 +58,39 @@ fun AppNavGraph(navController: NavHostController) {
             AddWishlistScreen(navController = navController)
         }
 
-        composable(route = Screens.GIFT_DETAILS_SCREEN.route) {
-            val isNotYours = false
-            GiftDetailsScreen(navController = navController, isNotYours)
+        composable(
+            route = Screen.GiftDetails.route,
+            arguments = listOf(
+                navArgument("giftId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val giftId =
+                backStackEntry.arguments?.getInt("giftId") ?: return@composable
+
+            GiftDetailsScreen(
+                navController = navController,
+                giftId = giftId,
+                isNotYours = false
+            )
         }
         composable(route = Screens.ADD_GIFT_SCREEN.route) {
             AddGiftScreen(navController = navController)
         }
-        composable(route = Screens.FIND_WISHLISTS_SCREEN.route) {
-            FindWishlistScreen(navController = navController)
+        composable(
+            route = Screen.FindWishlist.route,
+            arguments = listOf(
+                navArgument("wishlistId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val wishlistId =
+                backStackEntry.arguments?.getInt("wishlistId") ?: return@composable
+
+            FindWishlistScreen(
+                navController = navController,
+                wishlistId = wishlistId
+            )
         }
-        composable(route = Screens.SEARCH_SCREEN.route) {
+        composable(route = Screen.Search.route) {
             SearchScreen(navController = navController)
         }
 
@@ -75,8 +98,10 @@ fun AppNavGraph(navController: NavHostController) {
             ReserveGiftsScreen(navController = navController)
         }
 
-        composable(route = Screens.SETTINGS_SCREEN.route) {
-            SettingsScreen(navController = navController)
+        composable(route = Screen.Settings.route) {
+            SettingsScreen(
+                navController = navController)
         }
+
     }
 }
