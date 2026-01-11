@@ -1,4 +1,4 @@
-package com.example.wishlistapp.ui.screens.auth
+package com.example.wishlistapp.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wishlistapp.data.repository.AuthRepository
+import com.example.wishlistapp.ui.screens.auth.AuthState
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
@@ -63,4 +64,3 @@ class AuthViewModel(
         state = AuthState.Idle
     }
 }
-
