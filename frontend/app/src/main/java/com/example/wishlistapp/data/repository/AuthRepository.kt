@@ -16,11 +16,9 @@ class AuthRepository(
         if (response.accessToken.isBlank()) {
             error("Empty access token")
         }
-        Log.d("AUTH", "Token: ${response.accessToken}")
-
+        Log.d("AuthRepository", "Token: ${response.accessToken}")
         sessionManager.saveToken(response.accessToken)
     }
-
 
 
 suspend fun register(login: String, email: String, password: String) {

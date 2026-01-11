@@ -20,7 +20,7 @@ sealed class BottomNavItem(
     )
 
     object Wishlists : BottomNavItem(
-        route = Screens.WISHLISTS_SCREEN.route,
+        route = Screen.Wishlists.route,
         title = "Вишлисты",
         icon = Icons.Default.List
     )

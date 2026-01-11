@@ -2,8 +2,10 @@ package com.example.wishlistapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.wishlistapp.ui.screens.AddGiftScreen
 import com.example.wishlistapp.ui.screens.AddWishlistScreen
 import com.example.wishlistapp.ui.screens.FindWishlistScreen
@@ -17,6 +19,7 @@ import com.example.wishlistapp.ui.screens.WishlistsScreen
 import com.example.wishlistapp.ui.screens.auth.AuthViewModel
 import com.example.wishlistapp.ui.screens.auth.LoginScreen
 import com.example.wishlistapp.ui.screens.auth.RegisterScreen
+import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -35,13 +38,22 @@ fun AppNavGraph(navController: NavHostController) {
         composable(route = Screens.PROFILE_SCREEN.route) {
             ProfileScreen(navController = navController)
         }
-        composable(route = Screens.WISHLISTS_SCREEN.route) {
-            WishlistsScreen(navController = navController)
+        composable(route = Screen.Wishlists.route) {
+            val  wishViewModel: WishlistViewModel  = koinViewModel()
+            WishlistsScreen(navController = navController, wishViewModel)
         }
-        composable(route = Screens.WISHLIST_DETAILS_SCREEN.route) {
-            WishlistDetailsScreen(navController = navController)
+
+        composable(
+            route = Screen.WishlistDetails.route,
+            arguments = listOf(
+                navArgument("wishlistId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val wishlistId = backStackEntry.arguments?.getInt("wishlistId") ?: return@composable
+            val  wishViewModel: WishlistViewModel  = koinViewModel()
+            WishlistDetailsScreen(navController = navController, wishlistId,wishViewModel)
         }
-        composable(route = Screens.ADD_WISHLIST_SCREEN.route) {
+        composable(route = Screen.AddWishlist.route) {
             AddWishlistScreen(navController = navController)
         }
 
