@@ -60,7 +60,7 @@ fun AddWishlistScreen(
     var isPrivate by remember { mutableStateOf(false) }
 
     val generatedLink = remember {
-        "https://wishlistapp.com/share/${Random.nextInt(100000, 999999)}"
+        "wishlistapp.com/share/${Random.nextInt(100000, 999999)}"
     }
 
     Scaffold(

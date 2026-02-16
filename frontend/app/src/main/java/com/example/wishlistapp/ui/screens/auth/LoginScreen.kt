@@ -1,6 +1,5 @@
 package com.example.wishlistapp.ui.screens.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,21 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,17 +27,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.navigation.Screens
+import com.example.wishlistapp.ui.components.AppOutlinedTextField
+import com.example.wishlistapp.ui.components.PasswordVisibilityToggle
+import com.example.wishlistapp.ui.components.PulsingStarIcon
 import com.example.wishlistapp.viewmodel.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
+
 
 @Composable
 fun LoginScreen(
@@ -68,129 +64,109 @@ fun LoginScreen(
             viewModel.resetState()
         }
     }
-
+    if (state is AuthState.Loading) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(26.dp, 35.dp, 26.dp, 16.dp))
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .alpha(if (state is AuthState.Loading) 0.5f else 1f),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(25.dp))
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(32.dp)
-            )
-        }
+        PulsingStarIcon()
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Text(
-            text = "Wishlist App",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color =MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Войдите в свой аккаунт",
+            text = stringResource(R.string.log_in_to_your_acc),
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        OutlinedTextField(
+        AppOutlinedTextField(
+            textPlaceholder = R.string.email_label,
+            onChanged = { email = it },
+            leadingIcon = Icons.Default.Email,
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            leadingIcon = {
-                Icon(Icons.Default.Email, null)
-            },
-            modifier = Modifier.fillMaxWidth()
+            isSingleLine = true,
+            isCost = false,
+            isPasswordField = false,
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        OutlinedTextField(
+        AppOutlinedTextField(
+            textPlaceholder = R.string.password_label,
             value = password,
-            onValueChange = { password = it },
-            label = { Text("Пароль") },
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            leadingIcon = {
-                Icon(Icons.Default.Lock, null)
+            onChanged = { password = it },
+            leadingIcon = Icons.Default.Lock,
+            isSingleLine = true,
+            isPasswordField = true,
+            isPasswordVisible = isPasswordVisible,
+            onVisibilityClick = {
+                PasswordVisibilityToggle(isPasswordVisible, {isPasswordVisible = !isPasswordVisible})
             },
-            trailingIcon = {
-                IconButton(onClick = {
-                    isPasswordVisible = !isPasswordVisible
-                }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible)
-                            Icons.Default.Visibility
-                        else Icons.Default.VisibilityOff,
-                        contentDescription = null
-                    )
-                }
-            },
-            visualTransformation = if (isPasswordVisible)
-                VisualTransformation.None
-            else PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (state is AuthState.Error) {
+        if (state is AuthState.LoginError) {
             Text(
-                text = "${state.message}. Проверьте правильность введённых данных",
+                text = "${state.message} ",
+                modifier = Modifier.padding(8.dp),
                 color = MaterialTheme.colorScheme.error
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                viewModel.login(email, password)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            enabled = state !is AuthState.Loading
-        ) {
-            Text("Войти")
+        Box() {
+            Button(
+                onClick = {
+                    viewModel.login(email, password)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = state !is AuthState.Loading
+            ) {
+                Text(stringResource(R.string.login_label),
+                    color = Color.White)
+            }
+            if (state is AuthState.Loading) {
+                LinearProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
         }
-
         Spacer(modifier = Modifier.height(32.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Нет аккаунта?",
-                color = Color.Gray
+                text = stringResource(R.string.no_account_label),
+                color = MaterialTheme.colorScheme.onSurface
             )
             TextButton(
                 onClick = {
                     navController.navigate(Screens.REGISTER_SCREEN.route)
+                    viewModel.resetState()
                 }
             ) {
-                Text("Зарегистрироваться")
+                Text(text = stringResource(R.string.register_label))
             }
         }
     }
