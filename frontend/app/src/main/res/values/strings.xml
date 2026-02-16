@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Wishlist App</string>
-    <string name="log_in">Войти</string>
+    <string name="login_label">Войти</string>
     <string name="log_in_to_your_acc">Войдите в свой аккаунт</string>
     <string name="register">Зарегистрироваться</string>
-    <string name="is_no_acc">Нет аккаунта?</string>
+    <string name="no_account_label">Нет аккаунта?</string>
     <string name="email_label">Email</string>
     <string name="password_label">Пароль</string>
     <string name="repeat_password_label">Повторите пароль</string>
-    <string name="register_button">Зарегистрироваться</string>
-<!--    <string name=""></string>-->
+    <string name="register_label">Зарегистрируйтесь</string>
+    <string name="nickname_label">Имя пользователя</string>-->
 <!--    <string name=""></string>-->
 <!--    <string name=""></string>-->
 <!--    <string name=""></string>-->

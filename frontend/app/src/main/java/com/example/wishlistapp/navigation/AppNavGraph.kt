@@ -23,11 +23,11 @@ import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AppNavGraph(   navController: NavHostController){
+fun AppNavGraph(   navController: NavHostController ){
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Search.route
-                //startDestination = Screens.LOGIN_SCREEN.route
+        startDestination = Screens.LOGIN_SCREEN.route
     ) {
         composable(route = Screens.LOGIN_SCREEN.route) {
             val     viewModel: AuthViewModel = koinViewModel()

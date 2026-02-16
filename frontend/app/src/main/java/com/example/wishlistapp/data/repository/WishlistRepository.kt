@@ -111,7 +111,7 @@ object  WishlistRepository  {
                     price = "1 990 ₽",
                     description = "Классическая литература",
                     link = "https://www.wildberries.ru/catalog/143592972/detail.aspx?size=242472035",
-                    status = GiftStatus.RESERVED,
+                    status = GiftStatus.AVAILABLE,
                     created = LocalDate.of(2025, 10, 5),
                     ownerName = "Aleksandra Petrova",
                     reservedBy = "kate_rosan"
@@ -134,7 +134,7 @@ object  WishlistRepository  {
                     price = "990 ₽",
                     description = "Классическая литература от издательства Эксмо в красивом оформлении",
                     link = "https://www.wildberries.ru/catalog/143592972/detail.aspx?size=242472035",
-                    status = GiftStatus.RESERVED,
+                    status = GiftStatus.AVAILABLE,
                     created = LocalDate.of(2025, 11, 3),
                     ownerName = "Aleksandra Petrova",
                     reservedBy = "kate_rosan"
@@ -157,8 +157,8 @@ object  WishlistRepository  {
             title = "Годовщина 💕",
             ownerName = "Aleksandra Petrova",
             eventDate = LocalDate.of(2025, 7, 20),
-            description = "Наша годовщина! Хочу что-то романтичное и памятное. Люблю настольные игры и уютные вещи для дома.",
-            isPrivate = false,
+            description = "Наша годовщина! Хочу что-то романтичное и памятное. Возможно, настольные игры или уютные вещи для дома.",
+            isPrivate = true,
             publicLink = "wishlist.app/74291",
             gifts = listOf(
                 Gift(
@@ -197,7 +197,7 @@ object  WishlistRepository  {
                 Gift(
                     id = 9,
                     wishlistId = 2,
-                    name = "Настольная игра для взрослых",
+                    name = "Настольная игра ",
                     price = "2 590 ₽",
                     description = "Интересная стратегическая игра для уютных вечеров вдвоем",
                     link = "https://www.wildberries.ru/catalog/232553104/detail.aspx?size=366819059",
@@ -209,9 +209,9 @@ object  WishlistRepository  {
         ),
         Wishlist(
             id = 3,
-            title = "Новый Год 2026! 🎄✨",
+            title = "8 Марта!",
             ownerName = "Aleksandra Petrova",
-            eventDate = LocalDate.of(2025, 12, 31),
+            eventDate = LocalDate.of(2026, 12, 31),
             description = "Новогодние подарки! Хочу творческие наборы, головоломки и сладости для праздничного настроения 🎅",
             isPrivate = false,
             publicLink = "wishlist.app/98342",
@@ -275,7 +275,7 @@ object  WishlistRepository  {
         ),
         Wishlist(
             id = 4,
-            title = "Новый Год 2026",
+            title = "Новый год! 🎄✨",
             ownerName = "kate_rosan",
             eventDate = LocalDate.of(2025, 12, 31),
             description = "Новогодние подарки! Хочу творческие наборы, головоломки и сладости для праздничного настроения 🎅",
@@ -283,7 +283,7 @@ object  WishlistRepository  {
             publicLink = "wishlist.app/56739",
             gifts = listOf(
                 Gift(
-                    id = 15,
+                    id = 20,
                     wishlistId = 4,
                     name = "Пазл Hatber 1000 элементов",
                     price = "1 290 ₽",
@@ -335,6 +335,7 @@ object  WishlistRepository  {
                     link = "https://www.wildberries.ru/catalog/82464813/detail.aspx?size=135901932",
                     status = GiftStatus.AVAILABLE,
                     created = LocalDate.of(2025, 12, 5),
+                    reservedBy = "Иван Иванов",
                     ownerName = "kate_rosan"
                 )
             )

@@ -29,7 +29,7 @@ class WishlistCreate(WishlistBase):
     )
     unique_link: Optional[str] = Field(
         None,
-        max_length=255,
+        max_length=6,
         description="Уникальная ссылка для доступа к списку"
     )
 

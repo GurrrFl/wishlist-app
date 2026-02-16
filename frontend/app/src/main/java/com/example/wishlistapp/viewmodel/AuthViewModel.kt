@@ -16,10 +16,11 @@ class AuthViewModel(
 
     var state by mutableStateOf<AuthState>(AuthState.Idle)
         private set
-
+    //fun isLoggedIn()
+    //fun logout()
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            state = AuthState.Error("Заполните все поля")
+            state = AuthState.LoginError("Заполните все поля")
             return
         }
 
@@ -30,20 +31,20 @@ class AuthViewModel(
                 state = AuthState.Success
             } catch (e: Exception) {
                 Log.e("AUTH", "Login error", e)
-                state = AuthState.Error(e.message ?: "Ошибка")
-                state = AuthState.Error("Ошибка входа")
+                state = AuthState.LoginError(e.message ?: "Ошибка")
+                state = AuthState.LoginError("Ошибка входа")
             }
         }
     }
 
     fun register(login: String, email: String, password: String, repeatPassword: String) {
         if (login.isBlank() || email.isBlank() || password.isBlank() || repeatPassword.isBlank()) {
-            state = AuthState.Error("Заполните все поля")
+            state = AuthState.RegisterError("Заполните все поля")
             return
         }
 
         if (password != repeatPassword) {
-            state = AuthState.Error("Пароли не совпадают")
+            state = AuthState.RegisterError("Пароли не совпадают")
             return
         }
 
@@ -54,10 +55,11 @@ class AuthViewModel(
                 state = AuthState.Success
             } catch (e: Exception) {
                 Log.e("AUTH", "Login error", e)
-                state = AuthState.Error(e.message ?: "Ошибка регистрации")
-                state = AuthState.Error("Ошибка регистрации")
+                state = AuthState.RegisterError(e.message ?: "Ошибка регистрации")
+                state = AuthState.RegisterError("Ошибка регистрации")
             }
         }
+
     }
 
     fun resetState() {

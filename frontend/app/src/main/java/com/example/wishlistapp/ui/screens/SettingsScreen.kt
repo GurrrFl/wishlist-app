@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.navigation.Screens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,7 +162,7 @@ fun SettingsScreen(navController: NavHostController) {
                     icon = Icons.AutoMirrored.Filled.ExitToApp,
                     title = "Выйти",
                     titleColor = Color(0xFFE57373),
-                    onClick = { /* logout */ }
+                    onClick = { navController.navigate(Screens.LOGIN_SCREEN.route) }
                 )
             }
 

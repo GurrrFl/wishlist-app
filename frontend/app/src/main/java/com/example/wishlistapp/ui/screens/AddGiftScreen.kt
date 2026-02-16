@@ -196,7 +196,7 @@ fun AddGiftScreen(
                     onDismissRequest = { expanded = false }
                 ) {
                     wishlists.forEach { wishlist ->
-                        if (wishlist.id != 3) {
+                        if (wishlist.id != 4) {
                             DropdownMenuItem(
                                 text = { Text(wishlist.title) },
                                 onClick = {
