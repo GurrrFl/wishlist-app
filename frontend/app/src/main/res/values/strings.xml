@@ -8,8 +8,31 @@
     <string name="password_label">Пароль</string>
     <string name="repeat_password_label">Повторите пароль</string>
     <string name="register_label">Зарегистрируйтесь</string>
-    <string name="nickname_label">Имя пользователя</string>-->
-<!--    <string name=""></string>-->
+    <string name="nickname_label">Имя пользователя</string>
+    <string name="has_account_label">Уже есть аккаунт?</string>
+    <string name="has_login_acc_label">Войдите</string>
+    <!-- AddGiftScreen -->
+    <string name="add_gift_title">Добавить желание</string>
+    <string name="back_button_description">Назад</string>
+    <string name="done_button">Готово</string>
+    <string name="error_gift_name_required">Укажите название желания</string>
+    <string name="error_wishlist_required">Выберите вишлист</string>
+
+    <string name="gift_name_label">Название</string>
+    <string name="gift_name_placeholder">Напишите название вашего желания</string>
+
+    <string name="gift_price_label">Цена</string>
+    <string name="gift_price_placeholder">Напишите примерную стоимость подарка</string>
+
+    <string name="gift_link_label">Ссылка</string>
+    <string name="gift_link_placeholder">Добавьте ссылку</string>
+
+    <string name="wishlist_label">Вишлист</string>
+    <string name="wishlist_placeholder">Выберите вишлист</string>
+
+    <string name="gift_description_label">Описание</string>
+    <string name="gift_description_placeholder">Добавьте описание подарка</string>
+<!--    -->
 <!--    <string name=""></string>-->
 <!--    <string name=""></string>-->
 <!--    <string name=""></string>-->
