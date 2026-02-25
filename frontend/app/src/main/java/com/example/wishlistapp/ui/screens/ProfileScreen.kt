@@ -35,9 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.R
+import com.example.wishlistapp.ui.components.AppHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,10 +49,7 @@ fun ProfileScreen(navController: NavHostController) {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Профиль",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
+                    AppHeader(stringResource(id = R.string.profile_title))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background

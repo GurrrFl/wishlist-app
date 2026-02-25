@@ -18,5 +18,6 @@ fun AppErrorsText(error: String) {
         modifier = Modifier.padding(8.dp),
         color = MaterialTheme.colorScheme.error
     )
+    Spacer(modifier = Modifier.height(16.dp))
 
 }
