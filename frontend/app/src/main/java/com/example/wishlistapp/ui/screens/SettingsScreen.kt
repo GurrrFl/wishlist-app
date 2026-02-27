@@ -31,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,11 +52,7 @@ import com.example.wishlistapp.ui.components.AppHeader
 @Composable
 fun SettingsScreen(navController: NavHostController) {
     Scaffold(
-        topBar = {
-             TopAppBar(
-                 title = {AppHeader(stringResource(R.string.settings_title)) },
-                 )
-        }
+        topBar = {AppHeader(stringResource(R.string.settings_title)) },
     ) { paddingValues ->
         Column(
             modifier = Modifier

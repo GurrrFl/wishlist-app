@@ -27,8 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,19 +44,7 @@ import com.example.wishlistapp.ui.components.AppHeader
 @Composable
 fun ProfileScreen(navController: NavHostController) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    AppHeader(stringResource(id = R.string.profile_title))
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 120.dp)
-            )
-        }
+        topBar = { AppHeader(stringResource(id = R.string.profile_title))}
     ) { paddingValues ->
         Column(
             modifier = Modifier
