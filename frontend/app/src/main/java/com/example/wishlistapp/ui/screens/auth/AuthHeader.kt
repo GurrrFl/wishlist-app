@@ -6,7 +6,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.wishlistapp.R
 import com.example.wishlistapp.ui.components.PulsingStarIcon
@@ -16,10 +15,9 @@ fun AuthHeader(textAfterAppName: String) {
     PulsingStarIcon()
     Text(
         text = stringResource(R.string.app_name),
-        style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.titleLarge,
         color =MaterialTheme.colorScheme.onBackground,
-        modifier = Modifier.padding(top = 28.dp, bottom = 8.dp)
+        modifier = Modifier.padding(top = 38.dp, bottom = 8.dp)
     )
     Text(
         text = textAfterAppName,

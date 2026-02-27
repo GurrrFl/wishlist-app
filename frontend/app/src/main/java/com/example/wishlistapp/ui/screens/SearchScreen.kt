@@ -33,8 +33,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,12 +44,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.R
 import com.example.wishlistapp.data.SearchHistoryStorage
 import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import kotlinx.coroutines.launch
 
@@ -75,18 +76,7 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Найти вишлист по ссылке",
-                        style = MaterialTheme.typography.headlineMedium,
-                        //color = MaterialTheme.colorScheme.primary,
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
+            AppHeader(stringResource(R.string.search_title))
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->

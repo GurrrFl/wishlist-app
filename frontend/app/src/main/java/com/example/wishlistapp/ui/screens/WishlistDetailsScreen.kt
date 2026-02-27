@@ -1,4 +1,3 @@
-//
 package com.example.wishlistapp.ui.screens
 
 import android.widget.Toast
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Button
@@ -29,8 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.example.wishlistapp.data.model.Gift
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.GiftCardNew
+import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import java.time.format.DateTimeFormatter
 
@@ -63,19 +60,7 @@ fun WishlistDetailsScreen(
             .padding(16.dp)
     ) {
 
-        TopAppBar(
-            title = { Text(wishlist.title,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 26.dp)
-            ) },
-            navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(Icons.Default.ArrowBackIosNew, contentDescription = null)
-                }
-            },
-            colors = topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-        )
+        NestedScreenHeader(wishlist.title){navController.popBackStack()}
 
         Spacer(modifier = Modifier.height(12.dp))
 

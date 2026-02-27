@@ -31,8 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,30 +40,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screens
+import com.example.wishlistapp.ui.components.AppHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavHostController) {
     Scaffold(
-        topBar = {
-             TopAppBar(
-                 title = {
-                     Text(
-                         "Настройки",
-                         style = MaterialTheme.typography.headlineMedium
-                     )
-                 },
-                 colors = TopAppBarDefaults.topAppBarColors(
-                     containerColor = MaterialTheme.colorScheme.background
-                 ),
-                 modifier = Modifier.fillMaxWidth().padding(horizontal = 120.dp)
-
-            )
-        }
+        topBar = {AppHeader(stringResource(R.string.settings_title)) },
     ) { paddingValues ->
         Column(
             modifier = Modifier

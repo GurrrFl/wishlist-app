@@ -12,19 +12,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,14 +26,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.wishlistapp.R
 import com.example.wishlistapp.data.model.Wishlist
 import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -65,22 +61,8 @@ fun AddWishlistScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Создать вишлист",
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 26.dp)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBackIosNew, null)
-                    }
-                },
-                colors = topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-            )
+            NestedScreenHeader(stringResource(R.string.add_wishlist_title),
+                                onClick = { navController.popBackStack() })
         }
     ) { padding ->
 
@@ -136,7 +118,7 @@ fun AddWishlistScreen(
 
             }
             Text(text = "Если вишлист приватный - только вы cможете видеть его, а желания не будут доступны для резервирования!",
-            style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp))
 
             Spacer(modifier = Modifier.height(28.dp))

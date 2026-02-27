@@ -13,7 +13,7 @@ val appModule = module {
 
     single {
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8000/")
+            .baseUrl("http://wishlist-app-3owv.onrender.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
