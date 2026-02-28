@@ -1,0 +1,136 @@
+###  📱 Wishlist App - Клиент-серверное приложение для списков желаний
+# 🎯 Описание проекта
+Основная идея: устранить дублирование подарков за счет прозрачного резервирования и согласования между участниками. Каждый подарок можно зарезервировать, чтобы другие видели его статус.
+Цель проекта: изучить FastAPI + Android Kotlin Compose.
+Статус: учебный проект в активной разработке.
+
+# 🏗️ Архитектура проекта
+```
+📁 backend/              # FastAPI сервер
+📁 app/                  # Основное приложение
+├── 📁 models/           # SQLAlchemy модели БД
+├── 📁 repositories/     # Репозитории для работы с данными
+├── 📁 routers/          # API роутеры FastAPI
+├── 📁 schemas/          # Pydantic схемы валидации
+├── 📁 services/         # Бизнес-логика
+├── 📁 static/images/    # Статические файлы
+└── main.py             # Точка входа FastAPI
+📄 config.py            # Конфигурация
+📄 database.py          # Подключение к БД
+📄 dependencies.py      # Зависимости (auth)
+📄 main.py              # Сервер
+📄 requirements.txt     # Зависимости Python
+```
+
+# ✨ Основной функционал
+🔐 Аутентификация
+- Регистрация /auth/register
+- Вход /auth/login  
+- JWT токены
+📝 Управление списками
+- Создать список POST /lists
+- Мои списки GET /lists  
+- Список по ID GET /lists/{id}
+- Публичная ссылка для шаринга
+🎁 Подарки
+- Добавить подарок POST /lists/{id}/gifts
+- Список подарков GET /lists/{id}/gifts
+✅ Резервирование
+- Забронировать POST /lists/{id}/gifts/{gift_id}/reserve  
+- Отменить DELETE /lists/{id}/gifts/{gift_id}/reserve
+✅ Клиент (Android Kotlin Compose)
+
+📱 Экраны:
+- Авторизация/Регистрация
+- Мои списки подарков  
+- Детали списка + подарки
+- Создание списка/подарка
+- Открытие по публичной ссылке
+- Резервирование подарков
+
+🛠️ Стек технологий
+Часть	Технологии
+Backend	FastAPI, SQLAlchemy, Pydantic, JWT
+Frontend	Kotlin, Jetpack Compose, Retrofit2, Koin, Coroutines, StateFlow
+Общее	REST API, JWT Auth
+
+## 🗺️ API Endpoints 
+
+### 👤 **Пользователи** (`/users/`)
+
+| Метод | Endpoint | Описание | Auth |
+| :-- | :-- | :-- | :-- |
+| `POST` | `/users/register` | Регистрация нового пользователя | Нет |
+| `POST` | `/users/token` | Получить JWT токен (логин) | Нет |
+| `GET` | `/users/me` | Профиль текущего пользователя | Да |
+| `PATCH` | `/users/me` | Обновить профиль | Да |
+| `DELETE` | `/users/me` | Удалить аккаунт | Да |
+| `GET` | `/users/` | Список всех пользователей (пагинация) | Нет |
+| `GET` | `/users/{user_id}` | Пользователь по ID | Нет |
+
+***
+
+### 📝 **Вишлисты** (`/wishlists/`)
+
+| Метод | Endpoint | Описание | Auth |
+| :-- | :-- | :-- | :-- |
+| `POST` | `/wishlists/` | Создать вишлист | Да |
+| `GET` | `/wishlists/my` | Мои вишлисты (пагинация, фильтры) | Да |
+| `GET` | `/wishlists/{wishlist_id}` | Вишлист по ID (только владелец) | Да |
+| `PATCH` | `/wishlists/{wishlist_id}` | Обновить вишлист | Да |
+| `DELETE` | `/wishlists/{wishlist_id}` | Удалить вишлист | Да |
+| `GET` | `/wishlists/link/{unique_link}` | **Публичный доступ** по ссылке | Нет |
+| `POST` | `/wishlists/{id}/regenerate-link` | Новая уникальная ссылка | Да |
+| `DELETE` | `/wishlists/{id}/link` | Удалить публичную ссылку | Да |
+
+***
+
+### 🎁 **Подарки** (`/gifts/`)
+
+| Метод | Endpoint | Описание | Auth |
+| :-- | :-- | :-- | :-- |
+| `POST` | `/gifts/` | Создать подарок в вишлисте | Да |
+| `GET` | `/gifts/wishlist/{wishlist_id}` | Все подарки вишлиста (пагинация) | Да |
+| `GET` | `/gifts/{gift_id}` | Подарок по ID | Да |
+| `PATCH` | `/gifts/{gift_id}` | Обновить подарок | Да |
+| `DELETE` | `/gifts/{gift_id}` | Удалить подарок | Да |
+| `PATCH` | `/gifts/{id}/status?new_status=...` | Изменить статус вручную | Да |
+
+
+***
+
+### ✅ **Резервирование** (`/reservations/`)
+
+| Метод | Endpoint | Описание | Auth |
+| :-- | :-- | :-- | :-- |
+| `POST` | `/reservations/gift/{gift_id}` | **Забронировать подарок** | Да |
+| `GET` | `/reservations/gift/{gift_id}` | Резервации подарка (для владельца) | Да |
+| `GET` | `/reservations/my` | Мои резервации | Да |
+| `GET` | `/reservations/{reservation_id}` | Резервация по ID | Да |
+| `POST` | `/reservations/{id}/cancel` | **Отменить резервацию** | Да |
+| `DELETE` | `/reservations/{id}` | Полное удаление (админ) | Да |
+
+***
+
+## 🔐 **Аутентификация (JWT)**
+
+1. **Регистрация** → `/users/register`
+2. **Логин** → `/users/token` (form-data: `username`, `password`)
+3. **Токен** → `Authorization: Bearer <token>`
+4. **Все защищенные эндпоинты** требуют заголовок `Authorization`
+
+## 🚀 **Основной пользовательский флоу**
+
+```
+1. POST /users/register  → создать аккаунт
+2. POST /users/token     → получить JWT токен  
+3. POST /wishlists/      → создать вишлист "ДР Саши"
+4. POST /gifts/          → добавить подарки
+5. POST /wishlists/5/regenerate-link → получить публичную ссылку
+6. Друг открывает: GET /wishlists/link/abc123
+7. Друг бронирует: POST /reservations/gift/42
+8. Владелец видит: GET /wishlists/my → статус reserved
+```
+
+
+

@@ -1,0 +1,105 @@
+<resources>
+    <!-- Общие строки -->
+    <string name="app_name">Wishlist App</string>
+    <string name="done_button">Готово</string>
+    <string name="back_button_description">Назад</string>
+
+    <!-- Экран входа / регистрации -->
+    <string name="login_label">Войти</string>
+    <string name="log_in_to_your_acc">Войдите в свой аккаунт</string>
+    <string name="register">Зарегистрироваться</string>
+    <string name="no_account_label">Нет аккаунта?</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Пароль</string>
+    <string name="repeat_password_label">Повторите пароль</string>
+    <string name="register_label">Зарегистрируйтесь</string>
+    <string name="nickname_label">Имя пользователя</string>
+    <string name="has_account_label">Уже есть аккаунт?</string>
+    <string name="has_login_acc_label">Войдите</string>
+
+    <!-- Экран добавления подарка (AddGiftScreen) -->
+    <string name="add_gift_title">Добавить желание</string>
+    <string name="error_gift_name_required">Укажите название желания</string>
+    <string name="error_wishlist_required">Выберите вишлист</string>
+    <string name="gift_name_label">Название</string>
+    <string name="gift_name_placeholder">Напишите название вашего желания</string>
+    <string name="gift_price_label">Цена</string>
+    <string name="gift_price_placeholder">Напишите примерную стоимость подарка</string>
+    <string name="gift_link_label">Ссылка</string>
+    <string name="gift_link_placeholder">Добавьте ссылку</string>
+    <string name="wishlist_label">Вишлист</string>
+    <string name="wishlist_placeholder">Выберите вишлист</string>
+    <string name="gift_description_label">Описание</string>
+    <string name="gift_description_placeholder">Добавьте описание подарка</string>
+
+    <!-- Экран создания вишлиста (AddWishlistScreen) -->
+    <string name="add_wishlist_title">Создать вишлист</string>
+    <string name="wishlist_name_hint">Название</string>
+    <string name="wishlist_date_hint">Дата</string>
+    <string name="wishlist_description_hint">Описание</string>
+    <string name="wishlist_description_placeholder">Введите описание для вишлиста</string>
+    <string name="wishlist_private_label">Приватный вишлист</string>
+    <string name="wishlist_private_description">Если вишлист приватный — только вы сможете видеть его, а желания не будут доступны для резервирования!</string>
+    <string name="wishlist_share_link_format">wishlistapp.com/share/%d</string>
+
+    <!-- Экран профиля (ProfileScreen) -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_default_name">Aleksandra Petrova</string>       <!-- Заглушка, заменится реальными данными -->
+    <string name="profile_default_email">sasha_petrova@gmail.com</string> <!-- Заглушка -->
+    <string name="profile_stats_wishlists">Вишлиста</string>
+    <string name="profile_stats_gifts">Желаний</string>
+    <string name="profile_menu_my_wishlists">Мои вишлисты</string>
+    <string name="profile_menu_reserved_gifts">Забронированные подарки</string>
+    <string name="profile_menu_find_by_link">Найти вишлист по ссылке</string>
+
+    <!-- Экран деталей вишлиста (WishlistDetailsScreen) -->
+    <string name="details_owner_label">Владелец</string>
+    <string name="details_date_label">Дата</string>
+    <string name="details_type_label">Тип</string>
+    <string name="details_private">Приватный</string>
+    <string name="details_public">Публичный</string>
+    <string name="details_description_label">Описание</string>
+    <string name="details_public_link_label">Публичная ссылка</string>
+    <string name="details_copy_snackbar">Ссылка скопирована</string>
+    <string name="details_add_button">Добавить</string>
+    <string name="details_empty_gifts">Пока подарков нет. Добавьте своё первое желание!</string>
+    <string name="details_gifts_title">Подарки</string>
+
+    <!-- Экран поиска (SearchScreen) -->
+    <string name="search_title">Найти вишлист по ссылке</string>
+    <string name="search_placeholder">Введите ссылку</string>
+    <string name="search_button">Открыть</string>
+    <string name="search_clear_content_desc">Очистить</string>
+    <string name="search_snackbar_empty">Введите ссылку</string>
+    <string name="search_snackbar_not_found">Вишлист не найден</string>
+    <string name="search_history_title">История поиска</string>
+    <string name="search_delete_content_desc">Удалить</string>
+
+    <!-- Экран настроек (SettingsScreen) -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_section_account">Аккаунт</string>
+    <string name="settings_section_notifications">Уведомления</string>
+    <string name="settings_section_other">Прочее</string>
+    <string name="settings_edit_profile">Редактировать профиль</string>
+    <string name="settings_privacy">Приватность</string>
+    <string name="settings_dark_theme">Тёмная тема</string>
+    <string name="settings_push_notifications">Push-уведомления</string>
+    <string name="settings_email_notifications">Email-уведомления</string>
+    <string name="settings_help">Помощь и поддержка</string>
+    <string name="settings_terms">Условия использования</string>
+    <string name="settings_logout">Выйти</string>
+    <string name="settings_version">Wishlist App v1.0.0</string>
+
+    <!-- Экран списка вишлистов (WishlistsScreen) -->
+    <string name="wishlists_tab_my">Мои вишлисты</string>
+    <string name="wishlists_tab_subscriptions">Мои подписки</string>
+    <string name="wishlists_title">Вишлисты</string>
+    <string name="wishlists_create_button">Создать</string>
+    <string name="wishlist_card_date_prefix">Дата события:</string>
+    <string name="wishlist_card_chevron_desc">Перейти к вишлисту</string>
+    <string name="gift_card_chevron_desc">Перейти к подарку</string>
+
+
+    <!-- Экран reserve подарка (ReserveGiftScreen) -->
+    <string name="reserve_gifts_title">Забронированные подарки</string>
+</resources>
