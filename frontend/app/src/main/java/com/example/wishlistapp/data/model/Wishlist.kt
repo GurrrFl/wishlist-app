@@ -7,7 +7,7 @@ data class Wishlist(
     val title: String,
     val ownerName: String,
     val eventDate: LocalDate,
-    val description: String,
+    val description: String?,
     val isPrivate: Boolean,
     val publicLink: String?,
     val gifts: List<Gift>

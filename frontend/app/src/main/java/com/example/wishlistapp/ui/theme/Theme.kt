@@ -18,6 +18,7 @@ private val DarkColorScheme = darkColorScheme(
 
     background = BackgroundColor,
     surface = BackgroundColor,
+    onPrimary = Color.White,
     onBackground = Color.White,
     onSurface = TextColor80,
     onSurfaceVariant = TextGray,
@@ -33,6 +34,7 @@ private val LightColorScheme = lightColorScheme(
 
     background = LightGray,
     surface = LightBackgroundColor,
+    onPrimary = Color.White,
     onBackground = Color.Black,
     onSurface = TextColor40,
     onSurfaceVariant = TextGray,
