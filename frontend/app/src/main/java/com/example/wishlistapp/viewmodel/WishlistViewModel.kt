@@ -37,7 +37,7 @@ class WishlistViewModel ()  : ViewModel() {
             isPrivate = isPrivate,
             eventDate = LocalDate.parse(
                 eventDate,
-                DateTimeFormatter.ofPattern("дд.мм.гггг")
+                DateTimeFormatter.ofPattern("dd.MM.yyyy")
             ),
             publicLink = if (isPrivate) null else generatedLink,
             ownerName = "Вы",

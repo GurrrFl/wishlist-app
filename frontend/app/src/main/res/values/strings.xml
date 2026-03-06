@@ -41,7 +41,10 @@
     <string name="wishlist_private_label">Приватный вишлист</string>
     <string name="wishlist_private_description">Если вишлист приватный — только вы сможете видеть его, а желания не будут доступны для резервирования!</string>
     <string name="wishlist_share_link_format">wishlistapp.com/share/%d</string>
-
+    <string name="wishlist_add_error_text">Название не может быть пустым</string>
+    <string name="wishlist_add_error_date">Дата не может быть пустой</string>
+    <string name="wishlist_add_error_description">Описание не может быть пустым</string>
+    <string name="wishlist_add_validation_success">Ура вишлист</string>
     <!-- Экран профиля (ProfileScreen) -->
     <string name="profile_title">Профиль</string>
     <string name="profile_default_name">Aleksandra Petrova</string>       <!-- Заглушка, заменится реальными данными -->
@@ -95,7 +98,7 @@
     <string name="wishlists_tab_subscriptions">Мои подписки</string>
     <string name="wishlists_title">Вишлисты</string>
     <string name="wishlists_create_button">Создать</string>
-    <string name="wishlist_card_date_prefix">Дата события:</string>
+    <string name="wishlist_card_date_prefix">Дата события: </string>
     <string name="wishlist_card_chevron_desc">Перейти к вишлисту</string>
     <string name="gift_card_chevron_desc">Перейти к подарку</string>
 

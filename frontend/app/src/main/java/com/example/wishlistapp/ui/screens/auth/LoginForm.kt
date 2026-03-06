@@ -29,7 +29,7 @@ fun LoginForm(
     var isPasswordVisible by remember { mutableStateOf(false) }
 
     AppOutlinedTextField(
-        textPlaceholder = R.string.email_label,
+        textLabel = R.string.email_label,
         onChanged = { email = it },
         leadingIcon = Icons.Default.Email,
         value = email,
@@ -39,7 +39,7 @@ fun LoginForm(
     )
     Spacer(modifier = Modifier.height(10.dp))
     AppOutlinedTextField(
-        textPlaceholder = R.string.password_label,
+        textLabel = R.string.password_label,
         value = password,
         onChanged = { password = it },
         leadingIcon = Icons.Default.Lock,

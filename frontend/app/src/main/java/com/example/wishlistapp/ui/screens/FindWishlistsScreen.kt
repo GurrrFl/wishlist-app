@@ -139,12 +139,14 @@ fun FindWishlistScreen(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
+                        wishlist.description?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                lineHeight = 20.sp
+                            )
+                        }
 
-                        Text(
-                            text = wishlist.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            lineHeight = 20.sp
-                        )
                     }
                 }
 

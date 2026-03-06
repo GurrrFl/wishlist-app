@@ -7,39 +7,32 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
-import com.example.wishlistapp.data.model.Wishlist
-import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.ui.components.AppButton
+import com.example.wishlistapp.ui.components.AppOutlinedTextField
 import com.example.wishlistapp.ui.components.NestedScreenHeader
+import com.example.wishlistapp.ui.components.obtainWishlist
 import com.example.wishlistapp.viewmodel.WishlistViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import kotlin.random.Random
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,21 +41,20 @@ fun AddWishlistScreen(
     viewModel: WishlistViewModel
 ) {
 
-    var wishlistName by remember { mutableStateOf(TextFieldValue("")) }
-    var eventDate by remember {
-        mutableStateOf(TextFieldValue(""))
-    }
-    var description by remember { mutableStateOf(TextFieldValue("")) }
+    var wishlistName by remember { mutableStateOf("") }
+    var eventDate by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
     var isPrivate by remember { mutableStateOf(false) }
-
-    val generatedLink = remember {
-        "wishlistapp.com/share/${Random.nextInt(100000, 999999)}"
-    }
+    var isValid by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
-            NestedScreenHeader(stringResource(R.string.add_wishlist_title),
-                                onClick = { navController.popBackStack() })
+            NestedScreenHeader(
+                text = stringResource(R.string.add_wishlist_title),
+                onClick = { navController.popBackStack() }
+            )
         }
     ) { padding ->
 
@@ -74,37 +66,28 @@ fun AddWishlistScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            OutlinedTextField(
+            AppOutlinedTextField(
+                textLabel = R.string.wishlist_name_hint,
                 value = wishlistName,
-                onValueChange = { wishlistName = it },
-                label = { Text("Название") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                ),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = eventDate,
-                onValueChange = { eventDate = it },
-                label = { Text("Дата") },
-                shape = RoundedCornerShape(16.dp),
-                placeholder = {
-                    Text("Введите дату в формате: dd.MM.yyyy")
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Описание") },
-                shape = RoundedCornerShape(16.dp),
-                placeholder = { Text("Введите описание для вишлиста") },
+                onChanged = { wishlistName = it },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3
+            )
+
+            AppOutlinedTextField(
+                textLabel = R.string.wishlist_date_hint,
+                textPlaceholder = R.string.wishlist_card_date_prefix,
+                value = eventDate,
+                onChanged = { eventDate = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            AppOutlinedTextField(
+                textLabel = R.string.wishlist_description_hint,
+                textPlaceholder = R.string.wishlist_description_placeholder,
+                value = description,
+                onChanged = { description = it },
+                modifier = Modifier.fillMaxWidth(),
+                isSingleLine = false
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -112,46 +95,34 @@ fun AddWishlistScreen(
                     checked = isPrivate,
                     onCheckedChange = { isPrivate = it }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Приватный вишлист")
-                Spacer(modifier = Modifier.width(8.dp))
-
+                Text(
+                    text = stringResource(R.string.wishlist_private_label),
+                    modifier = Modifier.padding(8.dp)
+                )
             }
-            Text(text = "Если вишлист приватный - только вы cможете видеть его, а желания не будут доступны для резервирования!",
+
+            Text(
+                text = stringResource(R.string.wishlist_private_description),
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp))
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+            )
 
             Spacer(modifier = Modifier.height(28.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth().height(60.dp),
+            AppButton(stringResource(R.string.done_button), modifier = Modifier.fillMaxWidth()
+                .height(56.dp),
                 onClick = {
-                    val wishlistId = Random.nextInt(1000, 9999)
-
-                    viewModel.addWishlist(
-                        Wishlist(
-                            id = wishlistId,
-                            title = wishlistName.text,
-                            description = description.text,
-                            isPrivate = isPrivate,
-                            eventDate = LocalDate.parse(
-                                eventDate.text,
-                                DateTimeFormatter.ofPattern("дд.мм.гггг")
-                            ),
-                            publicLink = if (isPrivate) null else generatedLink,
-                            ownerName = "Вы",
-                            gifts = emptyList()
-                        )
-                    )
-
-                    navController.navigate(
-                        Screen.WishlistDetails.createRoute(wishlistId)
-                    ) {
-                        popUpTo(Screen.Wishlists.route)
-                    }
-                }
-            ) {
-                Text("Готово", style = MaterialTheme.typography.titleMedium)
-            }
+                obtainWishlist(wishlistName, description, eventDate).fold(
+                        onSuccess = { gift ->
+                            val id = viewModel.addWishlist(title = wishlistName, description = description, isPrivate = isPrivate, eventDate = eventDate)
+                            navController.popBackStack()
+                        },
+                        onFailure = Button@{ error ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar(error.message.toString())
+                            }
+                            return@Button
+                        })
+            })
         }
     }
 }
