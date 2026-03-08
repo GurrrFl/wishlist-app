@@ -1,5 +1,6 @@
 package com.example.wishlistapp.ui.screens
 
+import InfoCard
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,14 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.GiftCardNew
-import com.example.wishlistapp.ui.components.InfoCard
 import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 
@@ -35,7 +34,6 @@ fun WishlistDetailsScreen(
     wishlistId: Int,
     viewModel: WishlistViewModel
 ) {
-    val context = LocalContext.current
     val wishlist = viewModel.getWishlist(wishlistId) ?: return
 
     Column(
@@ -46,7 +44,7 @@ fun WishlistDetailsScreen(
     ) {
 
         NestedScreenHeader(wishlist.title) { navController.popBackStack() }
-        InfoCard(wishlist, context)
+        InfoCard(wishlist)
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,

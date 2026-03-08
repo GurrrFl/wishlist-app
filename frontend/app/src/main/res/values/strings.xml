@@ -3,6 +3,8 @@
     <string name="app_name">Wishlist App</string>
     <string name="done_button">Готово</string>
     <string name="back_button_description">Назад</string>
+    <string name="price">₽</string>
+    <string name="arrow_right">Детали</string>
 
     <!-- Экран входа / регистрации -->
     <string name="login_label">Войти</string>
@@ -69,7 +71,7 @@
     <string name="details_gifts_title">Подарки</string>
 
     <!-- Экран поиска (SearchScreen) -->
-    <string name="search_title">Найти вишлист по ссылке</string>
+    <string name="search_title">Вишлист по ссылке</string>
     <string name="search_placeholder">Введите ссылку</string>
     <string name="search_button">Открыть</string>
     <string name="search_clear_content_desc">Очистить</string>
@@ -77,6 +79,11 @@
     <string name="search_snackbar_not_found">Вишлист не найден</string>
     <string name="search_history_title">История поиска</string>
     <string name="search_delete_content_desc">Удалить</string>
+
+    <!-- Экран найденного вишлиста (FindWishlistScreen) -->
+    <string name="find_free_item">Доступен</string>
+    <string name="find_reserved_item">Забронирован</string>
+
 
     <!-- Экран настроек (SettingsScreen) -->
     <string name="settings_title">Настройки</string>

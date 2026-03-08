@@ -23,7 +23,8 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = TextColor80,
     onSurfaceVariant = TextGray,
     surfaceDim = Pink80,
-    //tertiaryFixedDim = Green80
+    tertiaryFixedDim = Green80,
+
 
 )
 
@@ -39,7 +40,7 @@ private val LightColorScheme = lightColorScheme(
     onSurface = TextColor40,
     onSurfaceVariant = TextGray,
     surfaceDim = Pink40,
-    //tertiaryFixedDim = Green40
+    tertiaryFixedDim = Green40
 )
 
 @Composable

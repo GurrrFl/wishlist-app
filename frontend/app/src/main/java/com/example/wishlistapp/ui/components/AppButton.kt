@@ -15,7 +15,7 @@ fun AppButton(
     modifier: Modifier = Modifier,
     buttonColor: Color = MaterialTheme.colorScheme.primary,
     buttonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
-    onClick: @Composable () -> Unit,
+    onClick: () -> Unit,
 ) {
     Button(
         onClick = onClick,
