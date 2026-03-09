@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NestedScreenHeader(text: String, onClick: () -> Unit) {
+fun NestedScreenHeader(text: String,  onClick: () -> Unit) {
     CenterAlignedTopAppBar(
         title = {
             Text(

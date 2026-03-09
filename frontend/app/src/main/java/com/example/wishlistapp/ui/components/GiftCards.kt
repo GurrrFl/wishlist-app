@@ -108,15 +108,12 @@ fun GiftCardNew(
                         Surface(
                             modifier = Modifier.align(Alignment.TopEnd),
                             shape = RoundedCornerShape(18.dp),
-                            color = MaterialTheme.colorScheme.tertiaryFixedDim.copy(alpha = 0.2f)
+                            color = if (gift.status == GiftStatus.AVAILABLE) MaterialTheme.colorScheme.tertiaryFixedDim.copy(alpha = 0.2f) else MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
                         ) {
+
                             //TODO("Добавить логику, вызов проверки, доступен ли подарок")
-                            if (gift.status == GiftStatus.AVAILABLE) {
-                                ItemAccessTeg(stringResource(R.string.find_free_item))
-                            }
-                            else {
-                                ItemAccessTeg(stringResource(R.string.find_reserved_item))
-                            }
+                            ItemAccessTeg(gift.status)
+
                         }
                     }
 
@@ -135,10 +132,11 @@ fun GiftCardNew(
 }
 
 @Composable
-fun ItemAccessTeg(type: String){
+fun ItemAccessTeg(type: GiftStatus){
+
         Text(
-            text = stringResource(R.string.find_free_item),
+            text = if (type == GiftStatus.AVAILABLE) stringResource(R.string.find_free_item) else stringResource(R.string.find_reserved_item),
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 2.dp),
-            color = MaterialTheme.colorScheme.tertiaryFixedDim
+            color = if (type == GiftStatus.AVAILABLE) MaterialTheme.colorScheme.tertiaryFixedDim else MaterialTheme.colorScheme.error
         )
 }

@@ -6,6 +6,12 @@
     <string name="price">₽</string>
     <string name="arrow_right">Детали</string>
 
+    <string name="nav_profile">Профиль</string>
+    <string name="nav_wishlists">Вишлисты</string>
+    <string name="nav_search">Поиск</string>
+    <string name="nav_reserve">Резерв</string>
+    <string name="nav_settings">Настройки</string>
+
     <!-- Экран входа / регистрации -->
     <string name="login_label">Войти</string>
     <string name="log_in_to_your_acc">Войдите в свой аккаунт</string>
@@ -34,10 +40,18 @@
     <string name="gift_description_label">Описание</string>
     <string name="gift_description_placeholder">Добавьте описание подарка</string>
 
+    <!-- Экран деталей вишлиста (WishlistDetailsScreen) -->
+    <string name="gift_details_title">Желание</string>
+    <string name="gift_details_status_label">Статус</string>
+    <string name="gift_details_data_label">Добавлен</string>
+    <string name="gift_details_store">Открыть магазин</string>
+    <string name="gift_details_owner">Владелец</string>
+
     <!-- Экран создания вишлиста (AddWishlistScreen) -->
     <string name="add_wishlist_title">Создать вишлист</string>
     <string name="wishlist_name_hint">Название</string>
     <string name="wishlist_date_hint">Дата</string>
+    <string name="wishlist_date_format">Введите в формате ДД.ММ.ГГГГ</string>
     <string name="wishlist_description_hint">Описание</string>
     <string name="wishlist_description_placeholder">Введите описание для вишлиста</string>
     <string name="wishlist_private_label">Приватный вишлист</string>
@@ -68,7 +82,7 @@
     <string name="details_copy_snackbar">Ссылка скопирована</string>
     <string name="details_add_button">Добавить</string>
     <string name="details_empty_gifts">Пока подарков нет. Добавьте своё первое желание!</string>
-    <string name="details_gifts_title">Подарки</string>
+    <string name="details_gifts_title">Желания</string>
 
     <!-- Экран поиска (SearchScreen) -->
     <string name="search_title">Вишлист по ссылке</string>

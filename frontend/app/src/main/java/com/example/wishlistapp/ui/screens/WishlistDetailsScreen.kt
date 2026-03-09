@@ -43,7 +43,7 @@ fun WishlistDetailsScreen(
             .padding(16.dp)
     ) {
 
-        NestedScreenHeader(wishlist.title) { navController.popBackStack() }
+        NestedScreenHeader(text = wishlist.title) { navController.popBackStack() }
         InfoCard(wishlist)
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp),

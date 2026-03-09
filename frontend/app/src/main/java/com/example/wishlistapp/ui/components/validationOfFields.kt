@@ -1,14 +1,21 @@
 package com.example.wishlistapp.ui.components
 
-import androidx.compose.runtime.Composable
+import android.content.Context
+import com.example.wishlistapp.R
 
-fun obtainWishlist(title : String,
-                   description : String,
-                   eventDate :String,
-
+fun obtainWishlist(
+    context: Context,
+    title: String,
+    description: String,
+    eventDate: String
 ): Result<String> {
-    return if (title.isEmpty()) Result.failure(Exception("Название не может быть пустым"))
-    else if (eventDate.isEmpty()) Result.failure(Exception("Дата не может быть пустой"))
-    else if (description.isEmpty()) Result.failure(Exception("Описание не может быть пустым"))
-    else Result.success("Ура вишлист")
+    return if (title.isEmpty()) {
+        Result.failure(Exception(context.getString(R.string.wishlist_add_error_text)))
+    } else if (eventDate.isEmpty()) {
+        Result.failure(Exception(context.getString(R.string.wishlist_add_error_date)))
+    } else if (description.isEmpty()) {
+        Result.failure(Exception(context.getString(R.string.wishlist_add_error_description)))
+    } else {
+        Result.success(context.getString(R.string.wishlist_add_validation_success))
+    }
 }

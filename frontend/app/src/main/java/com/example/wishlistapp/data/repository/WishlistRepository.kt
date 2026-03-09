@@ -111,7 +111,7 @@ object  WishlistRepository  {
                     price = "1 990 ",
                     description = "Классическая литература",
                     link = "https://www.wildberries.ru/catalog/143592972/detail.aspx?size=242472035",
-                    status = GiftStatus.AVAILABLE,
+                    status = GiftStatus.RESERVED,
                     created = LocalDate.of(2025, 10, 5),
                     ownerName = "Aleksandra Petrova",
                     reservedBy = "kate_rosan"
@@ -311,7 +311,7 @@ object  WishlistRepository  {
                     price = "1 590 ",
                     description = "Набор изысканных шоколадных конфет в подарочной упаковке",
                     link = "https://www.wildberries.ru/catalog/321921587/detail.aspx?size=484412787",
-                    status = GiftStatus.AVAILABLE,
+                    status = GiftStatus.RESERVED,
                     created = LocalDate.of(2025, 11, 25),
                     ownerName = "kate_rosan"
                 ),
@@ -333,7 +333,7 @@ object  WishlistRepository  {
                     price = "990 ",
                     description = "Качественная канва с нанесенным рисунком для творчества",
                     link = "https://www.wildberries.ru/catalog/82464813/detail.aspx?size=135901932",
-                    status = GiftStatus.AVAILABLE,
+                    status = GiftStatus.RESERVED,
                     created = LocalDate.of(2025, 12, 5),
                     reservedBy = "Иван Иванов",
                     ownerName = "kate_rosan"
