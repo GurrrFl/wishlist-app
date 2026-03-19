@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -64,59 +65,121 @@ fun ReserveGiftsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         Text(
-            text = "Забронированные подарки",
+            text = stringResource(R.string.reserve_gifts_title),
             style = MaterialTheme.typography.headlineMedium
         )
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(gifts) { gift ->
-                ReservedGiftCard(
-                    gift = gift,
-                    onCancelReservation = { giftToCancel = gift },
-                    onOpenDetails = {
-                        navController.navigate(
-                            Screen.GiftDetails.createRoute(gift.id)
-                        )
-                    }
-                )
-            }
+        if (gifts.isEmpty()) {
+            EmptyReserveGiftsCard()
+        } else {
+            ReservedGiftsList(
+                gifts = gifts,
+                onGiftClick = { gift ->
+                    navController.navigate(Screen.GiftDetails.createRoute(gift.id))
+                },
+                onCancelReservation = { gift ->
+                    giftToCancel = gift
+                }
+            )
         }
     }
 
-    giftToCancel?.let { gift ->
-        AlertDialog(
-            onDismissRequest = { giftToCancel = null },
-            title = { Text("Отменить бронь?") },
-            text = {
-                Text("Бронь подарка «${gift.name}» будет отменена.")
+    if (giftToCancel != null) {
+        CancelReservationDialog(
+            gift = giftToCancel!!,
+            onConfirm = {
+                viewModel.cancelReservation(giftToCancel!!.id)
+                giftToCancel = null
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.cancelReservation(gift.id)
-                        giftToCancel = null
-                    }
-                ) {
-                    Text("Отменить бронь")
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { giftToCancel = null },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Text("Нет")
-                }
-            }
+            onDismiss = { giftToCancel = null }
         )
     }
 }
+
+
+
+@Composable
+fun EmptyReserveGiftsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            Image(
+                painter = painterResource(R.drawable.free_icon_gift),
+                contentDescription = stringResource(R.string.reserve_gifts_card_image_desc),
+                modifier = Modifier.size(60.dp)
+            )
+
+
+            Text(
+                text = stringResource(R.string.reserve_gifts_empty_message),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+@Composable
+fun ReservedGiftsList(
+    gifts: List<Gift>,
+    onGiftClick: (Gift) -> Unit,
+    onCancelReservation: (Gift) -> Unit
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(gifts) { gift ->
+            ReservedGiftCard(
+                gift = gift,
+                onCancelReservation = { onCancelReservation(gift) },
+                onOpenDetails = { onGiftClick(gift) }
+            )
+        }
+    }
+}
+
+@Composable
+fun CancelReservationDialog(
+    gift: Gift,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.reserve_gifts_cancel_dialog_title)) },
+        text = {
+            Text(
+                stringResource(R.string.reserve_gifts_cancel_dialog_message, gift.name)
+            )
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(stringResource(R.string.reserve_gifts_cancel_confirm))
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(stringResource(R.string.reserve_gifts_cancel_dismiss))
+            }
+        }
+    )
+}
+
 @Composable
 fun ReservedGiftCard(
     gift: Gift,
@@ -132,9 +195,7 @@ fun ReservedGiftCard(
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
             Row(verticalAlignment = Alignment.CenterVertically) {
-
                 Box(
                     modifier = Modifier
                         .size(60.dp)
@@ -177,7 +238,7 @@ fun ReservedGiftCard(
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            text = "Забронировано ${gift.created}",
+                            text = stringResource(R.string.reserve_gifts_card_reserved, gift.created),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -190,18 +251,23 @@ fun ReservedGiftCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 Button(
                     onClick = onCancelReservation,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceDim
                     )
                 ) {
-                    Text("Удалить бронь", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(R.string.reserve_gifts_card_cancel_button),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
 
                 Button(onClick = onOpenDetails) {
-                    Text("Открыть детали", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(R.string.reserve_gifts_card_details_button),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }

@@ -107,8 +107,6 @@
     <string name="settings_edit_profile">Редактировать профиль</string>
     <string name="settings_privacy">Приватность</string>
     <string name="settings_dark_theme">Тёмная тема</string>
-    <string name="settings_push_notifications">Push-уведомления</string>
-    <string name="settings_email_notifications">Email-уведомления</string>
     <string name="settings_help">Помощь и поддержка</string>
     <string name="settings_terms">Условия использования</string>
     <string name="settings_logout">Выйти</string>
@@ -126,4 +124,28 @@
 
     <!-- Экран reserve подарка (ReserveGiftScreen) -->
     <string name="reserve_gifts_title">Забронированные подарки</string>
+    <string name="reserve_gifts_empty_message">Когда вы найдете то, что захотите подарить, вы сможете забронировать подарок. Он появится в этом списке!</string>
+    <string name="reserve_gifts_cancel_dialog_title">Отменить бронь?</string>
+    <string name="reserve_gifts_cancel_dialog_message">Бронь подарка «%s» будет отменена.</string>
+    <string name="reserve_gifts_cancel_confirm">Отменить бронь</string>
+    <string name="reserve_gifts_cancel_dismiss">Нет</string>
+    <string name="reserve_gifts_card_reserved">Забронировано %s</string>
+    <string name="reserve_gifts_card_cancel_button">Удалить бронь</string>
+    <string name="reserve_gifts_card_details_button">Открыть детали</string>
+    <string name="reserve_gifts_card_image_desc">Изображение подарка</string>
+
+    <!-- Экран деталей подарка (GiftDetailsScreen) -->
+    <string name="gift_details_status_available">Доступен</string>
+    <string name="gift_details_status_reserved">Забронирован</string>
+    <string name="gift_details_status_hidden">Скрыто</string>
+    <string name="gift_details_owner_label">Владелец</string>
+    <string name="gift_details_id_label">ID</string>
+    <string name="gift_details_description_label">Описание</string>
+    <string name="gift_details_link_label">Ссылка</string>
+    <string name="gift_details_created_label">Добавлен</string>
+    <string name="gift_details_open_store">Открыть магазин</string>
+    <string name="gift_details_reserve">Забронировать</string>
+    <string name="gift_details_cancel_reservation">Отменить бронь</string>
+    <string name="gift_details_delete">Удалить</string>
+    <string name="gift_details_image_desc">Изображение подарка</string>
 </resources>
