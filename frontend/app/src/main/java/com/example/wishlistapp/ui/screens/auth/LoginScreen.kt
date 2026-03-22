@@ -28,9 +28,8 @@ fun LoginScreen(
     viewModel: AuthViewModel = koinViewModel()
 ) {
     val state = viewModel.state
-
     LaunchedEffect(state) {
-        if (state is AuthState.Idle) {
+        if (state is AuthState.Success) {
             navController.navigate(Screen.Wishlists.route) {
                 popUpTo(Screens.LOGIN_SCREEN.route) {
                     inclusive = true

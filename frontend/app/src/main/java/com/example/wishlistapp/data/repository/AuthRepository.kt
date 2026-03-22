@@ -23,9 +23,25 @@ class AuthRepository(
     }
 
 
-suspend fun register(login: String, email: String, password: String) = withContext(Dispatchers.IO) {
-    val response = api.register(
-        RegisterRequest(login, email, password))}
+    suspend fun register(login: String, email: String, password: String) = withContext(Dispatchers.IO) {
+        val response = api.register(
+            RegisterRequest(login, email, password))
+    }
 
+    suspend fun logout() = withContext(Dispatchers.IO) {
+        try {
+            val token = sessionManager.getToken()
+            if (!token.isNullOrBlank()) {
+                api.logout("Bearer $token")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Logout error", e)
+        } finally {
+            sessionManager.clear()
+        }
+    }
 
+    fun isLoggedIn(): Boolean {
+        return sessionManager.isLoggedIn()
+    }
 }

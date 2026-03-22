@@ -16,8 +16,22 @@ class AuthViewModel(
 
     var state by mutableStateOf<AuthState>(AuthState.Idle)
         private set
-    //fun isLoggedIn()
-    //fun logout()
+
+    var isLoggedIn by mutableStateOf(repository.isLoggedIn())
+        private set
+
+    fun checkAuthState() {
+        isLoggedIn = repository.isLoggedIn()
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            repository.logout()
+            isLoggedIn = false
+            state = AuthState.Success
+        }
+    }
+
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
             state = AuthState.LoginError("Заполните все поля")
@@ -28,6 +42,7 @@ class AuthViewModel(
             state = AuthState.Loading
             try {
                 repository.login(email, password)
+                isLoggedIn = true
                 state = AuthState.Success
             } catch (e: Exception) {
                 Log.e("AUTH", "Login error", e)
@@ -52,6 +67,7 @@ class AuthViewModel(
             state = AuthState.Loading
             try {
                 repository.register(login, email, password)
+                isLoggedIn = true
                 state = AuthState.Success
             } catch (e: Exception) {
                 Log.e("AUTH", "Login error", e)

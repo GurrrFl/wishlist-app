@@ -12,6 +12,10 @@ import kotlin.random.Random
 
 class WishlistViewModel ()  : ViewModel() {
 
+    private val currentUserName = "Aleksandra Petrova"
+
+    fun isGiftOwner(gift: Gift): Boolean =
+        gift.ownerName == currentUserName
 
     fun getWishlists(): List<Wishlist> =
         WishlistRepository.getWishlists()

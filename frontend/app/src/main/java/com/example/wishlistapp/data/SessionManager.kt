@@ -20,6 +20,20 @@ class SessionManager(context: Context) {
         return prefs.getString("token", null)
     }
 
+    fun isLoggedIn(): Boolean {
+        return !getToken().isNullOrBlank()
+    }
+
+    fun saveDarkTheme(enabled: Boolean) {
+        prefs.edit {
+            putBoolean("dark_theme", enabled)
+        }
+    }
+
+    fun isDarkTheme(): Boolean {
+        return prefs.getBoolean("dark_theme", false)
+    }
+
     fun clear() {
         prefs.edit {
             clear()
