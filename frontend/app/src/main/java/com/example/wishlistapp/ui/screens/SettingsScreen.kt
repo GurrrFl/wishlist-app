@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Article
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
@@ -62,7 +61,7 @@ fun SettingsScreen(navController: NavHostController) {
                 .padding(horizontal = 16.dp)
         ) {
 
-            SectionHeader("Аккаунт")
+            SectionHeader(stringResource(R.string.settings_section_account))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -73,20 +72,21 @@ fun SettingsScreen(navController: NavHostController) {
             ) {
                 SettingsItem(
                     icon = Icons.Default.Add,
-                    title = "Редактировать профиль",
+                    title = stringResource(R.string.settings_edit_profile),
                     onClick = { /* navigate to edit profile */ }
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                 SettingsItem(
                     icon = Icons.Default.Lock,
-                    title = "Приватность",
+                    title = stringResource(R.string.settings_privacy),
                     onClick = { /* navigate to privacy */ }
                 )
                 var darkEnabled by remember { mutableStateOf(false) }
 
+                Divider(modifier = Modifier.padding(horizontal = 16.dp))
                 SettingsSwitchItem(
                     icon = Icons.Default.Notifications,
-                    title = "Темная тема",
+                    title = stringResource(R.string.settings_dark_theme),
                     checked = darkEnabled,
                     onCheckedChange = { darkEnabled = it }
                 )
@@ -94,37 +94,7 @@ fun SettingsScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionHeader("Уведомления")
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                var pushEnabled by remember { mutableStateOf(true) }
-                var emailEnabled by remember { mutableStateOf(false) }
-
-                SettingsSwitchItem(
-                    icon = Icons.Default.Notifications,
-                    title = "Push-уведомления",
-                    checked = pushEnabled,
-                    onCheckedChange = { pushEnabled = it }
-                )
-                Divider(modifier = Modifier.padding(horizontal = 16.dp))
-                SettingsSwitchItem(
-                    icon = Icons.Default.Email,
-                    title = "Email-уведомления",
-                    checked = emailEnabled,
-                    onCheckedChange = { emailEnabled = it }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-
-            SectionHeader("Прочее")
+            SectionHeader(stringResource(R.string.settings_section_other))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -135,19 +105,19 @@ fun SettingsScreen(navController: NavHostController) {
             ) {
                 SettingsItem(
                     icon = Icons.Default.Info,
-                    title = "Помощь и поддержка",
+                    title = stringResource(R.string.settings_help),
                     onClick = { /* navigate to help */ }
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                 SettingsItem(
                     icon = Icons.Default.Article,
-                    title = "Условия использования",
+                    title = stringResource(R.string.settings_terms),
                     onClick = { /* navigate to terms */ }
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
                 SettingsItem(
                     icon = Icons.AutoMirrored.Filled.ExitToApp,
-                    title = "Выйти",
+                    title = stringResource(R.string.settings_logout),
                     titleColor = Color(0xFFE57373),
                     onClick = { navController.navigate(Screens.LOGIN_SCREEN.route) }
                 )
@@ -156,7 +126,7 @@ fun SettingsScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Wishlist App v1.0.0",
+                text = stringResource(R.string.settings_version),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 modifier = Modifier

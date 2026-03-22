@@ -39,6 +39,12 @@
     <string name="wishlist_placeholder">Выберите вишлист</string>
     <string name="gift_description_label">Описание</string>
     <string name="gift_description_placeholder">Добавьте описание подарка</string>
+    <string name="gift_add_error_name">Название подарка не может быть пустым</string>
+    <string name="gift_add_error_price">Цена не может быть пустой</string>
+    <string name="gift_add_error_link">Ссылка не может быть пустой</string>
+    <string name="gift_add_error_wishlist">Выберите вишлист</string>
+    <string name="gift_add_error_description">Описание не может быть пустым</string>
+    <string name="gift_add_validation_success">Подарок успешно добавлен</string>
 
     <!-- Экран деталей вишлиста (WishlistDetailsScreen) -->
     <string name="gift_details_title">Желание</string>

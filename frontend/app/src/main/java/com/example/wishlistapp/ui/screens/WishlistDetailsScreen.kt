@@ -3,6 +3,7 @@ package com.example.wishlistapp.ui.screens
 import InfoCard
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,18 +59,26 @@ fun WishlistDetailsScreen(
                 style = MaterialTheme.typography.titleLarge
             )
             Button(onClick = {
-                navController.navigate(Screen.AddGift.route)
+                navController.navigate(Screen.AddGift.createRoute(wishlistId))
             }) {
                 Text(stringResource(R.string.details_add_button))
             }
         }
 
         if (wishlist.gifts.isEmpty()) {
-            Text(
-                stringResource(R.string.details_empty_gifts),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { navController.navigate(Screen.AddGift.createRoute(wishlistId)) },
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Text(stringResource(R.string.details_empty_gifts),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(wishlist.gifts) { gift ->

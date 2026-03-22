@@ -7,120 +7,67 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.wishlistapp.data.model.Gift
+import com.example.wishlistapp.R
+import com.example.wishlistapp.ui.components.AppButton
+import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.viewmodel.WishlistViewModel
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGiftScreen(
     navController: NavHostController,
+    wishlistId: Int,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-
     var giftName by remember { mutableStateOf(TextFieldValue("")) }
     var giftPrice by remember { mutableStateOf(TextFieldValue("")) }
     var giftLink by remember { mutableStateOf(TextFieldValue("")) }
     var giftDescription by remember { mutableStateOf(TextFieldValue("")) }
 
-    var selectedWishlistId by remember { mutableStateOf<Int?>(null) }
+    val wishlists = viewModel.getWishlists()
+    var selectedWishlistId by remember { mutableStateOf<Int?>(wishlistId) }
     var expanded by remember { mutableStateOf(false) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    val wishlists = viewModel.getWishlists()
-
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            TopAppBar(
-                title = { Text("Добавить желание") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBackIosNew,
-                            contentDescription = "Назад"
-                        )
-                    }
-                }
-            )
+            NestedScreenHeader(
+                stringResource(R.string.add_gift_title)
+            ) { navController.navigateUp() }
         },
         bottomBar = {
-            Button(
+            AppButton(
+                buttonText = stringResource(R.string.done_button),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                onClick = {
-
-                    if (giftName.text.isBlank()) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Укажите название желания")
-                        }
-                        return@Button
-                    }
-
-                    if (selectedWishlistId == null) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Выберите вишлист")
-                        }
-                        return@Button
-                    }
-
-                    val newGift = Gift(
-                        id = 0,
-                        wishlistId = selectedWishlistId!!,
-                        name = giftName.text,
-                        price = giftPrice.text,
-                        description = giftDescription.text,
-                        link = giftLink.text.ifBlank { null },
-                        created = LocalDate.now(),
-                        ownerName = "Aleksandra Petrova"
-                    )
-
-                    viewModel.addGift(newGift)
-                    navController.navigateUp()
-                }
-            ) {
-                Text("Готово")
-            }
+                    .height(60.dp),
+                onClick = { /* Логика сохранения будет добавлена позже */ }
+            )
         }
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -128,101 +75,128 @@ fun AddGiftScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
                 .background(MaterialTheme.colorScheme.surface),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Название", style = MaterialTheme.typography.bodySmall)
-            OutlinedTextField(
+            AppTextField(
+                label = stringResource(R.string.gift_name_label),
                 value = giftName,
                 onValueChange = { giftName = it },
-                placeholder = { Text("Напишите название вашего желания") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp),
-                isError = giftName.text.isBlank()
+                placeholder = stringResource(R.string.gift_name_placeholder),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("Цена", style = MaterialTheme.typography.bodySmall)
-            OutlinedTextField(
+            AppTextField(
+                label = stringResource(R.string.gift_price_label),
                 value = giftPrice,
                 onValueChange = { giftPrice = it },
-                placeholder = { Text("Напишите примерную стоимость подарка") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
+                placeholder = stringResource(R.string.gift_price_placeholder),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("Ссылка", style = MaterialTheme.typography.bodySmall)
-            OutlinedTextField(
+            AppTextField(
+                label = stringResource(R.string.gift_link_label),
                 value = giftLink,
                 onValueChange = { giftLink = it },
-                placeholder = { Text("Добавьте ссылку") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
+                placeholder = stringResource(R.string.gift_link_placeholder),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("Вишлист", style = MaterialTheme.typography.bodySmall)
-            ExposedDropdownMenuBox(
+            AppDropdownField(
+                label = stringResource(R.string.wishlist_label),
+                selectedValue = wishlists.find { it.id == selectedWishlistId }?.title ?: "",
                 expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-
-                OutlinedTextField(
-                    value = wishlists.find { it.id == selectedWishlistId }?.title ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    placeholder = { Text("Выберите вишлист") },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    isError = selectedWishlistId == null
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    wishlists.forEach { wishlist ->
-                        if (wishlist.id != 4) {
-                            DropdownMenuItem(
-                                text = { Text(wishlist.title) },
-                                onClick = {
-                                    selectedWishlistId = wishlist.id
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
+                onExpandedChange = { expanded = it },
+                placeholder = stringResource(R.string.wishlist_placeholder),
+                items = wishlists,
+                onItemSelected = { wishlist ->
+                    selectedWishlistId = wishlist.id
+                    expanded = false
                 }
-            }
+            )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("Описание", style = MaterialTheme.typography.bodySmall)
-            OutlinedTextField(
+            AppTextField(
+                label = stringResource(R.string.gift_description_label),
                 value = giftDescription,
                 onValueChange = { giftDescription = it },
+                placeholder = stringResource(R.string.gift_description_placeholder),
+                minLines = 3,
+                maxLines = 5
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun AppTextField(
+    label: String,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    placeholder: String,
+    singleLine: Boolean = false,
+    minLines: Int = 1,
+    maxLines: Int = 1
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label, style = MaterialTheme.typography.bodySmall)
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(placeholder) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = singleLine,
+            minLines = minLines,
+            maxLines = maxLines,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppDropdownField(
+    label: String,
+    selectedValue: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    placeholder: String,
+    items: List<com.example.wishlistapp.data.model.Wishlist>,
+    onItemSelected: (com.example.wishlistapp.data.model.Wishlist) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(label, style = MaterialTheme.typography.bodySmall)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = onExpandedChange
+        ) {
+            OutlinedTextField(
+                value = selectedValue,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                placeholder = { Text(placeholder) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 100.dp),
-                maxLines = 5,
+                    .menuAnchor()
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
 
-            Spacer(modifier = Modifier.height(80.dp))
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { onExpandedChange(false) }
+            ) {
+                items.forEach { wishlist ->
+                    DropdownMenuItem(
+                        text = { Text(wishlist.title) },
+                        onClick = {
+                            onItemSelected(wishlist)
+                        }
+                    )
+                }
+            }
         }
     }
 }
