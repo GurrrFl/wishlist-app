@@ -36,8 +36,6 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(paddingValues)) {
                         AppNavGraph(
                             navController = navController,
-                            darkThemeEnabled = darkThemeEnabled,
-                            onThemeChange = { newTheme -> settings.toggleDarkTheme(newTheme) },
                             settings
                         )
                     }

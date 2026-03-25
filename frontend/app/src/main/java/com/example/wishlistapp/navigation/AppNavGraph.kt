@@ -29,8 +29,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    darkThemeEnabled: Boolean,
-    onThemeChange: (Boolean) -> Unit,
     settingsViewModel: SettingsViewModel
 ) {
     val startDestination by settingsViewModel.startDestination.collectAsState()
@@ -46,9 +44,7 @@ fun AppNavGraph(
         composable(route = Screen.Sample.route) {
             SplitScreen(
                 navController = navController,
-                settingsViewModel = settingsViewModel,
-                darkThemeEnabled = darkThemeEnabled,
-                onThemeChange = onThemeChange
+                settingsViewModel = settingsViewModel
             )
         }
         composable(route = Screen.Login.route) {
