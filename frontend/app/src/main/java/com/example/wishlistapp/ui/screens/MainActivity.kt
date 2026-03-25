@@ -6,30 +6,25 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.navigation.AppNavGraph
 import com.example.wishlistapp.navigation.BottomNavigationBar
 import com.example.wishlistapp.ui.theme.WishlistAppTheme
+import com.example.wishlistapp.viewmodel.SettingsViewModel
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sessionManager = SessionManager(this)
 
         setContent {
-            var darkThemeEnabled by rememberSaveable {
-                mutableStateOf(sessionManager.isDarkTheme())
-            }
 
+            val settings: SettingsViewModel by inject()
+            val darkThemeEnabled = settings.darkThemeState.collectAsState().value
             WishlistAppTheme(darkTheme = darkThemeEnabled) {
                 val navController = rememberNavController()
 
@@ -41,12 +36,9 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(paddingValues)) {
                         AppNavGraph(
                             navController = navController,
-                            context = this@MainActivity,
                             darkThemeEnabled = darkThemeEnabled,
-                            onThemeChange = { 
-                                darkThemeEnabled = it
-                                sessionManager.saveDarkTheme(it)
-                            }
+                            onThemeChange = { newTheme -> settings.toggleDarkTheme(newTheme) },
+                            settings
                         )
                     }
 

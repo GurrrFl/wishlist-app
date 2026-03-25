@@ -1,18 +1,13 @@
 package com.example.wishlistapp.navigation
 
-import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.ui.screens.AddGiftScreen
 import com.example.wishlistapp.ui.screens.AddWishlistScreen
 import com.example.wishlistapp.ui.screens.FindWishlistScreen
@@ -27,26 +22,18 @@ import com.example.wishlistapp.ui.screens.WishlistsScreen
 import com.example.wishlistapp.ui.screens.auth.LoginScreen
 import com.example.wishlistapp.ui.screens.auth.RegisterScreen
 import com.example.wishlistapp.viewmodel.AuthViewModel
+import com.example.wishlistapp.viewmodel.SettingsViewModel
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    context: Context,
     darkThemeEnabled: Boolean,
-    onThemeChange: (Boolean) -> Unit
+    onThemeChange: (Boolean) -> Unit,
+    settingsViewModel: SettingsViewModel
 ) {
-    var startDestination by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        val sessionManager = SessionManager(context)
-        startDestination = if (sessionManager.isLoggedIn()) {
-            Screen.Wishlists.route
-        } else {
-            Screens.LOGIN_SCREEN.route
-        }
-    }
+    val startDestination by settingsViewModel.startDestination.collectAsState()
 
     if (startDestination == null) {
         return
@@ -59,19 +46,19 @@ fun AppNavGraph(
         composable(route = Screen.Sample.route) {
             SplitScreen(
                 navController = navController,
-                context = context,
+                settingsViewModel = settingsViewModel,
                 darkThemeEnabled = darkThemeEnabled,
                 onThemeChange = onThemeChange
             )
         }
-        composable(route = Screens.LOGIN_SCREEN.route) {
+        composable(route = Screen.Login.route) {
             val     viewModel: AuthViewModel = koinViewModel()
             LoginScreen( navController = navController, viewModel)
         }
-        composable(route = Screens.REGISTER_SCREEN.route) {
+        composable(route = Screen.Register.route) {
             RegisterScreen(navController = navController)
         }
-        composable(route = Screens.PROFILE_SCREEN.route) {
+        composable(route = Screen.Profile.route) {
             val viewModel: AuthViewModel = koinViewModel()
             ProfileScreen(navController = navController, viewModel )
         }
@@ -137,7 +124,7 @@ fun AppNavGraph(
             SearchScreen(navController = navController)
         }
 
-        composable(route = Screens.RESERVE_GIFTS_SCREEN.route) {
+        composable(route = Screen.ReserveGifts.route) {
             val  wishViewModel: WishlistViewModel  = koinViewModel()
             ReserveGiftsScreen(navController = navController, wishViewModel)
         }

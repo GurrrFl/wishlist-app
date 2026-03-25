@@ -1,6 +1,5 @@
 package com.example.wishlistapp.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +38,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,22 +53,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
-import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.navigation.Screen
-
 import com.example.wishlistapp.ui.components.AppHeader
+import com.example.wishlistapp.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SplitScreen(
     navController: NavHostController,
-    context: Context,
+    settingsViewModel: SettingsViewModel,
     darkThemeEnabled: Boolean,
     onThemeChange: (Boolean) -> Unit
 ) {
     var userName by remember { mutableStateOf("Temp name now") }
     var showEditDialog by remember { mutableStateOf(false) }
-    val sessionManager = remember { SessionManager(context) }
+    val isDarkTheme by settingsViewModel.darkThemeState.collectAsState()
 
     Scaffold(
         topBar = { AppHeader(stringResource(id = R.string.profile_title)) }
@@ -178,8 +177,7 @@ fun SplitScreen(
                     title = stringResource(R.string.settings_dark_theme),
                     checked = darkThemeEnabled,
                     onCheckedChange = { 
-                        sessionManager.saveDarkTheme(it)
-                        onThemeChange(it)
+                        settingsViewModel.toggleDarkTheme(!isDarkTheme)
                     }
                 )
 

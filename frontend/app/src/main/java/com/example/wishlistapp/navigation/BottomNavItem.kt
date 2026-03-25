@@ -14,7 +14,7 @@ sealed class BottomNavItem(
     val icon: ImageVector
 ) {
     object Profile : BottomNavItem(
-        route = Screens.PROFILE_SCREEN.route,
+        route = Screen.Profile.route,
         title = "Профиль",
         icon = Icons.Default.Person
     )
@@ -32,7 +32,7 @@ sealed class BottomNavItem(
     )
 
     object ReserveGifts : BottomNavItem(
-        route = Screens.RESERVE_GIFTS_SCREEN.route,
+        route = Screen.ReserveGifts.route,
         title = "Резерв",
         icon = Icons.Default.Bookmark
     )

@@ -1,17 +1,22 @@
 package com.example.wishlistapp.di
 
 import com.example.wishlistapp.viewmodel.AuthViewModel
+import com.example.wishlistapp.viewmodel.SettingsViewModel
 import com.example.wishlistapp.viewmodel.WishlistViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
+
+
 import org.koin.dsl.module
 
 val presentationModule = module{
     viewModel {
-        AuthViewModel(repository = get())
+        AuthViewModel( get())
     }
     viewModel {
         WishlistViewModel()
     }
-
+    viewModel {
+        SettingsViewModel(get())
+    }
 
 }
