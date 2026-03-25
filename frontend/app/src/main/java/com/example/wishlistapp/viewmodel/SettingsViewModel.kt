@@ -37,5 +37,11 @@ class SettingsViewModel(
             _startDestination.value = destination
         }
     }
+    fun editName(newName: String){
+        sessionManager.saveUserName(newName)
+    }
+    fun getUserName(): String? {
+        return sessionManager.getUserName()
+    }
 
 }

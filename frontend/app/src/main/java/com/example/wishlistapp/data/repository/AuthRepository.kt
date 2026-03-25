@@ -11,7 +11,6 @@ class AuthRepository(
     private val api: UserApi,
     private val sessionManager: SessionManager
 ) {
-
     suspend fun login(email: String, password: String) = withContext(Dispatchers.IO) {
         val response = api.login(email, password)
 
@@ -26,6 +25,7 @@ class AuthRepository(
     suspend fun register(login: String, email: String, password: String) = withContext(Dispatchers.IO) {
         val response = api.register(
             RegisterRequest(login, email, password))
+        sessionManager.saveUserName(response.login)
     }
 
     suspend fun logout() = withContext(Dispatchers.IO) {

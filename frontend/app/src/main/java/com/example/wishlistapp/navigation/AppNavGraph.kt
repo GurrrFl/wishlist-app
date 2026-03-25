@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.wishlistapp.ui.screens.AccountScreen
 import com.example.wishlistapp.ui.screens.AddGiftScreen
 import com.example.wishlistapp.ui.screens.AddWishlistScreen
 import com.example.wishlistapp.ui.screens.FindWishlistScreen
@@ -16,7 +17,6 @@ import com.example.wishlistapp.ui.screens.ProfileScreen
 import com.example.wishlistapp.ui.screens.ReserveGiftsScreen
 import com.example.wishlistapp.ui.screens.SearchScreen
 import com.example.wishlistapp.ui.screens.SettingsScreen
-import com.example.wishlistapp.ui.screens.SplitScreen
 import com.example.wishlistapp.ui.screens.WishlistDetailsScreen
 import com.example.wishlistapp.ui.screens.WishlistsScreen
 import com.example.wishlistapp.ui.screens.auth.LoginScreen
@@ -42,7 +42,7 @@ fun AppNavGraph(
         startDestination = startDestination!!
     ) {
         composable(route = Screen.Sample.route) {
-            SplitScreen(
+            AccountScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel
             )

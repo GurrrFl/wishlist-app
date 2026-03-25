@@ -7,6 +7,7 @@ class SessionManager(private val prefs: SharedPreferences) {
 
     companion object {
         private const val KEY_TOKEN = "token"
+        private const val KEY_USER_NAME = "user_name"
         private const val KEY_DARK_THEME = "dark_theme"
     }
 
@@ -38,5 +39,13 @@ class SessionManager(private val prefs: SharedPreferences) {
         prefs.edit {
             clear()
         }
+    }
+    fun saveUserName(userName: String) {
+        prefs.edit {
+            putString(KEY_USER_NAME, userName)
+        }
+    }
+    fun getUserName(): String? {
+        return prefs.getString(KEY_USER_NAME, "User")
     }
 }

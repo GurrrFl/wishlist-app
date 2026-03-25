@@ -117,6 +117,13 @@
     <string name="settings_terms">Условия использования</string>
     <string name="settings_logout">Выйти</string>
     <string name="settings_version">Wishlist App v1.0.0</string>
+    <string name="edit_name">Редактировать имя</string>
+    <string name="account_title">Аккаунт</string>
+    <string name="edit_name_label">Имя пользователя</string>
+    <string name="edit_name_error">Имя не может быть пустым</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="options">Возможности</string>
 
     <!-- Экран списка вишлистов (WishlistsScreen) -->
     <string name="wishlists_tab_my">Мои вишлисты</string>
