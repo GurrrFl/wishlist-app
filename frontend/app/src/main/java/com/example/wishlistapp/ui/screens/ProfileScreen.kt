@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screen
-import com.example.wishlistapp.navigation.Screens
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.screens.auth.AuthState
 import com.example.wishlistapp.viewmodel.AuthViewModel
@@ -58,7 +57,7 @@ fun ProfileScreen(
 
     LaunchedEffect(state) {
         if (state is AuthState.Success && !authViewModel.isLoggedIn) {
-            navController.navigate(Screens.LOGIN_SCREEN.route) {
+            navController.navigate(Screen.Login.route) {
                 popUpTo(0) { inclusive = true }
             }
             authViewModel.resetState()

@@ -54,7 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.data.SessionManager
-import com.example.wishlistapp.navigation.Screens
+import com.example.wishlistapp.navigation.Screen
+
 import com.example.wishlistapp.ui.components.AppHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -187,7 +188,7 @@ fun SplitScreen(
                     icon = Icons.AutoMirrored.Filled.ExitToApp,
                     title = stringResource(R.string.settings_logout),
                     titleColor = Color(0xFFE57373),
-                    onClick = { navController.navigate(Screens.LOGIN_SCREEN.route) }
+                    onClick = { navController.navigate(Screen.Login.route) }
                 )
             }
 
