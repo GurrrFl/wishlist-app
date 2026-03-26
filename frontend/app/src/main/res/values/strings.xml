@@ -69,7 +69,7 @@
     <string name="wishlist_add_validation_success">Ура вишлист</string>
     <!-- Экран профиля (ProfileScreen) -->
     <string name="profile_title">Профиль</string>
-    <string name="profile_default_name">Aleksandra Petrova</string>       <!-- Заглушка, заменится реальными данными -->
+    <string name="profile_default_name">Aleksandra Petrova</string>
     <string name="profile_default_email">sasha_petrova@gmail.com</string> <!-- Заглушка -->
     <string name="profile_stats_wishlists">Вишлиста</string>
     <string name="profile_stats_gifts">Желаний</string>

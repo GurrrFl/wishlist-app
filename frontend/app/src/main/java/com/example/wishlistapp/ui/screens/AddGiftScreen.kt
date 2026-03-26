@@ -18,6 +18,8 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,7 +52,7 @@ fun AddGiftScreen(
     val wishlists = viewModel.getWishlists()
     var selectedWishlistId by remember { mutableStateOf<Int?>(wishlistId) }
     var expanded by remember { mutableStateOf(false) }
-
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
@@ -58,6 +60,7 @@ fun AddGiftScreen(
                 stringResource(R.string.add_gift_title)
             ) { navController.navigateUp() }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             AppButton(
                 buttonText = stringResource(R.string.done_button),

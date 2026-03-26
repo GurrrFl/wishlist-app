@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -53,6 +51,7 @@ import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.EditNameDialog
+import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,14 +67,14 @@ fun AccountScreen(
     Scaffold(
         topBar = { AppHeader(stringResource(id = R.string.profile_title)) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp)
+                    .padding(paddingValues),
+
+            ) { headerDivider()
 
             UserProfileCard(
                 userName = userName,
@@ -157,7 +156,7 @@ fun AccountScreen(
         EditNameDialog(
             currentName = userName!!,
             onDismiss = { showEditDialog = false },
-            onSave = { userName = it }
+            onSave = { userName = it; settingsViewModel.editName(it) }
         )
     }
 }

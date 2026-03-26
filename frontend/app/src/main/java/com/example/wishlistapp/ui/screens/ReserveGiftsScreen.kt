@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,7 +44,9 @@ import com.example.wishlistapp.R
 import com.example.wishlistapp.data.model.Gift
 import com.example.wishlistapp.data.model.GiftStatus
 import com.example.wishlistapp.navigation.Screen
+import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.generateRandomColor
+import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -57,46 +60,45 @@ fun ReserveGiftsScreen(
         .filter { it.status == GiftStatus.RESERVED }
 
     var giftToCancel by remember { mutableStateOf<Gift?>(null) }
+    Scaffold(
+        topBar = {AppHeader(stringResource(R.string.reserve_gifts_title)) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            headerDivider()
+            if (gifts.isEmpty()) {
+                EmptyReserveGiftsCard()
+            } else {
+                ReservedGiftsList(
+                    gifts = gifts,
+                    onGiftClick = { gift ->
+                        navController.navigate(Screen.GiftDetails.createRoute(gift.id))
+                    },
+                    onCancelReservation = { gift ->
+                        giftToCancel = gift
+                    }
+                )
+            }
+        }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.reserve_gifts_title),
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        if (gifts.isEmpty()) {
-            EmptyReserveGiftsCard()
-        } else {
-            ReservedGiftsList(
-                gifts = gifts,
-                onGiftClick = { gift ->
-                    navController.navigate(Screen.GiftDetails.createRoute(gift.id))
+        if (giftToCancel != null) {
+            CancelReservationDialog(
+                gift = giftToCancel!!,
+                onConfirm = {
+                    viewModel.cancelReservation(giftToCancel!!.id)
+                    giftToCancel = null
                 },
-                onCancelReservation = { gift ->
-                    giftToCancel = gift
-                }
+                onDismiss = { giftToCancel = null }
             )
         }
     }
-
-    if (giftToCancel != null) {
-        CancelReservationDialog(
-            gift = giftToCancel!!,
-            onConfirm = {
-                viewModel.cancelReservation(giftToCancel!!.id)
-                giftToCancel = null
-            },
-            onDismiss = { giftToCancel = null }
-        )
-    }
 }
-
 
 
 @Composable

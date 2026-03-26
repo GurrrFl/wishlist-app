@@ -24,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +53,7 @@ import com.example.wishlistapp.R
 import com.example.wishlistapp.data.SearchHistoryStorage
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
+import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -86,13 +86,7 @@ fun SearchScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding( 16.dp)
         ) {
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.primary,
-                thickness = 2.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
+            headerDivider()
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 verticalAlignment = Alignment.CenterVertically

@@ -23,7 +23,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,6 +39,7 @@ import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.generateRandomColor
+import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 
 
@@ -75,13 +75,7 @@ fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistVi
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.primary,
-                thickness = 2.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
+            headerDivider()
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)

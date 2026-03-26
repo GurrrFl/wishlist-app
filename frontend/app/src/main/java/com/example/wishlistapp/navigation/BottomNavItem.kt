@@ -47,11 +47,10 @@ sealed class BottomNavItem(
 
     companion object {
         val all: List<BottomNavItem> = listOf(
-            Profile,
             Wishlists,
             FindWishlist,
             ReserveGifts,
-            Settings
+            Profile,
         )
     }
 }
