@@ -1,21 +1,16 @@
 package com.example.wishlistapp.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,9 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +39,7 @@ import com.example.wishlistapp.R
 import com.example.wishlistapp.data.model.GiftStatus
 import com.example.wishlistapp.ui.components.AppButton
 import com.example.wishlistapp.ui.components.NestedScreenHeader
+import com.example.wishlistapp.ui.components.RoundedImage
 import com.example.wishlistapp.ui.components.generateRandomColor
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -59,8 +53,9 @@ fun GiftDetailsScreen(
     viewModel: WishlistViewModel = koinViewModel()
 ) {
     val gift = viewModel.getGift(giftId) ?: return
-
-    val isOwner = viewModel.isGiftOwner(gift)
+    
+    //при подключении репы будут сравниваться Idшники, а не имена
+    val isOwner = viewModel.isGiftOwner(gift.ownerName)
 
     val iconBackgroundColor = remember {
         generateRandomColor().copy(alpha = 0.65f)
@@ -78,6 +73,7 @@ fun GiftDetailsScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -109,8 +105,6 @@ fun GiftDetailsScreen(
 
             CreatedCard(created = gift.created)
 
-            Spacer(Modifier.height(24.dp))
-
             ActionButtons(
                 isOwner = isOwner,
                 gift = gift,
@@ -125,20 +119,16 @@ fun GiftDetailsScreen(
 fun GiftImage(
     iconBackgroundColor: Color
 ) {
-    Box(
+    RoundedImage(
+        imageRes = R.drawable.free_icon_gift,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(16.dp))
-            .background(iconBackgroundColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(R.drawable.free_icon_gift),
-            contentDescription = stringResource(R.string.gift_details_image_desc),
-            modifier = Modifier.size(120.dp)
-        )
-    }
+            .aspectRatio(1f),
+        imageModifier = Modifier.size(120.dp),
+        backgroundColor = iconBackgroundColor,
+        shape = RoundedCornerShape(16.dp),
+        contentDescription = stringResource(R.string.gift_details_image_desc)
+    )
 }
 
 @Composable
@@ -197,17 +187,21 @@ fun GiftInfoRow(
 @Composable
 fun DescriptionCard(description: String) {
     Card {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Icon(
                     Icons.Default.Info,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.gift_details_description_label))
             }
-            Spacer(Modifier.height(8.dp))
             Text(description)
         }
     }
@@ -216,17 +210,21 @@ fun DescriptionCard(description: String) {
 @Composable
 fun LinkCard(link: String) {
     Card {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Icon(
                     Icons.Default.Link,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.gift_details_link_label))
             }
-            Spacer(Modifier.height(8.dp))
             Text(
                 text = link,
                 color = MaterialTheme.colorScheme.primary,
@@ -239,17 +237,21 @@ fun LinkCard(link: String) {
 @Composable
 fun CreatedCard(created: LocalDate) {
     Card {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Icon(
                     Icons.Default.CalendarToday,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.gift_details_created_label))
             }
-            Spacer(Modifier.height(8.dp))
             Text(created.toString())
         }
     }
@@ -263,7 +265,9 @@ fun ActionButtons(
     onNavigateUp: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Button(

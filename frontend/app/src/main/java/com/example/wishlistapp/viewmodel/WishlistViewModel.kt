@@ -2,6 +2,7 @@ package com.example.wishlistapp.viewmodel
 
 
 import androidx.lifecycle.ViewModel
+import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.data.model.Gift
 import com.example.wishlistapp.data.model.Wishlist
 import com.example.wishlistapp.data.repository.WishlistRepository
@@ -10,12 +11,11 @@ import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 
-class WishlistViewModel ()  : ViewModel() {
-
-    private val currentUserName = "Aleksandra Petrova"
-
-    fun isGiftOwner(gift: Gift): Boolean =
-        gift.ownerName == currentUserName
+class WishlistViewModel (
+    private val sessionManager: SessionManager
+)  : ViewModel() {
+    fun isGiftOwner(gift: String): Boolean =
+        gift == sessionManager.getUserName()
 
     fun getWishlists(): List<Wishlist> =
         WishlistRepository.getWishlists()

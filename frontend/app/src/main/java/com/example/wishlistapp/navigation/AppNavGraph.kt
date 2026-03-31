@@ -13,7 +13,6 @@ import com.example.wishlistapp.ui.screens.AddGiftScreen
 import com.example.wishlistapp.ui.screens.AddWishlistScreen
 import com.example.wishlistapp.ui.screens.FindWishlistScreen
 import com.example.wishlistapp.ui.screens.GiftDetailsScreen
-import com.example.wishlistapp.ui.screens.ProfileScreen
 import com.example.wishlistapp.ui.screens.ReserveGiftsScreen
 import com.example.wishlistapp.ui.screens.SearchScreen
 import com.example.wishlistapp.ui.screens.SettingsScreen
@@ -41,7 +40,7 @@ fun AppNavGraph(
         navController = navController,
         startDestination = startDestination!!
     ) {
-        composable(route = Screen.Sample.route) {
+        composable(route = Screen.Profile.route) {
             AccountScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel
@@ -54,10 +53,10 @@ fun AppNavGraph(
         composable(route = Screen.Register.route) {
             RegisterScreen(navController = navController)
         }
-        composable(route = Screen.Profile.route) {
-            val viewModel: AuthViewModel = koinViewModel()
-            ProfileScreen(navController = navController, viewModel )
-        }
+//        composable(route = Screen.Profile.route) {
+//            val viewModel: AuthViewModel = koinViewModel()
+//            ProfileScreen(navController = navController, viewModel )
+//        }
         composable(route = Screen.Wishlists.route) {
             val  wishViewModel: WishlistViewModel  = koinViewModel()
             WishlistsScreen(navController = navController, wishViewModel)
