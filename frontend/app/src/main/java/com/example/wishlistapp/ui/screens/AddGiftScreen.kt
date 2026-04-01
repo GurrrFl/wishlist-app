@@ -1,6 +1,5 @@
 package com.example.wishlistapp.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,16 +24,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.ui.components.AppButton
 import com.example.wishlistapp.ui.components.NestedScreenHeader
+import com.example.wishlistapp.ui.components.obtainGift
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,17 +46,20 @@ fun AddGiftScreen(
     wishlistId: Int,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    var giftName by remember { mutableStateOf(TextFieldValue("")) }
-    var giftPrice by remember { mutableStateOf(TextFieldValue("")) }
-    var giftLink by remember { mutableStateOf(TextFieldValue("")) }
-    var giftDescription by remember { mutableStateOf(TextFieldValue("")) }
+    var giftName by remember { mutableStateOf("") }
+    var giftPrice by remember { mutableStateOf("") }
+    var giftLink by remember { mutableStateOf("") }
+    var giftDescription by remember { mutableStateOf("") }
 
     val wishlists = viewModel.getWishlists()
-    var selectedWishlistId by remember { mutableStateOf<Int?>(wishlistId) }
+    var selectedWishlistId by remember { mutableStateOf<Int?>(if (wishlistId != -1) wishlistId else null) }
     var expanded by remember { mutableStateOf(false) }
+    
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             NestedScreenHeader(
                 stringResource(R.string.add_gift_title)
@@ -66,8 +71,34 @@ fun AddGiftScreen(
                 buttonText = stringResource(R.string.done_button),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp),
-                onClick = { /* Логика сохранения будет добавлена позже */ }
+                    .height(84.dp)
+                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                onClick = {
+                    obtainGift(
+                        context = context,
+                        name = giftName,
+                        price = giftPrice,
+                        link = giftLink,
+                        description = giftDescription,
+                        wishlistId = selectedWishlistId
+                    ).fold(
+                        onSuccess = {
+                            viewModel.addGift(
+                                name = giftName,
+                                price = giftPrice,
+                                link = giftLink,
+                                description = giftDescription,
+                                wishlistId = selectedWishlistId!!
+                            )
+                            navController.popBackStack()
+                        },
+                        onFailure = { error ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar(error.message.toString())
+                            }
+                        }
+                    )
+                }
             )
         }
     ) { paddingValues ->
@@ -76,8 +107,7 @@ fun AddGiftScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .background(MaterialTheme.colorScheme.surface),
+                .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -127,7 +157,7 @@ fun AddGiftScreen(
                 minLines = 3,
                 maxLines = 5
             )
-
+            
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -136,8 +166,8 @@ fun AddGiftScreen(
 @Composable
 fun AppTextField(
     label: String,
-    value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit,
     placeholder: String,
     singleLine: Boolean = false,
     minLines: Int = 1,

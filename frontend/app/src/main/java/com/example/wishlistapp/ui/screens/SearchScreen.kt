@@ -47,7 +47,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.data.SearchHistoryStorage
@@ -57,12 +56,13 @@ import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    viewModel: WishlistViewModel = viewModel()
+    viewModel: WishlistViewModel = koinViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -71,6 +71,7 @@ fun SearchScreen(
     val searchHistory by historyStorage.historyFlow.collectAsState(initial = emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val message = stringResource(R.string.search_snackbar_not_found)
 
     Scaffold(
         topBar = {
@@ -84,17 +85,21 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
-                .padding( 16.dp)
+                .padding(16.dp)
         ) {
             headerDivider()
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
                     placeholder = {
                         Text(
                             text = stringResource(R.string.search_placeholder),
@@ -148,9 +153,7 @@ fun SearchScreen(
                                     Screen.FindWishlist.createRoute(wishlist.id)
                                 )
                             } else {
-                                snackbarHostState.showSnackbar(
-                                    "Вишлист не найден"
-                                )
+                                snackbarHostState.showSnackbar(message)
                             }
                         }
                     },
@@ -160,7 +163,7 @@ fun SearchScreen(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("Открыть")
+                    Text(stringResource(R.string.search_button))
                 }
             }
 
@@ -247,7 +250,7 @@ private fun SearchHistoryItem(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Удалить",
+                    contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )

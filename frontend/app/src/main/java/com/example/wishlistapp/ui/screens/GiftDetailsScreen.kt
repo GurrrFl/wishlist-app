@@ -96,13 +96,12 @@ fun GiftDetailsScreen(
                 gift = gift,
                 isOwner = isOwner
             )
-
+            //вопрос как лучше делать, так, чтоб не загромождать вызовами экран
+            // или 1 кард компоненту, а тут ее 3 раза вызывать? или сделать еще 1 функцию где делать 3 вызова?
             DescriptionCard(description = gift.description)
-
             gift.link?.let {
                 LinkCard(link = it)
             }
-
             CreatedCard(created = gift.created)
 
             ActionButtons(
@@ -284,35 +283,31 @@ fun ActionButtons(
             )
         }
 
-        if (isOwner) {
-            AppButton(
-                buttonText = stringResource(R.string.gift_details_delete),
-                modifier = Modifier.weight(1f),
-                buttonColor = MaterialTheme.colorScheme.error,
-                buttonTextColor = Color.White,
-                onClick = {
+        val buttonText = when {
+            isOwner -> stringResource(R.string.gift_details_delete)
+            gift.status == GiftStatus.AVAILABLE -> stringResource(R.string.gift_details_reserve)
+            else -> stringResource(R.string.gift_details_cancel_reservation)
+        }
+
+        val buttonColor = if (isOwner) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+
+        AppButton(
+            buttonText = buttonText,
+            modifier = Modifier.weight(1f),
+            buttonColor = buttonColor,
+            buttonTextColor = if (isOwner) Color.White else MaterialTheme.colorScheme.onPrimary,
+            onClick = {
+                if (isOwner) {
                     viewModel.deleteGift(gift.id)
                     onNavigateUp()
-                }
-            )
-        } else {
-            if (gift.status == GiftStatus.AVAILABLE) {
-                AppButton(
-                    buttonText = stringResource(R.string.gift_details_reserve),
-                    modifier = Modifier.weight(1f),
-                    onClick = {
+                } else {
+                    if (gift.status == GiftStatus.AVAILABLE) {
                         viewModel.reserveGift(gift.wishlistId, gift.id, "Вы")
-                    }
-                )
-            } else {
-                AppButton(
-                    buttonText = stringResource(R.string.gift_details_cancel_reservation),
-                    modifier = Modifier.weight(1f),
-                    onClick = {
+                    } else {
                         viewModel.cancelReservation(gift.id)
                     }
-                )
+                }
             }
-        }
+        )
     }
 }

@@ -2,14 +2,11 @@ package com.example.wishlistapp.navigation
 
 
 sealed class Screen(val route: String) {
-    object Sample : Screen("sample")
     object Login : Screen("login")
     object Register : Screen("register")
 
     object Profile : Screen("profile")
     object Wishlists : Screen("wishlists")
-    object Settings : Screen("settings")
-
     object AddWishlist : Screen("add_wishlist/{wishlistId}") {
         fun createRoute(wishlistId: Int) = "add_wishlist/$wishlistId"
     }

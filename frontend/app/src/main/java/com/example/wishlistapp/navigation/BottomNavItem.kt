@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.wishlistapp.R
 
@@ -38,13 +37,6 @@ sealed class BottomNavItem(
         titleRes = R.string.nav_reserve,
         icon = Icons.Default.Bookmark
     )
-
-    object Settings : BottomNavItem(
-        route = Screen.Settings.route,
-        titleRes = R.string.nav_settings,
-        icon = Icons.Default.Settings
-    )
-
     companion object {
         val all: List<BottomNavItem> = listOf(
             Wishlists,

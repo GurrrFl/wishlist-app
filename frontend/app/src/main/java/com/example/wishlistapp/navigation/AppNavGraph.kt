@@ -15,7 +15,6 @@ import com.example.wishlistapp.ui.screens.FindWishlistScreen
 import com.example.wishlistapp.ui.screens.GiftDetailsScreen
 import com.example.wishlistapp.ui.screens.ReserveGiftsScreen
 import com.example.wishlistapp.ui.screens.SearchScreen
-import com.example.wishlistapp.ui.screens.SettingsScreen
 import com.example.wishlistapp.ui.screens.WishlistDetailsScreen
 import com.example.wishlistapp.ui.screens.WishlistsScreen
 import com.example.wishlistapp.ui.screens.auth.LoginScreen
@@ -124,10 +123,6 @@ fun AppNavGraph(
             ReserveGiftsScreen(navController = navController, wishViewModel)
         }
 
-        composable(route = Screen.Settings.route) {
-            SettingsScreen(
-                navController = navController)
-        }
 
     }
 }

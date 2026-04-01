@@ -32,7 +32,7 @@
     <string name="gift_name_label">Название</string>
     <string name="gift_name_placeholder">Напишите название вашего желания</string>
     <string name="gift_price_label">Цена</string>
-    <string name="gift_price_placeholder">Напишите примерную стоимость подарка</string>
+    <string name="gift_price_placeholder">Напишите примерную стоимость</string>
     <string name="gift_link_label">Ссылка</string>
     <string name="gift_link_placeholder">Добавьте ссылку</string>
     <string name="wishlist_label">Вишлист</string>
