@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.navigation.Screen
-import com.example.wishlistapp.navigation.Screens
 import com.example.wishlistapp.viewmodel.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -28,11 +27,10 @@ fun LoginScreen(
     viewModel: AuthViewModel = koinViewModel()
 ) {
     val state = viewModel.state
-
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
             navController.navigate(Screen.Wishlists.route) {
-                popUpTo(Screens.LOGIN_SCREEN.route) {
+                popUpTo(Screen.Login.route) {
                     inclusive = true
                 }
             }
@@ -53,7 +51,7 @@ fun LoginScreen(
         LoginFooter(
             stringResource(R.string.no_account_label),
             stringResource(R.string.register_label),
-        ){ navController.navigate(Screens.REGISTER_SCREEN.route) }
+        ){ navController.navigate(Screen.Register.route) }
 
         Spacer(modifier = Modifier.height(32.dp))
     }

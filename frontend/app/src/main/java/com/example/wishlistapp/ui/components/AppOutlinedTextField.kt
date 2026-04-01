@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppOutlinedTextField(
-    textPlaceholder: Int,
+    textLabel: Int,
+    textPlaceholder: Int? = null,
     value: String,
     onChanged:(String) -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth(),
@@ -30,12 +31,16 @@ fun AppOutlinedTextField(
     isCost: Boolean = false,
     isPasswordField: Boolean = false,
     isPasswordVisible: Boolean = false,
+    isError: Boolean = false,
     onVisibilityClick: @Composable (()-> Unit)? = null,
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onChanged,
-        label = { Text(text = stringResource(textPlaceholder)) },
+        label = { Text(text = stringResource(textLabel)) },
+        placeholder = textPlaceholder?.let{
+            { Text(text = stringResource(textPlaceholder)) }
+        },
         leadingIcon = leadingIcon?.let {
             { Icon(it, contentDescription = null) }
         },
@@ -49,6 +54,7 @@ fun AppOutlinedTextField(
         suffix = if (isCost) {
             { Text(text = "₽") }
         } else null,
+        isError = isError
     )
 
 }
@@ -72,5 +78,5 @@ fun PasswordVisibilityToggle(
 @Preview
 @Composable
 fun AppOutlinedTextFieldPreview() {
-    AppOutlinedTextField(textPlaceholder = 0, value = "", onChanged = {})
+    AppOutlinedTextField(textLabel = 0, value = "", onChanged = {})
 }

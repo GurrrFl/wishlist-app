@@ -47,32 +47,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.data.SearchHistoryStorage
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
+import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavHostController,
-    viewModel: WishlistViewModel = viewModel()
+    viewModel: WishlistViewModel = koinViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val historyStorage = remember { SearchHistoryStorage(context) }
-
-    val searchHistory by historyStorage
-        .historyFlow
-        .collectAsState(initial = emptyList())
-
+    val searchHistory by historyStorage.historyFlow.collectAsState(initial = emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val message = stringResource(R.string.search_snackbar_not_found)
 
     Scaffold(
         topBar = {
@@ -80,27 +79,30 @@ fun SearchScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp)
+                .padding(16.dp)
         ) {
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+            headerDivider()
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
                     placeholder = {
                         Text(
-                            text = "Введите ссылку",
+                            text = stringResource(R.string.search_placeholder),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
                     },
@@ -118,7 +120,7 @@ fun SearchScreen(
                             IconButton(onClick = { searchQuery = "" }) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Очистить"
+                                    contentDescription = stringResource(R.string.search_clear_content_desc)
                                 )
                             }
                         }
@@ -131,13 +133,12 @@ fun SearchScreen(
                     )
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
                     onClick = {
                         scope.launch {
                             if (searchQuery.isBlank()) {
-                                snackbarHostState.showSnackbar("Введите ссылку")
+                                snackbarHostState.showSnackbar(message = "Введите ссылку")
                                 return@launch
                             }
 
@@ -152,9 +153,7 @@ fun SearchScreen(
                                     Screen.FindWishlist.createRoute(wishlist.id)
                                 )
                             } else {
-                                snackbarHostState.showSnackbar(
-                                    "Вишлист не найден"
-                                )
+                                snackbarHostState.showSnackbar(message)
                             }
                         }
                     },
@@ -164,43 +163,54 @@ fun SearchScreen(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("Открыть")
+                    Text(stringResource(R.string.search_button))
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            SearchHistoryComponent(
+                searchHistory = searchHistory,
+                onItemClicked = { query -> searchQuery = query },
+                onItemDeleted = { link ->
+                    scope.launch {
+                    historyStorage.removeLink(link)} },
+                scope = scope
+            )
 
-            if (searchHistory.isNotEmpty()) {
-                Text(
-                    text = "История поиска",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
+        }
+    }
+}
+@Composable
+fun SearchHistoryComponent(
+    searchHistory: List<String>,
+    onItemClicked: (String) -> Unit,
+    onItemDeleted: (String) -> Unit,
+    scope: CoroutineScope
+) {
+    if (searchHistory.isNotEmpty()) {
+        Column(modifier = Modifier.padding(top = 24.dp)) {
+            Text(
+                text = stringResource(R.string.search_history_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(searchHistory) { item ->
-                        SearchHistoryItem(
-                            url = item,
-                            onClick = {
-                                searchQuery = item
-                            },
-                            onDelete = {
-                                scope.launch {
-                                    historyStorage.removeLink(item)
-                                }
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(searchHistory) { item ->
+                    SearchHistoryItem(
+                        url = item,
+                        onClick = { onItemClicked(item) },
+                        onDelete = {
+                            scope.launch {
+                                onItemDeleted(item)
                             }
-
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
     }
 }
-
 @Composable
 private fun SearchHistoryItem(
     url: String,
@@ -240,7 +250,7 @@ private fun SearchHistoryItem(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Удалить",
+                    contentDescription = null,
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )

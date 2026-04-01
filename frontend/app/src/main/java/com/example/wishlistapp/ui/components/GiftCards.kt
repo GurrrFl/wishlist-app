@@ -1,17 +1,13 @@
 package com.example.wishlistapp.ui.components
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
@@ -19,23 +15,25 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.wishlistapp.R
 import com.example.wishlistapp.data.model.Gift
+import com.example.wishlistapp.data.model.GiftStatus
 
 @Composable
 fun GiftCardNew(
     gift: Gift,
+    isSearched: Boolean = false,
+
     onClick: () -> Unit
 ) {
     val iconBackgroundColor = remember {
@@ -59,25 +57,17 @@ fun GiftCardNew(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(iconBackgroundColor),
-                contentAlignment = Alignment.Center
-            ) {
-               Image(
-                    painter = painterResource(id = R.drawable.free_icon_gift),
-                    contentDescription = gift.name,
-                    modifier = Modifier.size(36.dp),
-                    contentScale = ContentScale.Fit
-)
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
+            RoundedImage(
+                imageRes = R.drawable.free_icon_gift,
+                modifier = Modifier.size(60.dp),
+                imageModifier = Modifier.size(36.dp),
+                backgroundColor = iconBackgroundColor,
+                shape = RoundedCornerShape(8.dp),
+                contentDescription = gift.name
+            )
 
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).padding(start = 16.dp),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -94,21 +84,48 @@ fun GiftCardNew(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Text(
-                    text = gift.price,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = gift.price + stringResource(R.string.price),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (isSearched) {
+                        Surface(
+                            modifier = Modifier.align(Alignment.TopEnd),
+                            shape = RoundedCornerShape(18.dp),
+                            color = if (gift.status == GiftStatus.AVAILABLE) MaterialTheme.colorScheme.tertiaryFixedDim.copy(alpha = 0.2f) else MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
+                        ) {
+
+                            //TODO("Добавить логику, вызов проверки, доступен ли подарок")
+                            ItemAccessTeg(gift.status)
+
+                        }
+                    }
+
+
+                }
             }
 
             Icon(
                 imageVector = Icons.Default.ChevronRight,
-                contentDescription = "Подробнее",
+                contentDescription = stringResource(R.string.arrow_right),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+
             )
         }
     }
 }
 
+@Composable
+fun ItemAccessTeg(type: GiftStatus){
+
+        Text(
+            text = if (type == GiftStatus.AVAILABLE) stringResource(R.string.find_free_item) else stringResource(R.string.find_reserved_item),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 2.dp),
+            color = if (type == GiftStatus.AVAILABLE) MaterialTheme.colorScheme.tertiaryFixedDim else MaterialTheme.colorScheme.error
+        )
+}

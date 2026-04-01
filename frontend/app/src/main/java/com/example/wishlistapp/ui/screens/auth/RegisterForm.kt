@@ -33,19 +33,19 @@ fun RegisterForm(state: AuthState,
     Column(modifier = Modifier.padding(0.dp,8.dp,0.dp,8.dp,)) {
 
         AppOutlinedTextField(
-            textPlaceholder = R.string.nickname_label,
+            textLabel = R.string.nickname_label,
             value = login,
             onChanged = { login = it },
             leadingIcon = Icons.Default.Person
         )
         AppOutlinedTextField(
-            textPlaceholder = R.string.email_label,
+            textLabel = R.string.email_label,
             value = email,
             onChanged = { email = it },
             leadingIcon = Icons.Default.Email
         )
         AppOutlinedTextField(
-            textPlaceholder = R.string.password_label,
+            textLabel = R.string.password_label,
             value = password,
             onChanged = { password = it },
             leadingIcon = Icons.Default.Lock,
@@ -59,7 +59,7 @@ fun RegisterForm(state: AuthState,
             }
         )
         AppOutlinedTextField(
-            textPlaceholder = R.string.repeat_password_label,
+            textLabel = R.string.repeat_password_label,
             value = repeatPassword,
             onChanged = { repeatPassword = it },
             leadingIcon = Icons.Default.Lock,
