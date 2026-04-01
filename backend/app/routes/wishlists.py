@@ -54,7 +54,8 @@ def get_my_wishlists(
         include_private=include_private,
         search=search,
     )
-    return wishlists
+    
+    return {"wishlists": wishlists}
 
 
 @router.get(

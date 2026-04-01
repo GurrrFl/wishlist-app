@@ -49,7 +49,7 @@ class UserInDBBase(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     user_id: int = Field(..., description="Внутренний идентификатор пользователя")
-    created_at: datetime = Field(..., description="Дата и время создания пользователя")
+    
 
 
 class UserShort(UserInDBBase):
