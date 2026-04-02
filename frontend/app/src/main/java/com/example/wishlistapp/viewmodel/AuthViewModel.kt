@@ -15,10 +15,12 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     fun checkAuthState() { isLoggedIn = repository.isLoggedIn() }
     fun logout() = viewModelScope.launch { repository.logout(); isLoggedIn = false; state = AuthState.Success }
     fun login(email: String, password: String) {
+        if (state == AuthState.Loading) return
         if (email.isBlank() || password.isBlank()) { state = AuthState.LoginError("Заполните все поля"); return }
         viewModelScope.launch { state = AuthState.Loading; runCatching { repository.login(email, password) }.onSuccess { isLoggedIn = repository.isLoggedIn(); state = AuthState.Success }.onFailure { state = AuthState.LoginError("Ошибка входа") } }
     }
     fun register(login: String, email: String, password: String, repeatPassword: String) {
+        if (state == AuthState.Loading) return
         if (login.isBlank() || email.isBlank() || password.isBlank() || repeatPassword.isBlank()) { state = AuthState.RegisterError("Заполните все поля"); return }
         if (password != repeatPassword) { state = AuthState.RegisterError("Пароли не совпадают"); return }
         viewModelScope.launch { state = AuthState.Loading; runCatching { repository.register(login, email, password) }.onSuccess { isLoggedIn = repository.isLoggedIn(); state = AuthState.Success }.onFailure { state = AuthState.RegisterError("Ошибка регистрации") } }
