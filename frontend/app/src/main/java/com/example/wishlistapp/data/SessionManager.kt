@@ -19,5 +19,9 @@ class SessionManager(private val prefs: SharedPreferences) {
     fun getUserName(): String? = prefs.getString(KEY_USER_NAME, null)
     fun saveDarkTheme(enabled: Boolean) = prefs.edit { putBoolean(KEY_DARK_THEME, enabled) }
     fun isDarkTheme() = prefs.getBoolean(KEY_DARK_THEME, false)
-    fun clear() = prefs.edit { clear() }
+    fun clear() = prefs.edit {
+        remove(KEY_TOKEN)
+        remove(KEY_USER_ID)
+        remove(KEY_USER_NAME)
+    }
 }
