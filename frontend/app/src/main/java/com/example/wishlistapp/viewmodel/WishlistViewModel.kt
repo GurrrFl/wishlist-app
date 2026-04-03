@@ -33,7 +33,7 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     var wishlistsState by mutableStateOf<LoadState<List<Wishlist>>>(LoadState.Idle); private set
     var wishlistState by mutableStateOf<LoadState<Wishlist>>(LoadState.Idle); private set
 
-    fun isGiftOwner(owner: String?) = owner == sessionManager.getUserName()
+    fun isWishlistOwner(wishlistId: Int) = getWishlist(wishlistId)?.ownerId == sessionManager.getUserId()
     fun reservationIdForGift(giftId: Int) = reservedGifts.value.find { it.gift.id == giftId }?.reservation?.id
     fun getWishlists() = wishlists.value
     fun getWishlist(id: Int) = wishlists.value.find { it.id == id }

@@ -3,6 +3,7 @@ package com.example.wishlistapp.di
 import android.content.SharedPreferences
 import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.data.remote.UserApi
+import com.example.wishlistapp.data.remote.AuthInterceptor
 import com.example.wishlistapp.data.repository.AuthRepository
 import com.example.wishlistapp.data.repository.FakeDataStore
 import com.example.wishlistapp.data.repository.FakeGiftRepository
@@ -22,9 +23,12 @@ val appModule = module {
       androidContext().getSharedPreferences("session_prefs", android.content.Context.MODE_PRIVATE)
     }
 
+    single { SessionManager(get()) }
+    single { AuthInterceptor(get()) }
     single {
         Retrofit.Builder()
             .baseUrl("http://wishlist-app-3owv.onrender.com/")
+            .client(okhttp3.OkHttpClient.Builder().addInterceptor(get<AuthInterceptor>()).build())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -33,11 +37,9 @@ val appModule = module {
         get<Retrofit>().create(UserApi::class.java)
     }
 
-    single { SessionManager(get()) }
-
     single { AuthRepository(get(), get()) }
     single { FakeDataStore() }
-    single<WishlistRepository> { FakeWishlistRepository(get()) }
+    single<WishlistRepository> { FakeWishlistRepository(get(), get()) }
     single { FakeGiftRepository(get()) }
     single<GiftRepository> { get<FakeGiftRepository>() }
     single<ReservationRepository> { FakeReservationRepository(get(), get(), get()) }

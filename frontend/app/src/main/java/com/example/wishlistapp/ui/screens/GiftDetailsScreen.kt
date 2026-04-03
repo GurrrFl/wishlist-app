@@ -58,7 +58,7 @@ fun GiftDetailsScreen(
     val gift = wishlists.flatMap { it.gifts }.find { it.id == giftId } ?: return
     
     //при подключении репы будут сравниваться Idшники, а не имена
-    val isOwner = viewModel.isGiftOwner(gift.ownerName)
+    val isOwner = viewModel.isWishlistOwner(gift.wishlistId)
 
     val iconBackgroundColor = remember {
         generateRandomColor().copy(alpha = 0.65f)

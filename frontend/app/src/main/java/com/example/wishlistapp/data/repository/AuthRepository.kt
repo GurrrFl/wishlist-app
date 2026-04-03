@@ -17,13 +17,15 @@ class AuthRepository(
             error("Empty access token")
         }
         sessionManager.saveToken(response.accessToken)
+        val user = api.getMe()
+        sessionManager.saveUser(user.userId, user.login)
     }
 
 
     suspend fun register(login: String, email: String, password: String) = withContext(Dispatchers.IO) {
         val response = api.register(
             RegisterRequest(login, email, password))
-        sessionManager.saveUserName(response.login)
+        sessionManager.saveUser(response.userId, response.login)
     }
 
     suspend fun logout() = withContext(Dispatchers.IO) { sessionManager.clear() }

@@ -3,10 +3,11 @@ package com.example.wishlistapp.data.repository
 import com.example.wishlistapp.domain.model.Wishlist
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
+import com.example.wishlistapp.data.SessionManager
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
-class FakeWishlistRepository(private val store: FakeDataStore) : WishlistRepository {
+class FakeWishlistRepository(private val store: FakeDataStore, private val sessionManager: SessionManager) : WishlistRepository {
     override fun observeMyWishlists(): Flow<List<Wishlist>> = store.wishlists
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> = AppResult.Success(store.wishlists.value)
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
@@ -18,7 +19,7 @@ class FakeWishlistRepository(private val store: FakeDataStore) : WishlistReposit
         return AppResult.Success(wishlist)
     }
     override suspend fun createWishlist(title: String, eventDate: LocalDate, isPrivate: Boolean): AppResult<Wishlist> {
-        val wishlist = Wishlist(store.nextWishlistId++, title, "User", eventDate, null, isPrivate, if (isPrivate) null else "wishlist.app/${10000 + store.nextWishlistId}")
+        val wishlist = Wishlist(store.nextWishlistId++, title, currentUserId, sessionManager.getUserName() ?: "User", eventDate, null, isPrivate, if (isPrivate) null else "wishlist.app/${10000 + store.nextWishlistId}")
         store.updateWishlists { it + wishlist }; return AppResult.Success(wishlist)
     }
     override suspend fun updateWishlist(id: Int, title: String?, eventDate: LocalDate?, isPrivate: Boolean?): AppResult<Wishlist> {
@@ -27,4 +28,5 @@ class FakeWishlistRepository(private val store: FakeDataStore) : WishlistReposit
         store.updateWishlists { it.map { item -> if (item.id == id) updated else item } }; return AppResult.Success(updated)
     }
     override suspend fun deleteWishlist(id: Int): AppResult<Unit> { if (store.wishlists.value.none { it.id == id }) return AppResult.Failure(AppError.NotFound); store.updateWishlists { it.filterNot { item -> item.id == id } }; return AppResult.Success(Unit) }
+    private val currentUserId get() = sessionManager.getUserId() ?: 0
 }

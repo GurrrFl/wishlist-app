@@ -7,8 +7,12 @@ import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
+import retrofit2.http.GET
 
 interface  UserApi {
+
+    @GET("users/me")
+    suspend fun getMe(): UserDto
 
     @POST("users/register")
     suspend fun register(
