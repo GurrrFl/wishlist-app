@@ -10,6 +10,8 @@ class AuthInterceptor(private val sessionManager: SessionManager) : Interceptor 
         val request = chain.request().newBuilder().apply {
             if (!token.isNullOrBlank()) header("Authorization", "Bearer $token")
         }.build()
-        return chain.proceed(request)
+        val response = chain.proceed(request)
+        if (response.code == 401 && !token.isNullOrBlank()) sessionManager.clear()
+        return response
     }
 }
