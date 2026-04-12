@@ -19,8 +19,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val debugApiUrl = providers.gradleProperty("wishlistDebugApiUrl")
+        .getOrElse("https://wishlist-app-3owv.onrender.com/")
+
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiUrl\"")
+        }
         release {
+            buildConfigField("String", "API_BASE_URL", "\"https://wishlist-app-3owv.onrender.com/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -37,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 dependencies {
