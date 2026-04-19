@@ -21,13 +21,18 @@ android {
 
     val debugApiUrl = providers.gradleProperty("wishlistDebugApiUrl")
         .getOrElse("https://wishlist-app-3owv.onrender.com/")
+    val useNetworkDataSource = providers.gradleProperty("wishlistNetworkDataSource")
+        .map(String::toBoolean)
+        .getOrElse(false)
 
     buildTypes {
         debug {
             buildConfigField("String", "API_BASE_URL", "\"$debugApiUrl\"")
+            buildConfigField("boolean", "NETWORK_DATA_SOURCE", useNetworkDataSource.toString())
         }
         release {
             buildConfigField("String", "API_BASE_URL", "\"https://wishlist-app-3owv.onrender.com/\"")
+            buildConfigField("boolean", "NETWORK_DATA_SOURCE", "true")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
