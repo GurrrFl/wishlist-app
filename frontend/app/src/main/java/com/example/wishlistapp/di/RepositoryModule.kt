@@ -12,6 +12,10 @@ import com.example.wishlistapp.data.repository.NetworkReservationRepository
 import com.example.wishlistapp.data.repository.NetworkWishlistRepository
 import com.example.wishlistapp.data.repository.ReservationRepository
 import com.example.wishlistapp.data.repository.WishlistRepository
+import com.example.wishlistapp.domain.action.AddGiftAction
+import com.example.wishlistapp.domain.action.CancelReservationAction
+import com.example.wishlistapp.domain.action.CreateWishlistAction
+import com.example.wishlistapp.domain.action.ReserveGiftAction
 import org.koin.dsl.module
 
 val repositoryModule = module {
@@ -30,4 +34,8 @@ val repositoryModule = module {
         if (BuildConfig.NETWORK_DATA_SOURCE) NetworkReservationRepository(get())
         else FakeReservationRepository(get(), get(), get())
     }
+    factory { CreateWishlistAction(get()) }
+    factory { AddGiftAction(get()) }
+    factory { ReserveGiftAction(get()) }
+    factory { CancelReservationAction(get()) }
 }
