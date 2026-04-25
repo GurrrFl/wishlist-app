@@ -57,5 +57,5 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     fun reserveGift(wishlistId: Int, giftId: Int, userName: String) = reserveGift(giftId)
     fun cancelReservation(reservationId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(cancelReservationAction(reservationId)) }
     private fun finish(result: AppResult<*>) { wishlistsState = when (result) { is AppResult.Success -> LoadState.Content(wishlists.value); is AppResult.Failure -> LoadState.Error(errorMessage(result)) } }
-    private fun errorMessage(result: AppResult.Failure) = when (result.error) { com.example.wishlistapp.domain.result.AppError.Forbidden -> "Нельзя бронировать подарок из своего списка"; com.example.wishlistapp.domain.result.AppError.Conflict -> "Подарок уже забронирован"; else -> "Не удалось выполнить операцию" }
+    private fun errorMessage(result: AppResult.Failure) = result.error.toUserMessage()
 }
