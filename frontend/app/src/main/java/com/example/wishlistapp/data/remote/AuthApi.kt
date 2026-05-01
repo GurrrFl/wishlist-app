@@ -3,6 +3,7 @@ package com.example.wishlistapp.data.remote
 import com.example.wishlistapp.data.model.RegisterRequest
 import com.example.wishlistapp.data.model.TokenResponse
 import com.example.wishlistapp.data.model.UserDto
+import com.example.wishlistapp.data.model.dto.UserProfileDto
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -19,4 +20,7 @@ interface AuthApi {
 
     @GET("users/me")
     suspend fun getMe(): UserDto
+
+    @GET("users/me")
+    suspend fun getProfile(): UserProfileDto
 }
