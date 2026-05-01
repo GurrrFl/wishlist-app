@@ -29,6 +29,10 @@ sealed interface LoadState<out T> { data object Idle : LoadState<Nothing>; data 
 data class ReservedGift(val reservation: Reservation, val gift: Gift)
 
 class WishlistViewModel(private val wishlistRepository: WishlistRepository, private val giftRepository: GiftRepository, private val reservationRepository: ReservationRepository, private val sessionManager: SessionManager, private val createWishlistAction: CreateWishlistAction, private val addGiftAction: AddGiftAction, private val reserveGiftAction: ReserveGiftAction, private val cancelReservationAction: CancelReservationAction) : ViewModel() {
+    init {
+        loadMyWishlists()
+        viewModelScope.launch { reservationRepository.getMyReservations() }
+    }
     val wishlists: StateFlow<List<Wishlist>> = wishlistRepository.observeMyWishlists().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val reservedGifts: StateFlow<List<ReservedGift>> = combine(wishlists, reservationRepository.observeMyReservations()) { lists, reservations ->
         val giftsById = lists.flatMap { it.gifts }.associateBy { it.id }
