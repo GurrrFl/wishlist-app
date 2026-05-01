@@ -22,7 +22,7 @@ val repositoryModule = module {
     single { AuthRepository(get(), get()) }
     single { FakeDataStore() }
     single<WishlistRepository> {
-        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkWishlistRepository(get(), get())
+        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkWishlistRepository(get(), get(), get())
         else FakeWishlistRepository(get(), get())
     }
     single { FakeGiftRepository(get()) }

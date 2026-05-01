@@ -5,6 +5,7 @@ import com.example.wishlistapp.data.mapper.toDomain
 import com.example.wishlistapp.data.model.dto.CreateWishlistDto
 import com.example.wishlistapp.data.model.dto.UpdateWishlistDto
 import com.example.wishlistapp.data.remote.WishlistApi
+import com.example.wishlistapp.data.remote.AuthApi
 import com.example.wishlistapp.data.remote.remoteCall
 import com.example.wishlistapp.domain.model.Wishlist
 import com.example.wishlistapp.domain.result.AppError
@@ -13,12 +14,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 
-class NetworkWishlistRepository(private val api: WishlistApi, private val session: SessionManager) : WishlistRepository {
+class NetworkWishlistRepository(private val api: WishlistApi, private val profileApi: AuthApi, private val session: SessionManager) : WishlistRepository {
     private val cache = MutableStateFlow<List<Wishlist>>(emptyList())
     override fun observeMyWishlists() = cache.asStateFlow()
 
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> {
-        val result = remoteCall { api.getMyWishlists().map { it.toDomain() } }
+        val result = remoteCall {
+            profileApi.getProfile().wishlists.map { summary ->
+                api.getWishlist(summary.wishlistId).toDomain()
+            }
+        }
         if (result is AppResult.Success) cache.value = result.data
         return result
     }
