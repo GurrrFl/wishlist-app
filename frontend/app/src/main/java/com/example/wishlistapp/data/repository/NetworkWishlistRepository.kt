@@ -29,6 +29,14 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
     }
 
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> = remoteCall { api.getWishlist(id).toDomain() }
+
+    suspend fun refreshWishlist(id: Int): AppResult<Wishlist> {
+        val result = getWishlist(id)
+        if (result is AppResult.Success) {
+            cache.value = cache.value.map { if (it.id == id) result.data else it }
+        }
+        return result
+    }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> =
         remoteCall { api.findByPublicLink(link.substringAfterLast('/')).toDomain() }
 
