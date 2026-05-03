@@ -21,13 +21,14 @@ import org.koin.dsl.module
 val repositoryModule = module {
     single { AuthRepository(get(), get()) }
     single { FakeDataStore() }
+    single { NetworkWishlistRepository(get(), get(), get()) }
     single<WishlistRepository> {
-        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkWishlistRepository(get(), get(), get())
+        if (BuildConfig.NETWORK_DATA_SOURCE) get<NetworkWishlistRepository>()
         else FakeWishlistRepository(get(), get())
     }
     single { FakeGiftRepository(get()) }
     single<GiftRepository> {
-        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkGiftRepository(get())
+        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkGiftRepository(get(), get())
         else get<FakeGiftRepository>()
     }
     single<ReservationRepository> {
