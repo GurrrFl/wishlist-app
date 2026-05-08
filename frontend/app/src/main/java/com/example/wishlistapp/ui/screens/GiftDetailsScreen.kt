@@ -55,7 +55,9 @@ fun GiftDetailsScreen(
     viewModel: WishlistViewModel = koinViewModel()
 ) {
     val wishlists by viewModel.wishlists.collectAsState()
-    val gift = wishlists.flatMap { it.gifts }.find { it.id == giftId } ?: return
+    val publicWishlist by viewModel.publicWishlist.collectAsState()
+    val gift = (wishlists.flatMap { it.gifts } + publicWishlist?.gifts.orEmpty())
+        .find { it.id == giftId } ?: return
     
     //при подключении репы будут сравниваться Idшники, а не имена
     val isOwner = viewModel.isWishlistOwner(gift.wishlistId)
