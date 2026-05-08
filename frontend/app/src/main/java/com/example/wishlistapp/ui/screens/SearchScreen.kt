@@ -54,6 +54,7 @@ import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -144,13 +145,13 @@ fun SearchScreen(
 
                             val wishlist = viewModel.findWishlist(searchQuery)
 
-                            if (wishlist != null) {
+                            if (wishlist is AppResult.Success) {
                                 if (!searchHistory.contains(searchQuery)) {
                                     historyStorage.addLink(searchQuery)
 
                                 }
                                 navController.navigate(
-                                    Screen.FindWishlist.createRoute(wishlist.id)
+                                    Screen.FindWishlist.createRoute(wishlist.data.id)
                                 )
                             } else {
                                 snackbarHostState.showSnackbar(message)
