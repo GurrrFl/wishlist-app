@@ -40,6 +40,8 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     var wishlistsState by mutableStateOf<LoadState<List<Wishlist>>>(LoadState.Idle); private set
     var wishlistState by mutableStateOf<LoadState<Wishlist>>(LoadState.Idle); private set
+    private val _publicWishlist = kotlinx.coroutines.flow.MutableStateFlow<Wishlist?>(null)
+    val publicWishlist: StateFlow<Wishlist?> = _publicWishlist
 
     fun isWishlistOwner(wishlistId: Int) = getWishlist(wishlistId)?.ownerId == sessionManager.getUserId()
     fun reservationIdForGift(giftId: Int) = reservedGifts.value.find { it.gift.id == giftId }?.reservation?.id
@@ -54,7 +56,11 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     fun createWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(createWishlistAction(title, isPrivate, eventDate)) }
     fun addWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = createWishlist(title, description, isPrivate, eventDate)
     fun deleteWishlist(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(wishlistRepository.deleteWishlist(id)) }
-    fun findWishlist(link: String): Wishlist? = wishlists.value.find { !it.isPrivate && it.publicLink == link }
+    suspend fun findWishlist(link: String): AppResult<Wishlist> {
+        val result = wishlistRepository.findByPublicLink(link)
+        if (result is AppResult.Success) _publicWishlist.value = result.data
+        return result
+    }
     fun addGift(name: String, price: String, link: String, description: String, wishlistId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(addGiftAction(wishlistId, name, price, description, link)) }
     fun deleteGift(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(giftRepository.deleteGift(id)) }
     fun reserveGift(giftId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(reserveGiftAction(giftId)) }
