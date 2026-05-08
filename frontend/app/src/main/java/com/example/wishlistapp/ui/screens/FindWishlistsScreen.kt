@@ -55,7 +55,10 @@ fun FindWishlistScreen(
     viewModel: WishlistViewModel = koinViewModel()
 ) {
     val wishlists by viewModel.wishlists.collectAsState()
-    val wishlist = wishlists.find { it.id == wishlistId } ?: return
+    val publicWishlist by viewModel.publicWishlist.collectAsState()
+    val wishlist = wishlists.find { it.id == wishlistId }
+        ?: publicWishlist?.takeIf { it.id == wishlistId }
+        ?: return
 
     Scaffold(
         topBar = {NestedScreenHeader(wishlist.title, onClick = {navController.navigateUp()})}
