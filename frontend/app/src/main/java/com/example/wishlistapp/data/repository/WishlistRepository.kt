@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 interface WishlistRepository {
     fun observeMyWishlists(): Flow<List<Wishlist>>
+    fun observePublicWishlist(): Flow<Wishlist?>
     suspend fun getMyWishlists(): AppResult<List<Wishlist>>
     suspend fun getWishlist(id: Int): AppResult<Wishlist>
     suspend fun findByPublicLink(link: String): AppResult<Wishlist>
