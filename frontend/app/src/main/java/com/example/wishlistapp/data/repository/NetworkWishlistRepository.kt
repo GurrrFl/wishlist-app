@@ -16,7 +16,9 @@ import java.time.LocalDate
 
 class NetworkWishlistRepository(private val api: WishlistApi, private val profileApi: AuthApi, private val session: SessionManager) : WishlistRepository {
     private val cache = MutableStateFlow<List<Wishlist>>(emptyList())
+    private val publicCache = MutableStateFlow<Wishlist?>(null)
     override fun observeMyWishlists() = cache.asStateFlow()
+    override fun observePublicWishlist() = publicCache.asStateFlow()
 
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> {
         val result = remoteCall {
@@ -37,8 +39,11 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
         }
         return result
     }
-    override suspend fun findByPublicLink(link: String): AppResult<Wishlist> =
-        remoteCall { api.findByPublicLink(link.substringAfterLast('/')).toDomain() }
+    override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {
+        val result = remoteCall { api.findByPublicLink(link.substringAfterLast('/')).toDomain() }
+        if (result is AppResult.Success) publicCache.value = result.data
+        return result
+    }
 
     override suspend fun createWishlist(title: String, eventDate: LocalDate, isPrivate: Boolean): AppResult<Wishlist> {
         val userId = session.getUserId() ?: return AppResult.Failure(AppError.Unauthorized)

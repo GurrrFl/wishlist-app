@@ -9,6 +9,7 @@ import java.time.LocalDate
 
 class FakeWishlistRepository(private val store: FakeDataStore, private val sessionManager: SessionManager) : WishlistRepository {
     override fun observeMyWishlists(): Flow<List<Wishlist>> = store.wishlists
+    override fun observePublicWishlist(): Flow<Wishlist?> = kotlinx.coroutines.flow.flowOf(null)
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> = AppResult.Success(store.wishlists.value)
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
         val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
