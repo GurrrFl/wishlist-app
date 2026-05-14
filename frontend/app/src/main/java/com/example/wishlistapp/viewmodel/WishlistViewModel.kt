@@ -29,8 +29,8 @@ sealed interface LoadState<out T> { data object Idle : LoadState<Nothing>; data 
 data class ReservedGift(val reservation: Reservation, val gift: Gift)
 
 class WishlistViewModel(private val wishlistRepository: WishlistRepository, private val giftRepository: GiftRepository, private val reservationRepository: ReservationRepository, private val sessionManager: SessionManager, private val createWishlistAction: CreateWishlistAction, private val addGiftAction: AddGiftAction, private val reserveGiftAction: ReserveGiftAction, private val cancelReservationAction: CancelReservationAction) : ViewModel() {
-    private val _publicWishlist = kotlinx.coroutines.flow.MutableStateFlow<Wishlist?>(null)
-    val publicWishlist: StateFlow<Wishlist?> = _publicWishlist
+    val publicWishlist: StateFlow<Wishlist?> = wishlistRepository.observePublicWishlist()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     init {
         loadMyWishlists()
         viewModelScope.launch { reservationRepository.getMyReservations() }
@@ -58,7 +58,6 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     fun deleteWishlist(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(wishlistRepository.deleteWishlist(id)) }
     suspend fun findWishlist(link: String): AppResult<Wishlist> {
         val result = wishlistRepository.findByPublicLink(link)
-        if (result is AppResult.Success) _publicWishlist.value = result.data
         return result
     }
     fun addGift(name: String, price: String, link: String, description: String, wishlistId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(addGiftAction(wishlistId, name, price, description, link)) }
