@@ -16,11 +16,15 @@ import com.example.wishlistapp.domain.action.AddGiftAction
 import com.example.wishlistapp.domain.action.CancelReservationAction
 import com.example.wishlistapp.domain.action.CreateWishlistAction
 import com.example.wishlistapp.domain.action.ReserveGiftAction
+import com.example.wishlistapp.data.local.FakeSnapshotStorage
+import android.content.Context
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val repositoryModule = module {
     single { AuthRepository(get(), get()) }
-    single { FakeDataStore() }
+    single { FakeSnapshotStorage(androidContext().getSharedPreferences("demo_data", Context.MODE_PRIVATE)) }
+    single { FakeDataStore(get()) }
     single { NetworkWishlistRepository(get(), get(), get()) }
     single<WishlistRepository> {
         if (BuildConfig.NETWORK_DATA_SOURCE) get<NetworkWishlistRepository>()

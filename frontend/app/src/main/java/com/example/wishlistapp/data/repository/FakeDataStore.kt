@@ -4,6 +4,10 @@ import com.example.wishlistapp.domain.model.Gift
 import com.example.wishlistapp.domain.model.GiftStatus
 import com.example.wishlistapp.domain.model.Reservation
 import com.example.wishlistapp.domain.model.Wishlist
+import com.example.wishlistapp.data.local.FakeSnapshot
+import com.example.wishlistapp.data.local.FakeSnapshotStorage
+import com.example.wishlistapp.data.local.toDomain
+import com.example.wishlistapp.data.local.toStored
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,19 +15,31 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 /** Single in-memory source. Values published from it are immutable Lists. */
-class FakeDataStore {
-    private val _wishlists = MutableStateFlow<List<Wishlist>>(demoWishlists)
+class FakeDataStore(private val storage: FakeSnapshotStorage? = null) {
+    private val restored = storage?.load()?.let { snapshot ->
+        runCatching { snapshot.wishlists.map { it.toDomain() } to snapshot.reservations }.getOrNull()
+    }
+    private val _wishlists = MutableStateFlow<List<Wishlist>>(restored?.first ?: demoWishlists)
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
-    private val _reservations = MutableStateFlow<List<Reservation>>(listOf(
+    private val _reservations = MutableStateFlow<List<Reservation>>(restored?.second ?: listOf(
         Reservation(1, 2, 2, "kate_rosan"), Reservation(2, 16, 2, "kate_rosan"), Reservation(3, 18, 3, "Иван Иванов")
     ))
     val reservations: StateFlow<List<Reservation>> = _reservations.asStateFlow()
-    var nextWishlistId = 5
-    var nextGiftId = 21
-    var nextReservationId = 4
+    var nextWishlistId = (_wishlists.value.maxOfOrNull { it.id } ?: 0) + 1
+    var nextGiftId = (_wishlists.value.flatMap { it.gifts }.maxOfOrNull { it.id } ?: 0) + 1
+    var nextReservationId = (_reservations.value.maxOfOrNull { it.id } ?: 0) + 1
 
-    fun updateWishlists(transform: (List<Wishlist>) -> List<Wishlist>) { _wishlists.value = transform(_wishlists.value).toList() }
-    fun updateReservations(transform: (List<Reservation>) -> List<Reservation>) { _reservations.value = transform(_reservations.value).toList() }
+    fun updateWishlists(transform: (List<Wishlist>) -> List<Wishlist>) {
+        _wishlists.value = transform(_wishlists.value).toList()
+        persist()
+    }
+    fun updateReservations(transform: (List<Reservation>) -> List<Reservation>) {
+        _reservations.value = transform(_reservations.value).toList()
+        persist()
+    }
+    private fun persist() {
+        storage?.save(FakeSnapshot(_wishlists.value.map { it.toStored() }, _reservations.value))
+    }
 
     private companion object {
         val demoWishlists = listOf(
