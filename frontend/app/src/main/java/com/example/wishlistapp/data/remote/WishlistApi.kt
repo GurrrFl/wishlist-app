@@ -11,7 +11,6 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface WishlistApi {
-    @GET("wishlists/my") suspend fun getMyWishlists(): List<WishlistDto>
     @GET("wishlists/{id}") suspend fun getWishlist(@Path("id") id: Int): WishlistDto
     @GET("wishlists/link/{link}") suspend fun findByPublicLink(@Path("link") link: String): WishlistDto
     @POST("wishlists/") suspend fun create(@Body request: CreateWishlistDto): WishlistDto

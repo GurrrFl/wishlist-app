@@ -6,14 +6,16 @@ JSON field names are defined in `data/model/dto`; UI screens consume domain mode
 ## Routes
 
 - Auth: `POST /users/register`, `POST /users/token`, `GET /users/me`.
-- Wishlists: `GET /wishlists/my`, `GET /wishlists/{id}`, `GET /wishlists/link/{link}`, `POST /wishlists/`, `PATCH /wishlists/{id}`, `DELETE /wishlists/{id}`.
+- Wishlists: `GET /wishlists/{id}`, `GET /wishlists/link/{link}`, `POST /wishlists/`, `PATCH /wishlists/{id}`, `DELETE /wishlists/{id}`.
 - Gifts: `GET /gifts/wishlist/{id}`, `GET /gifts/{id}`, `POST /gifts/`, `PATCH /gifts/{id}`, `DELETE /gifts/{id}`.
 - Reservations: `POST /reservations/gift/{id}`, `GET /reservations/my`, `POST /reservations/{id}/cancel`.
 
 ## Integration blockers
 
-`GET /wishlists/my` declares a list response but currently returns an object containing a `wishlists` property. The route should return the list it declares before the network source is enabled in debug or used in release.
+The backend's `GET /wishlists/my` declares a list response but currently returns an object containing a `wishlists` property. The client does not call this route. It reads the owner's wishlist IDs from `GET /users/me`, then fetches each `GET /wishlists/{id}` for full details. If the backend fixes the route, the client can switch to a direct list request.
 
 `WishlistCreate` requires `user_id` even though the route obtains the owner from the bearer token. The client sends the session user ID to satisfy the current schema; the server should continue to derive ownership from the token.
 
-The current `WishlistShort` response does not include gifts. The network data source must fetch details or gifts separately for screens that display them. Until this integration work is complete, the debug variant defaults to the fake source.
+The current `WishlistShort` response does not include gifts, so the client fetches full wishlist details for the owner's list. The debug variant defaults to the persistent fake source; set `wishlistNetworkDataSource=true` to exercise the network source. Release uses the network source.
+
+The public-link cache holds only the last opened wishlist in memory. After a restart, reservations on a friend's wishlist may not show their gift details until that public wishlist is opened again. The backend should expose gift details with reservations, or the client needs a persistent lookup keyed by wishlist ID.
