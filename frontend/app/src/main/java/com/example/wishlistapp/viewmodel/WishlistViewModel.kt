@@ -31,10 +31,6 @@ data class ReservedGift(val reservation: Reservation, val gift: Gift)
 class WishlistViewModel(private val wishlistRepository: WishlistRepository, private val giftRepository: GiftRepository, private val reservationRepository: ReservationRepository, private val sessionManager: SessionManager, private val createWishlistAction: CreateWishlistAction, private val addGiftAction: AddGiftAction, private val reserveGiftAction: ReserveGiftAction, private val cancelReservationAction: CancelReservationAction) : ViewModel() {
     val publicWishlist: StateFlow<Wishlist?> = wishlistRepository.observePublicWishlist()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-    init {
-        loadMyWishlists()
-        viewModelScope.launch { reservationRepository.getMyReservations() }
-    }
     val wishlists: StateFlow<List<Wishlist>> = wishlistRepository.observeMyWishlists().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val reservedGifts: StateFlow<List<ReservedGift>> = combine(wishlists, publicWishlist, reservationRepository.observeMyReservations()) { lists, public, reservations ->
         val giftsById = (lists.flatMap { it.gifts } + public?.gifts.orEmpty()).associateBy { it.id }
@@ -42,6 +38,11 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     var wishlistsState by mutableStateOf<LoadState<List<Wishlist>>>(LoadState.Idle); private set
     var wishlistState by mutableStateOf<LoadState<Wishlist>>(LoadState.Idle); private set
+
+    init {
+        loadMyWishlists()
+        viewModelScope.launch { reservationRepository.getMyReservations() }
+    }
 
     fun isWishlistOwner(wishlistId: Int) = getWishlist(wishlistId)?.ownerId == sessionManager.getUserId()
     fun reservationIdForGift(giftId: Int) = reservedGifts.value.find { it.gift.id == giftId }?.reservation?.id
