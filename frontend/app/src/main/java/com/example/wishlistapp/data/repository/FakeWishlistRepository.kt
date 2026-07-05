@@ -5,12 +5,16 @@ import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.data.SessionManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 class FakeWishlistRepository(private val store: FakeDataStore, private val sessionManager: SessionManager) : WishlistRepository {
-    override fun observeMyWishlists(): Flow<List<Wishlist>> = store.wishlists
+    override fun observeMyWishlists(): Flow<List<Wishlist>> = store.wishlists.map { lists ->
+        lists.filter { it.ownerId == currentUserId }
+    }
     override fun observePublicWishlist(): Flow<Wishlist?> = kotlinx.coroutines.flow.flowOf(null)
-    override suspend fun getMyWishlists(): AppResult<List<Wishlist>> = AppResult.Success(store.wishlists.value)
+    override suspend fun getMyWishlists(): AppResult<List<Wishlist>> =
+        AppResult.Success(store.wishlists.value.filter { it.ownerId == currentUserId })
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
         val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
         return AppResult.Success(wishlist)
