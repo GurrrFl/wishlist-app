@@ -6,12 +6,23 @@ import com.example.wishlistapp.domain.model.GiftStatus
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
 class FakeRepositoryTest {
+    @Test fun myWishlistsOnlyIncludeCurrentOwner() = runBlocking {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
+        val lists = FakeWishlistRepository(FakeDataStore(), session)
+
+        val loaded = lists.getMyWishlists() as AppResult.Success
+        assertTrue(loaded.data.isNotEmpty())
+        assertTrue(loaded.data.all { it.ownerId == 2 })
+        assertEquals(loaded.data, lists.observeMyWishlists().first())
+    }
+
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
