@@ -1,6 +1,7 @@
 package com.example.wishlistapp.data.repository
 
 import com.example.wishlistapp.domain.model.Wishlist
+import com.example.wishlistapp.domain.model.publicLinkCode
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.data.SessionManager
@@ -23,7 +24,10 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
         return AppResult.Success(wishlist)
     }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {
-        val wishlist = store.wishlists.value.find { !it.isPrivate && it.publicLink == link } ?: return AppResult.Failure(AppError.NotFound)
+        val code = publicLinkCode(link)
+        val wishlist = store.wishlists.value.find {
+            !it.isPrivate && it.publicLink?.let(::publicLinkCode) == code
+        } ?: return AppResult.Failure(AppError.NotFound)
         publicWishlist.value = wishlist
         return AppResult.Success(wishlist)
     }
