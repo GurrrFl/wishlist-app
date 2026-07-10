@@ -8,6 +8,7 @@ import com.example.wishlistapp.data.remote.WishlistApi
 import com.example.wishlistapp.data.remote.AuthApi
 import com.example.wishlistapp.data.remote.remoteCall
 import com.example.wishlistapp.domain.model.Wishlist
+import com.example.wishlistapp.domain.model.publicLinkCode
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +41,7 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
         return result
     }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {
-        val result = remoteCall { api.findByPublicLink(link.substringAfterLast('/')).toDomain() }
+        val result = remoteCall { api.findByPublicLink(publicLinkCode(link)).toDomain() }
         if (result is AppResult.Success) publicCache.value = result.data
         return result
     }
