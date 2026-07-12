@@ -23,6 +23,16 @@ class FakeRepositoryTest {
         assertEquals(loaded.data, lists.observeMyWishlists().first())
     }
 
+    @Test fun publicSearchPublishesOnlySharedWishlist() = runBlocking {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
+        val lists = FakeWishlistRepository(FakeDataStore(), session)
+
+        val found = lists.findByPublicLink("https://wishlist.app/53291?source=share") as AppResult.Success
+        assertEquals(1, found.data.id)
+        assertEquals(found.data, lists.observePublicWishlist().first())
+        assertEquals(AppError.NotFound, (lists.findByPublicLink("98342-private") as AppResult.Failure).error)
+    }
+
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
