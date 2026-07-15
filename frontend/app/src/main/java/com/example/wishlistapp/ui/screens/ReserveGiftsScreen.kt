@@ -11,14 +11,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,14 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
-import com.example.wishlistapp.data.model.Gift
-import com.example.wishlistapp.data.model.GiftStatus
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.RoundedImage
@@ -73,7 +67,7 @@ fun ReserveGiftsScreen(
                 ReservedGiftsList(
                     reservations = reservations,
                     onGiftClick = { item ->
-                        navController.navigate(Screen.GiftDetails.createRoute(item.gift.id))
+                        item.gift?.let { navController.navigate(Screen.GiftDetails.createRoute(it.id)) }
                     },
                     onCancelReservation = { item ->
                         giftToCancel = item
@@ -84,7 +78,8 @@ fun ReserveGiftsScreen(
 
         if (giftToCancel != null) {
             CancelReservationDialog(
-                gift = giftToCancel!!.gift,
+                giftName = giftToCancel!!.gift?.name
+                    ?: stringResource(R.string.reserve_gifts_unknown_gift, giftToCancel!!.reservation.giftId),
                 onConfirm = {
                     viewModel.cancelReservation(giftToCancel!!.reservation.id)
                     giftToCancel = null
@@ -135,7 +130,7 @@ fun ReservedGiftsList(
     ) {
         items(reservations) { item ->
             ReservedGiftCard(
-                gift = item.gift,
+                item = item,
                 onCancelReservation = { onCancelReservation(item) },
                 onOpenDetails = { onGiftClick(item) }
             )
@@ -145,7 +140,7 @@ fun ReservedGiftsList(
 
 @Composable
 fun CancelReservationDialog(
-    gift: Gift,
+    giftName: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -154,7 +149,7 @@ fun CancelReservationDialog(
         title = { Text(stringResource(R.string.reserve_gifts_cancel_dialog_title)) },
         text = {
             Text(
-                stringResource(R.string.reserve_gifts_cancel_dialog_message, gift.name)
+                stringResource(R.string.reserve_gifts_cancel_dialog_message, giftName)
             )
         },
         confirmButton = {
@@ -177,7 +172,7 @@ fun CancelReservationDialog(
 
 @Composable
 fun ReservedGiftCard(
-    gift: Gift,
+    item: ReservedGift,
     onCancelReservation: () -> Unit,
     onOpenDetails: () -> Unit
 ) {
@@ -203,37 +198,20 @@ fun ReservedGiftCard(
                     imageModifier = Modifier.size(32.dp),
                     backgroundColor = iconBackgroundColor,
                     shape = RoundedCornerShape(12.dp),
-                    contentDescription = gift.name
+                    contentDescription = item.gift?.name
                 )
 
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = gift.name,
+                        text = item.gift?.name
+                            ?: stringResource(R.string.reserve_gifts_unknown_gift, item.reservation.giftId),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(
-                        text = gift.price?.toString().orEmpty() + stringResource(R.string.price),
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 6.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp)
-                        )
+                    item.gift?.price?.let { price ->
                         Text(
-                            text = stringResource(R.string.reserve_gifts_card_reserved, gift?.created?.toString().orEmpty()),
-                            style = MaterialTheme.typography.bodySmall
+                            text = price.toString() + stringResource(R.string.price),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -255,7 +233,7 @@ fun ReservedGiftCard(
                     )
                 }
 
-                Button(onClick = onOpenDetails) {
+                Button(onClick = onOpenDetails, enabled = item.gift != null) {
                     Text(
                         stringResource(R.string.reserve_gifts_card_details_button),
                         style = MaterialTheme.typography.bodySmall

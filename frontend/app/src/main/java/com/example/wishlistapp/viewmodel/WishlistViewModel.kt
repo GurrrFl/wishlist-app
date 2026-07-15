@@ -26,7 +26,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 sealed interface LoadState<out T> { data object Idle : LoadState<Nothing>; data object Loading : LoadState<Nothing>; data class Content<T>(val data: T) : LoadState<T>; data class Error(val message: String) : LoadState<Nothing> }
-data class ReservedGift(val reservation: Reservation, val gift: Gift)
+data class ReservedGift(val reservation: Reservation, val gift: Gift?)
 
 class WishlistViewModel(private val wishlistRepository: WishlistRepository, private val giftRepository: GiftRepository, private val reservationRepository: ReservationRepository, private val sessionManager: SessionManager, private val createWishlistAction: CreateWishlistAction, private val addGiftAction: AddGiftAction, private val reserveGiftAction: ReserveGiftAction, private val cancelReservationAction: CancelReservationAction) : ViewModel() {
     val publicWishlist: StateFlow<Wishlist?> = wishlistRepository.observePublicWishlist()
@@ -34,7 +34,7 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     val wishlists: StateFlow<List<Wishlist>> = wishlistRepository.observeMyWishlists().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val reservedGifts: StateFlow<List<ReservedGift>> = combine(wishlists, publicWishlist, reservationRepository.observeMyReservations()) { lists, public, reservations ->
         val giftsById = (lists.flatMap { it.gifts } + public?.gifts.orEmpty()).associateBy { it.id }
-        reservations.mapNotNull { reservation -> giftsById[reservation.giftId]?.let { ReservedGift(reservation, it) } }
+        reservations.map { reservation -> ReservedGift(reservation, giftsById[reservation.giftId]) }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     var wishlistsState by mutableStateOf<LoadState<List<Wishlist>>>(LoadState.Idle); private set
     var wishlistState by mutableStateOf<LoadState<Wishlist>>(LoadState.Idle); private set
@@ -45,7 +45,7 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     }
 
     fun isWishlistOwner(wishlistId: Int) = getWishlist(wishlistId)?.ownerId == sessionManager.getUserId()
-    fun reservationIdForGift(giftId: Int) = reservedGifts.value.find { it.gift.id == giftId }?.reservation?.id
+    fun reservationIdForGift(giftId: Int) = reservedGifts.value.find { it.reservation.giftId == giftId }?.reservation?.id
     fun getWishlists() = wishlists.value
     fun getWishlist(id: Int) = wishlists.value.find { it.id == id }
     fun getAllGifts() = wishlists.value.flatMap { it.gifts }

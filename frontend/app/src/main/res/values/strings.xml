@@ -138,6 +138,7 @@
     <!-- Экран reserve подарка (ReserveGiftScreen) -->
     <string name="reserve_gifts_title">Забронированные подарки</string>
     <string name="reserve_gifts_empty_message">Когда вы найдете то, что захотите подарить, вы сможете забронировать подарок. Он появится в этом списке!</string>
+    <string name="reserve_gifts_unknown_gift">Подарок №%1$d</string>
     <string name="reserve_gifts_cancel_dialog_title">Отменить бронь?</string>
     <string name="reserve_gifts_cancel_dialog_message">Бронь подарка «%s» будет отменена.</string>
     <string name="reserve_gifts_cancel_confirm">Отменить бронь</string>
