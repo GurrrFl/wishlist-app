@@ -43,5 +43,8 @@ fun GiftDto.toDomain(): Gift = Gift(
 fun ReservationDto.toDomain(): Reservation = Reservation(
     id = reservationId,
     giftId = giftId,
-    userId = userId
+    userId = userId,
+    reservedAt = runCatching { OffsetDateTime.parse(reservedDate).toLocalDateTime() }
+        .recoverCatching { LocalDateTime.parse(reservedDate) }
+        .getOrNull()
 )

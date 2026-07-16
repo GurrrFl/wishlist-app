@@ -17,7 +17,9 @@ import java.time.LocalDateTime
 /** Single in-memory source. Values published from it are immutable Lists. */
 class FakeDataStore(private val storage: FakeSnapshotStorage? = null) {
     private val restored = storage?.load()?.let { snapshot ->
-        runCatching { snapshot.wishlists.map { it.toDomain() } to snapshot.reservations }.getOrNull()
+        runCatching {
+            snapshot.wishlists.map { it.toDomain() } to snapshot.reservations.map { it.toDomain() }
+        }.getOrNull()
     }
     private val _wishlists = MutableStateFlow<List<Wishlist>>(restored?.first ?: demoWishlists)
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
@@ -38,7 +40,10 @@ class FakeDataStore(private val storage: FakeSnapshotStorage? = null) {
         persist()
     }
     private fun persist() {
-        storage?.save(FakeSnapshot(_wishlists.value.map { it.toStored() }, _reservations.value))
+        storage?.save(FakeSnapshot(
+            _wishlists.value.map { it.toStored() },
+            _reservations.value.map { it.toStored() }
+        ))
     }
 
     private companion object {

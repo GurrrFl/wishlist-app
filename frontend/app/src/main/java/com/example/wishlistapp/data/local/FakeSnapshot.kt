@@ -7,7 +7,12 @@ import com.example.wishlistapp.domain.model.Wishlist
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class FakeSnapshot(val wishlists: List<StoredWishlist>, val reservations: List<Reservation>)
+data class FakeSnapshot(val wishlists: List<StoredWishlist>, val reservations: List<StoredReservation>)
+
+data class StoredReservation(
+    val id: Int, val giftId: Int, val userId: Int,
+    val reservedBy: String?, val reservedAt: String?
+)
 
 data class StoredWishlist(
     val id: Int, val title: String, val ownerId: Int, val ownerName: String?,
@@ -39,4 +44,10 @@ fun Gift.toStored() = StoredGift(
 fun StoredGift.toDomain() = Gift(
     id, wishlistId, name, price, description, link, GiftStatus.valueOf(status),
     createdAt?.let(LocalDateTime::parse), ownerName, reservedBy
+)
+
+fun Reservation.toStored() = StoredReservation(id, giftId, userId, reservedBy, reservedAt?.toString())
+
+fun StoredReservation.toDomain() = Reservation(
+    id, giftId, userId, reservedBy, reservedAt?.let(LocalDateTime::parse)
 )
