@@ -7,6 +7,7 @@ import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.LocalDateTime
 
 class FakeReservationRepository(private val store: FakeDataStore, private val gifts: FakeGiftRepository, private val sessionManager: SessionManager) : ReservationRepository {
     override fun observeMyReservations(): Flow<List<Reservation>> = store.reservations.map { reservations -> reservations.filter { it.userId == currentUserId } }
@@ -15,7 +16,7 @@ class FakeReservationRepository(private val store: FakeDataStore, private val gi
         val wishlist = store.wishlists.value.find { it.id == gift.wishlistId } ?: return AppResult.Failure(AppError.NotFound)
         if (wishlist.ownerId == currentUserId) return AppResult.Failure(AppError.Forbidden)
         if (gift.status == GiftStatus.RESERVED) return AppResult.Failure(AppError.Conflict)
-        val reservation = Reservation(store.nextReservationId++, giftId, currentUserId, currentUserName)
+        val reservation = Reservation(store.nextReservationId++, giftId, currentUserId, currentUserName, LocalDateTime.now())
         gifts.change(giftId) { it.copy(status = GiftStatus.RESERVED, reservedBy = currentUserName) }
         store.updateReservations { it + reservation }
         return AppResult.Success(reservation)

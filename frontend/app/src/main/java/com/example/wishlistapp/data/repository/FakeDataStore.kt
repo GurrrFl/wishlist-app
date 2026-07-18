@@ -24,7 +24,9 @@ class FakeDataStore(private val storage: FakeSnapshotStorage? = null) {
     private val _wishlists = MutableStateFlow<List<Wishlist>>(restored?.first ?: demoWishlists)
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
     private val _reservations = MutableStateFlow<List<Reservation>>(restored?.second ?: listOf(
-        Reservation(1, 2, 2, "kate_rosan"), Reservation(2, 16, 2, "kate_rosan"), Reservation(3, 18, 3, "Иван Иванов")
+        Reservation(1, 2, 2, "kate_rosan", LocalDateTime.of(2025, 10, 2, 12, 0)),
+        Reservation(2, 16, 3, "Иван Иванов", LocalDateTime.of(2025, 10, 3, 12, 0)),
+        Reservation(3, 18, 3, "Иван Иванов", LocalDateTime.of(2025, 10, 4, 12, 0))
     ))
     val reservations: StateFlow<List<Reservation>> = _reservations.asStateFlow()
     var nextWishlistId = (_wishlists.value.maxOfOrNull { it.id } ?: 0) + 1
@@ -58,7 +60,7 @@ class FakeDataStore(private val storage: FakeSnapshotStorage? = null) {
                 gift(10, 3, "Пазл Hatber 1000 элементов", 1290.0), gift(11, 3, "Набор для рисования", 2190.0), gift(12, 3, "Шоколад Lindt", 1590.0), gift(13, 3, "Набор для вышивки", 1790.0), gift(14, 3, "Канва Малевич", 990.0)
             )),
             Wishlist(4, "Новый год! 🎄✨", 2, "kate_rosan", LocalDate.of(2025, 12, 31), "Новогодние подарки", false, "wishlist.app/56739", listOf(
-                gift(20, 4, "Пазл Hatber 1000 элементов", 1290.0), gift(15, 4, "Набор для рисования", 2190.0), gift(16, 4, "Шоколад Lindt", 1590.0, GiftStatus.RESERVED, "kate_rosan"), gift(17, 4, "Набор для вышивки", 1790.0), gift(18, 4, "Канва Малевич", 990.0, GiftStatus.RESERVED, "Иван Иванов")
+                gift(20, 4, "Пазл Hatber 1000 элементов", 1290.0), gift(15, 4, "Набор для рисования", 2190.0), gift(16, 4, "Шоколад Lindt", 1590.0, GiftStatus.RESERVED, "Иван Иванов"), gift(17, 4, "Набор для вышивки", 1790.0), gift(18, 4, "Канва Малевич", 990.0, GiftStatus.RESERVED, "Иван Иванов")
             ))
         )
         fun gift(id: Int, wishlistId: Int, name: String, price: Double, status: GiftStatus = GiftStatus.AVAILABLE, reservedBy: String? = null) = Gift(id, wishlistId, name, price, "Тестовое описание подарка", null, status, LocalDateTime.of(2025, 10, 1, 12, 0), if (wishlistId == 4) "kate_rosan" else "Aleksandra Petrova", reservedBy)
