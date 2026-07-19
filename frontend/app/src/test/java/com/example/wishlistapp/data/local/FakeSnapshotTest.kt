@@ -2,7 +2,9 @@ package com.example.wishlistapp.data.local
 
 import com.example.wishlistapp.domain.model.Gift
 import com.example.wishlistapp.domain.model.GiftStatus
+import com.example.wishlistapp.domain.model.Reservation
 import com.example.wishlistapp.domain.model.Wishlist
+import com.example.wishlistapp.data.inMemoryPreferences
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
@@ -16,5 +18,13 @@ class FakeSnapshotTest {
             "Description", false, "abc123", listOf(gift))
 
         assertEquals(wishlist, wishlist.toStored().toDomain())
+    }
+
+    @Test fun persistedReservationPreservesItsDate() {
+        val storage = FakeSnapshotStorage(inMemoryPreferences())
+        val reservation = Reservation(7, 14, 3, "Guest", LocalDateTime.of(2026, 7, 19, 8, 56))
+        storage.save(FakeSnapshot(emptyList(), listOf(reservation.toStored())))
+
+        assertEquals(reservation, storage.load()!!.reservations.single().toDomain())
     }
 }
