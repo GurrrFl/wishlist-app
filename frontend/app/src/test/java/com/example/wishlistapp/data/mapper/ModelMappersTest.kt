@@ -1,11 +1,13 @@
 package com.example.wishlistapp.data.mapper
 
 import com.example.wishlistapp.data.model.dto.GiftDto
+import com.example.wishlistapp.data.model.dto.ReservationDto
 import com.example.wishlistapp.data.model.dto.WishlistDto
 import com.example.wishlistapp.domain.model.GiftStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class ModelMappersTest {
     @Test fun mapsBackendFieldNamesAndValues() {
@@ -20,5 +22,13 @@ class ModelMappersTest {
         assertEquals(LocalDate.of(2026, 5, 1), result.eventDate)
         assertEquals(GiftStatus.RESERVED, result.gifts.single().status)
         assertEquals(42.5, result.gifts.single().price!!, 0.0)
+    }
+
+    @Test fun mapsReservationTimestampWithOrWithoutOffset() {
+        val local = ReservationDto(4, 7, 2, "2026-07-19T12:38:00", null)
+        val offset = local.copy(reservedDate = "2026-07-19T12:38:00+03:00")
+
+        assertEquals(LocalDateTime.of(2026, 7, 19, 12, 38), local.toDomain().reservedAt)
+        assertEquals(local.toDomain().reservedAt, offset.toDomain().reservedAt)
     }
 }
