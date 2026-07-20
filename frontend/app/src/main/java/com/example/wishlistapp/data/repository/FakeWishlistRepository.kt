@@ -21,6 +21,7 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
         AppResult.Success(store.wishlists.value.filter { it.ownerId == currentUserId })
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
         val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
+        if (wishlist.ownerId != currentUserId) return AppResult.Failure(AppError.Forbidden)
         return AppResult.Success(wishlist)
     }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {
