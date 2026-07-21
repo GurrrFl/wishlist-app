@@ -38,6 +38,7 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
     }
     override suspend fun updateWishlist(id: Int, title: String?, eventDate: LocalDate?, isPrivate: Boolean?): AppResult<Wishlist> {
         val old = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
+        if (old.ownerId != currentUserId) return AppResult.Failure(AppError.Forbidden)
         val updated = old.copy(title = title ?: old.title, eventDate = eventDate ?: old.eventDate, isPrivate = isPrivate ?: old.isPrivate, publicLink = if (isPrivate == true) null else old.publicLink)
         store.updateWishlists { it.map { item -> if (item.id == id) updated else item } }; return AppResult.Success(updated)
     }
