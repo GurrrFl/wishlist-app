@@ -42,6 +42,11 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
         val updated = old.copy(title = title ?: old.title, eventDate = eventDate ?: old.eventDate, isPrivate = isPrivate ?: old.isPrivate, publicLink = if (isPrivate == true) null else old.publicLink)
         store.updateWishlists { it.map { item -> if (item.id == id) updated else item } }; return AppResult.Success(updated)
     }
-    override suspend fun deleteWishlist(id: Int): AppResult<Unit> { if (store.wishlists.value.none { it.id == id }) return AppResult.Failure(AppError.NotFound); store.updateWishlists { it.filterNot { item -> item.id == id } }; return AppResult.Success(Unit) }
+    override suspend fun deleteWishlist(id: Int): AppResult<Unit> {
+        val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
+        if (wishlist.ownerId != currentUserId) return AppResult.Failure(AppError.Forbidden)
+        store.updateWishlists { it.filterNot { item -> item.id == id } }
+        return AppResult.Success(Unit)
+    }
     private val currentUserId get() = sessionManager.getUserId() ?: 0
 }
