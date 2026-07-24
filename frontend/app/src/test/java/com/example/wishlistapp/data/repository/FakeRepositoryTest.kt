@@ -33,6 +33,19 @@ class FakeRepositoryTest {
         assertEquals(AppError.NotFound, (lists.findByPublicLink("98342-private") as AppResult.Failure).error)
     }
 
+    @Test fun wishlistMutationsRequireCurrentOwner() = runBlocking {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
+        val lists = FakeWishlistRepository(FakeDataStore(), session)
+
+        assertEquals(AppError.Forbidden, (lists.getWishlist(1) as AppResult.Failure).error)
+        assertEquals(AppError.Forbidden, (lists.updateWishlist(1, "Changed", null, null) as AppResult.Failure).error)
+        assertEquals(AppError.Forbidden, (lists.deleteWishlist(1) as AppResult.Failure).error)
+        assertEquals("День Рождения!", (lists.findByPublicLink("53291") as AppResult.Success).data.title)
+
+        session.clear()
+        assertEquals(AppError.Unauthorized, (lists.createWishlist("New", LocalDate.of(2026, 7, 1), false) as AppResult.Failure).error)
+    }
+
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
