@@ -33,7 +33,8 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
         return AppResult.Success(wishlist)
     }
     override suspend fun createWishlist(title: String, eventDate: LocalDate, isPrivate: Boolean): AppResult<Wishlist> {
-        val wishlist = Wishlist(store.nextWishlistId++, title, currentUserId, sessionManager.getUserName() ?: "User", eventDate, null, isPrivate, if (isPrivate) null else "wishlist.app/${10000 + store.nextWishlistId}")
+        val ownerId = sessionManager.getUserId() ?: return AppResult.Failure(AppError.Unauthorized)
+        val wishlist = Wishlist(store.nextWishlistId++, title, ownerId, sessionManager.getUserName() ?: "User", eventDate, null, isPrivate, if (isPrivate) null else "wishlist.app/${10000 + store.nextWishlistId}")
         store.updateWishlists { it + wishlist }; return AppResult.Success(wishlist)
     }
     override suspend fun updateWishlist(id: Int, title: String?, eventDate: LocalDate?, isPrivate: Boolean?): AppResult<Wishlist> {
