@@ -1,12 +1,13 @@
 package com.example.wishlistapp.data.repository
 
+import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.domain.model.Gift
 import com.example.wishlistapp.domain.model.GiftStatus
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import java.time.LocalDateTime
 
-class FakeGiftRepository(private val store: FakeDataStore) : GiftRepository {
+class FakeGiftRepository(private val store: FakeDataStore, private val session: SessionManager) : GiftRepository {
     override suspend fun getByWishlist(wishlistId: Int): AppResult<List<Gift>> {
         val wishlist = store.wishlists.value.find { it.id == wishlistId } ?: return AppResult.Failure(AppError.NotFound)
         return AppResult.Success(wishlist.gifts)
@@ -16,8 +17,9 @@ class FakeGiftRepository(private val store: FakeDataStore) : GiftRepository {
         return AppResult.Success(gift)
     }
     override suspend fun createGift(wishlistId: Int, name: String, price: Double?, description: String?, link: String?): AppResult<Gift> {
-        if (store.wishlists.value.none { it.id == wishlistId }) return AppResult.Failure(AppError.NotFound)
-        val gift = Gift(store.nextGiftId++, wishlistId, name, price, description, link, GiftStatus.AVAILABLE, LocalDateTime.now(), "User")
+        val wishlist = store.wishlists.value.find { it.id == wishlistId } ?: return AppResult.Failure(AppError.NotFound)
+        if (wishlist.ownerId != session.getUserId()) return AppResult.Failure(AppError.Forbidden)
+        val gift = Gift(store.nextGiftId++, wishlistId, name, price, description, link, GiftStatus.AVAILABLE, LocalDateTime.now(), session.getUserName())
         store.updateWishlists { it.map { list -> if (list.id == wishlistId) list.copy(gifts = list.gifts + gift) else list } }; return AppResult.Success(gift)
     }
     override suspend fun updateGift(giftId: Int, name: String?, price: Double?, description: String?, link: String?) = change(giftId) { it.copy(name = name ?: it.name, price = price ?: it.price, description = description ?: it.description, link = link ?: it.link) }

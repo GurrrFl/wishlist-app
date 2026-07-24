@@ -33,7 +33,7 @@ class WishlistViewModelStartupTest {
             val session = SessionManager(preferences)
             val store = FakeDataStore()
             val wishlists = FakeWishlistRepository(store, session)
-            val gifts = FakeGiftRepository(store)
+            val gifts = FakeGiftRepository(store, session)
             val reservations = FakeReservationRepository(store, gifts, session)
 
             val viewModel = WishlistViewModel(
@@ -66,7 +66,7 @@ class WishlistViewModelStartupTest {
                 override suspend fun getMyWishlists(): AppResult<List<Wishlist>> =
                     AppResult.Failure(AppError.Network)
             }
-            val gifts = FakeGiftRepository(store)
+            val gifts = FakeGiftRepository(store, session)
             val reservations = FakeReservationRepository(store, gifts, session)
 
             val viewModel = WishlistViewModel(

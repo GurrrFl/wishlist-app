@@ -50,7 +50,7 @@ class FakeRepositoryTest {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
         val lists = FakeWishlistRepository(store, session)
-        val gifts = FakeGiftRepository(store)
+        val gifts = FakeGiftRepository(store, session)
         val reservations = FakeReservationRepository(store, gifts, session)
 
         val created = lists.createWishlist("New", LocalDate.of(2026, 6, 1), false) as AppResult.Success

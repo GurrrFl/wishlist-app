@@ -30,7 +30,7 @@ val repositoryModule = module {
         if (BuildConfig.NETWORK_DATA_SOURCE) get<NetworkWishlistRepository>()
         else FakeWishlistRepository(get(), get())
     }
-    single { FakeGiftRepository(get()) }
+    single { FakeGiftRepository(get(), get()) }
     single<GiftRepository> {
         if (BuildConfig.NETWORK_DATA_SOURCE) NetworkGiftRepository(get(), get())
         else get<FakeGiftRepository>()
