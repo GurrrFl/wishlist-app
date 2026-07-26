@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.data.remote.UserApi
 import com.example.wishlistapp.data.repository.AuthRepository
+import com.example.wishlistapp.data.repository.WishlistRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
