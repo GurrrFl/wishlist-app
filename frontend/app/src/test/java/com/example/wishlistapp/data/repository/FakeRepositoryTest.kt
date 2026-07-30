@@ -46,6 +46,16 @@ class FakeRepositoryTest {
         assertEquals(AppError.Unauthorized, (lists.createWishlist("New", LocalDate.of(2026, 7, 1), false) as AppResult.Failure).error)
     }
 
+    @Test fun giftMutationsRequireWishlistOwner() = runBlocking {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
+        val gifts = FakeGiftRepository(FakeDataStore(), session)
+
+        assertEquals(AppError.Forbidden, (gifts.createGift(1, "Book", 10.0, null, null) as AppResult.Failure).error)
+        assertEquals(AppError.Forbidden, (gifts.updateGift(1, "Changed", null, null, null) as AppResult.Failure).error)
+        assertEquals(AppError.Forbidden, (gifts.deleteGift(1) as AppResult.Failure).error)
+        assertEquals("AirPods или похожие", (gifts.getGift(1) as AppResult.Success).data.name)
+    }
+
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
