@@ -27,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +54,8 @@ fun GiftDetailsScreen(
     giftId: Int,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val gift = viewModel.getGift(giftId) ?: return
+    val wishlists by viewModel.wishlists.collectAsState()
+    val gift = wishlists.flatMap { it.gifts }.find { it.id == giftId } ?: return
     
     //при подключении репы будут сравниваться Idшники, а не имена
     val isOwner = viewModel.isGiftOwner(gift.ownerName)
@@ -86,7 +89,7 @@ fun GiftDetailsScreen(
             )
 
             Text(
-                text = gift.price + stringResource(R.string.price),
+                text = gift.price?.toString().orEmpty() + stringResource(R.string.price),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -98,11 +101,11 @@ fun GiftDetailsScreen(
             )
             //вопрос как лучше делать, так, чтоб не загромождать вызовами экран
             // или 1 кард компоненту, а тут ее 3 раза вызывать? или сделать еще 1 функцию где делать 3 вызова?
-            DescriptionCard(description = gift.description)
+            DescriptionCard(description = gift.description.orEmpty())
             gift.link?.let {
                 LinkCard(link = it)
             }
-            CreatedCard(created = gift.created)
+            CreatedCard(created = gift.created ?: java.time.LocalDate.now())
 
             ActionButtons(
                 isOwner = isOwner,
@@ -170,7 +173,7 @@ fun GiftInfoRow(
                 stringResource(R.string.gift_details_owner_label),
                 style = MaterialTheme.typography.bodySmall
             )
-            Text(gift.ownerName)
+            Text(gift.ownerName.orEmpty())
         }
 
         Column(horizontalAlignment = Alignment.End) {
@@ -283,10 +286,12 @@ fun ActionButtons(
             )
         }
 
+        val reservationId = viewModel.reservationIdForGift(gift.id)
         val buttonText = when {
             isOwner -> stringResource(R.string.gift_details_delete)
             gift.status == GiftStatus.AVAILABLE -> stringResource(R.string.gift_details_reserve)
-            else -> stringResource(R.string.gift_details_cancel_reservation)
+            reservationId != null -> stringResource(R.string.gift_details_cancel_reservation)
+            else -> stringResource(R.string.gift_details_status_reserved)
         }
 
         val buttonColor = if (isOwner) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -296,6 +301,7 @@ fun ActionButtons(
             modifier = Modifier.weight(1f),
             buttonColor = buttonColor,
             buttonTextColor = if (isOwner) Color.White else MaterialTheme.colorScheme.onPrimary,
+            enabled = isOwner || gift.status == GiftStatus.AVAILABLE || reservationId != null,
             onClick = {
                 if (isOwner) {
                     viewModel.deleteGift(gift.id)
@@ -303,8 +309,8 @@ fun ActionButtons(
                 } else {
                     if (gift.status == GiftStatus.AVAILABLE) {
                         viewModel.reserveGift(gift.wishlistId, gift.id, "Вы")
-                    } else {
-                        viewModel.cancelReservation(gift.id)
+                    } else if (reservationId != null) {
+                        viewModel.cancelReservation(reservationId)
                     }
                 }
             }

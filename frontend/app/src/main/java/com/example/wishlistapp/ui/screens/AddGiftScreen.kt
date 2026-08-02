@@ -21,6 +21,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
 import com.example.wishlistapp.ui.components.AppButton
@@ -51,7 +54,7 @@ fun AddGiftScreen(
     var giftLink by remember { mutableStateOf("") }
     var giftDescription by remember { mutableStateOf("") }
 
-    val wishlists = viewModel.getWishlists()
+    val wishlists by viewModel.wishlists.collectAsState()
     var selectedWishlistId by remember { mutableStateOf<Int?>(if (wishlistId != -1) wishlistId else null) }
     var expanded by remember { mutableStateOf(false) }
     
@@ -115,7 +118,7 @@ fun AddGiftScreen(
             AppTextField(
                 label = stringResource(R.string.gift_name_label),
                 value = giftName,
-                onValueChange = { giftName = it },
+                onValueChange = { giftName = it.filterGiftText() },
                 placeholder = stringResource(R.string.gift_name_placeholder),
                 singleLine = true
             )
@@ -123,15 +126,16 @@ fun AddGiftScreen(
             AppTextField(
                 label = stringResource(R.string.gift_price_label),
                 value = giftPrice,
-                onValueChange = { giftPrice = it },
+                onValueChange = { candidate -> if (candidate.matches(Regex("^\\d{0,9}([.,]\\d{0,2})?$"))) giftPrice = candidate },
                 placeholder = stringResource(R.string.gift_price_placeholder),
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
 
             AppTextField(
                 label = stringResource(R.string.gift_link_label),
                 value = giftLink,
-                onValueChange = { giftLink = it },
+                onValueChange = { giftLink = it.filter { char -> char.isLetterOrDigit() || char in ":/.?&=_-%#" } },
                 placeholder = stringResource(R.string.gift_link_placeholder),
                 singleLine = true
             )
@@ -152,7 +156,7 @@ fun AddGiftScreen(
             AppTextField(
                 label = stringResource(R.string.gift_description_label),
                 value = giftDescription,
-                onValueChange = { giftDescription = it },
+                onValueChange = { giftDescription = it.filterGiftText(allowNewLines = true) },
                 placeholder = stringResource(R.string.gift_description_placeholder),
                 minLines = 3,
                 maxLines = 5
@@ -171,7 +175,8 @@ fun AppTextField(
     placeholder: String,
     singleLine: Boolean = false,
     minLines: Int = 1,
-    maxLines: Int = 1
+    maxLines: Int = 1,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, style = MaterialTheme.typography.bodySmall)
@@ -183,10 +188,14 @@ fun AppTextField(
             singleLine = singleLine,
             minLines = minLines,
             maxLines = maxLines,
+            keyboardOptions = keyboardOptions,
             shape = RoundedCornerShape(16.dp)
         )
     }
 }
+
+private fun String.filterGiftText(allowNewLines: Boolean = false): String =
+    filter { it.isLetterOrDigit() || it == ' ' || allowNewLines && it == '\n' || it in "-.,!?():;\"'" }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

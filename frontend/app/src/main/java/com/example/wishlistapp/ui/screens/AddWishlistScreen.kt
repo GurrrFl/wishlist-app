@@ -1,5 +1,7 @@
 package com.example.wishlistapp.ui.screens
 
+import android.app.DatePickerDialog
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +39,8 @@ import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.ui.components.obtainWishlist
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +56,8 @@ fun AddWishlistScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val dateFormatter = remember { DateTimeFormatter.ofPattern("dd.MM.yyyy") }
+    val selectedDate = eventDate.toLocalDateOrNull(dateFormatter)
 
     Scaffold(
         topBar = {
@@ -72,23 +81,21 @@ fun AddWishlistScreen(
             AppOutlinedTextField(
                 textLabel = R.string.wishlist_name_hint,
                 value = wishlistName,
-                onChanged = { wishlistName = it },
+                onChanged = { wishlistName = it.filterWishlistText() },
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            AppOutlinedTextField(
-                textLabel = R.string.wishlist_date_hint,
-                textPlaceholder = R.string.wishlist_card_date_prefix,
+            DatePickerField(
                 value = eventDate,
-                onChanged = { eventDate = it },
-                modifier = Modifier.fillMaxWidth()
+                onDateSelected = { eventDate = it },
+                initialDate = selectedDate ?: LocalDate.now()
             )
 
             AppOutlinedTextField(
                 textLabel = R.string.wishlist_description_hint,
                 textPlaceholder = R.string.wishlist_description_placeholder,
                 value = description,
-                onChanged = { description = it },
+                onChanged = { description = it.filterWishlistText(allowNewLines = true) },
                 modifier = Modifier.fillMaxWidth(),
                 isSingleLine = false
             )
@@ -126,3 +133,30 @@ fun AddWishlistScreen(
         }
     }
 }
+
+@Composable
+private fun DatePickerField(value: String, onDateSelected: (String) -> Unit, initialDate: LocalDate) {
+    val context = LocalContext.current
+    val formatter = remember { DateTimeFormatter.ofPattern("dd.MM.yyyy") }
+    AppOutlinedTextField(
+        textLabel = R.string.wishlist_date_hint,
+        textPlaceholder = R.string.wishlist_card_date_prefix,
+        value = value,
+        onChanged = {},
+        readOnly = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                DatePickerDialog(context, { _, year, month, day ->
+                    onDateSelected(LocalDate.of(year, month + 1, day).format(formatter))
+                }, initialDate.year, initialDate.monthValue - 1, initialDate.dayOfMonth).show()
+            },
+        leadingIcon = Icons.Default.CalendarToday
+    )
+}
+
+private fun String.toLocalDateOrNull(formatter: DateTimeFormatter): LocalDate? =
+    runCatching { LocalDate.parse(this, formatter) }.getOrNull()
+
+private fun String.filterWishlistText(allowNewLines: Boolean = false): String =
+    filter { it.isLetterOrDigit() || it == ' ' || allowNewLines && it == '\n' || it in "-.,!?():;\"'" }

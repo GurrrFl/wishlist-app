@@ -7,7 +7,6 @@ import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
-import retrofit2.http.Header
 
 interface  UserApi {
 
@@ -22,10 +21,5 @@ interface  UserApi {
         @Field("username") email: String,
         @Field("password") password: String
     ): TokenResponse
-
-    @POST("users/logout")
-    suspend fun logout(
-        @Header("Authorization") token: String
-    )
 
 }

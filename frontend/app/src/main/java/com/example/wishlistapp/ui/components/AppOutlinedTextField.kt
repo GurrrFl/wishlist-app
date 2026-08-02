@@ -32,6 +32,7 @@ fun AppOutlinedTextField(
     isPasswordField: Boolean = false,
     isPasswordVisible: Boolean = false,
     isError: Boolean = false,
+    readOnly: Boolean = false,
     onVisibilityClick: @Composable (()-> Unit)? = null,
 ) {
     OutlinedTextField(
@@ -54,7 +55,8 @@ fun AppOutlinedTextField(
         suffix = if (isCost) {
             { Text(text = "₽") }
         } else null,
-        isError = isError
+        isError = isError,
+        readOnly = readOnly
     )
 
 }

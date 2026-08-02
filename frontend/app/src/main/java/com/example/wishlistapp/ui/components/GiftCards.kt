@@ -77,7 +77,7 @@ fun GiftCardNew(
                 )
 
                 Text(
-                    text = gift.description,
+                    text = gift.description.orEmpty(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     maxLines = 2,
@@ -86,7 +86,7 @@ fun GiftCardNew(
 
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = gift.price + stringResource(R.string.price),
+                        text = gift.price?.toString().orEmpty() + stringResource(R.string.price),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),

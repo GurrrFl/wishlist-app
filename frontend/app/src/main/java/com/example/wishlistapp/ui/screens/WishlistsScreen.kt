@@ -30,6 +30,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +51,7 @@ import com.example.wishlistapp.viewmodel.WishlistViewModel
 @Composable
 fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistViewModel ) {
 
-    val wishlists = wishViewModel.getWishlists()
+    val wishlists by wishViewModel.wishlists.collectAsState()
     Scaffold(
         topBar = { AppHeader(stringResource(R.string.wishlists_title)) },
         floatingActionButton = {

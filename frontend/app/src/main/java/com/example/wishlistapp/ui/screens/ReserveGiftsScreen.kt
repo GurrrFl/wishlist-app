@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import com.example.wishlistapp.ui.components.RoundedImage
 import com.example.wishlistapp.ui.components.generateRandomColor
 import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.ReservedGift
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -50,11 +52,9 @@ fun ReserveGiftsScreen(
     navController: NavHostController,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val gifts = viewModel
-        .getAllGifts()
-        .filter { it.status == GiftStatus.RESERVED }
+    val reservations by viewModel.reservedGifts.collectAsState()
 
-    var giftToCancel by remember { mutableStateOf<Gift?>(null) }
+    var giftToCancel by remember { mutableStateOf<ReservedGift?>(null) }
     Scaffold(
         topBar = { AppHeader(stringResource(R.string.reserve_gifts_title)) }
     ) { paddingValues ->
@@ -67,16 +67,16 @@ fun ReserveGiftsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             headerDivider()
-            if (gifts.isEmpty()) {
+            if (reservations.isEmpty()) {
                 EmptyReserveGiftsCard()
             } else {
                 ReservedGiftsList(
-                    gifts = gifts,
-                    onGiftClick = { gift ->
-                        navController.navigate(Screen.GiftDetails.createRoute(gift.id))
+                    reservations = reservations,
+                    onGiftClick = { item ->
+                        navController.navigate(Screen.GiftDetails.createRoute(item.gift.id))
                     },
-                    onCancelReservation = { gift ->
-                        giftToCancel = gift
+                    onCancelReservation = { item ->
+                        giftToCancel = item
                     }
                 )
             }
@@ -84,9 +84,9 @@ fun ReserveGiftsScreen(
 
         if (giftToCancel != null) {
             CancelReservationDialog(
-                gift = giftToCancel!!,
+                gift = giftToCancel!!.gift,
                 onConfirm = {
-                    viewModel.cancelReservation(giftToCancel!!.id)
+                    viewModel.cancelReservation(giftToCancel!!.reservation.id)
                     giftToCancel = null
                 },
                 onDismiss = { giftToCancel = null }
@@ -126,18 +126,18 @@ fun EmptyReserveGiftsCard() {
 
 @Composable
 fun ReservedGiftsList(
-    gifts: List<Gift>,
-    onGiftClick: (Gift) -> Unit,
-    onCancelReservation: (Gift) -> Unit
+    reservations: List<ReservedGift>,
+    onGiftClick: (ReservedGift) -> Unit,
+    onCancelReservation: (ReservedGift) -> Unit
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(gifts) { gift ->
+        items(reservations) { item ->
             ReservedGiftCard(
-                gift = gift,
-                onCancelReservation = { onCancelReservation(gift) },
-                onOpenDetails = { onGiftClick(gift) }
+                gift = item.gift,
+                onCancelReservation = { onCancelReservation(item) },
+                onOpenDetails = { onGiftClick(item) }
             )
         }
     }
@@ -212,7 +212,7 @@ fun ReservedGiftCard(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = gift.price + stringResource(R.string.price),
+                        text = gift.price?.toString().orEmpty() + stringResource(R.string.price),
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -232,7 +232,7 @@ fun ReservedGiftCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = stringResource(R.string.reserve_gifts_card_reserved, gift.created),
+                            text = stringResource(R.string.reserve_gifts_card_reserved, gift?.created?.toString().orEmpty()),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }

@@ -19,6 +19,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,7 +41,8 @@ fun WishlistDetailsScreen(
     wishlistId: Int,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val wishlist = viewModel.getWishlist(wishlistId)!!
+    val wishlists by viewModel.wishlists.collectAsState()
+    val wishlist = wishlists.find { it.id == wishlistId } ?: return
 
     Scaffold(
         topBar = {

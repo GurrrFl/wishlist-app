@@ -1,0 +1,125 @@
+@startuml
+title Wishlist App - Detailed Class Diagram
+
+' Interfaces
+interface IAuthService {
+  +authenticate(login, password): User
+  +generate_token(user): String
+}
+
+interface INotifier {
+  +notify(user, message): void
+}
+
+' Abstract repository
+abstract class BaseRepository<T> {
+  +get_by_id(id): T
+  +list(offset, limit): List<T>
+  +create(data): T
+  +update(obj, data): T
+  +delete(obj): void
+}
+
+' Domain models
+class User {
+  +user_id: Integer
+  +login: String
+  +password_hash: Text
+  +email: String
+  +created_at: String
+  ++login(): bool
+}
+
+class Wishlist {
+  +wishlist_id: Integer
+  +user_id: Integer
+  +name: String
+  +event_date: String
+  +is_private: Integer
+  +unique_link: String
+  +created_at: String
+}
+
+class Gift {
+  +gift_id: Integer
+  +wishlist_id: Integer
+  +name: String
+  +description: Text
+  +price: Float
+  +store_link: String
+  +status: String
+  +created_at: String
+}
+
+class Reservation {
+  +reservation_id: Integer
+  +user_id: Integer
+  +gift_id: Integer
+  +reserved_date: String
+  +cancelled_at: String
+}
+
+' Service and notifier classes
+class AuthService {
+  +login(login, password): Token
+}
+
+class EmailNotifier {
+  +send(email, subject, body): void
+}
+
+' Repository implementations
+class UserRepository
+class WishlistRepository
+class GiftRepository
+class ReservationRepository
+
+' Inheritance / Realization
+AuthService ..|> IAuthService
+EmailNotifier ..|> INotifier
+
+UserRepository --|> BaseRepository
+WishlistRepository --|> BaseRepository
+GiftRepository --|> BaseRepository
+ReservationRepository --|> BaseRepository
+
+' Repositories depend on models
+UserRepository ..> User
+WishlistRepository ..> Wishlist
+GiftRepository ..> Gift
+ReservationRepository ..> Reservation
+
+' Associations & multiplicities
+User "1" o-- "0..*" Wishlist : owns
+Wishlist "1" *-- "0..*" Gift : contains
+Gift "1" -- "0..*" Reservation : has
+User "1" -- "0..*" Reservation : makes
+
+' Additional relationships
+AuthService ..> UserRepository : uses
+AuthService ..> INotifier : notifies
+EmailNotifier ..> User : sends to
+
+' Composition vs Aggregation notes
+note right of Wishlist
+  Aggregation for `wishlists` of a user.
+  Composition for `gifts` inside a wishlist.
+end note
+
+' Association class example: reservation details
+class ReservationDetails {
+  +reserved_date: String
+  +cancelled_at: String
+}
+ReservationDetails .. Reservation
+Reservation "1" .. "1" ReservationDetails : details
+
+' Stereotypes
+class UserRepository <<repository>>
+class WishlistRepository <<repository>>
+class GiftRepository <<repository>>
+class ReservationRepository <<repository>>
+class AuthService <<service>>
+class EmailNotifier <<infrastructure>>
+
+@enduml
