@@ -12,12 +12,13 @@ import java.time.LocalDateTime
 class FakeReservationRepository(private val store: FakeDataStore, private val gifts: FakeGiftRepository, private val sessionManager: SessionManager) : ReservationRepository {
     override fun observeMyReservations(): Flow<List<Reservation>> = store.reservations.map { reservations -> reservations.filter { it.userId == currentUserId } }
     override suspend fun reserveGift(giftId: Int): AppResult<Reservation> {
+        val userId = sessionManager.getUserId() ?: return AppResult.Failure(AppError.Unauthorized)
         val gift = store.wishlists.value.flatMap { it.gifts }.find { it.id == giftId }
             ?: return AppResult.Failure(AppError.NotFound)
         val wishlist = store.wishlists.value.find { it.id == gift.wishlistId } ?: return AppResult.Failure(AppError.NotFound)
-        if (wishlist.ownerId == currentUserId) return AppResult.Failure(AppError.Forbidden)
+        if (wishlist.ownerId == userId || wishlist.isPrivate) return AppResult.Failure(AppError.Forbidden)
         if (gift.status == GiftStatus.RESERVED) return AppResult.Failure(AppError.Conflict)
-        val reservation = Reservation(store.nextReservationId++, giftId, currentUserId, currentUserName, LocalDateTime.now())
+        val reservation = Reservation(store.nextReservationId++, giftId, userId, currentUserName, LocalDateTime.now())
         gifts.change(giftId) { it.copy(status = GiftStatus.RESERVED, reservedBy = currentUserName) }
         store.updateReservations { it + reservation }
         return AppResult.Success(reservation)
