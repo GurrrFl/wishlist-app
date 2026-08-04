@@ -48,12 +48,14 @@ class FakeRepositoryTest {
 
     @Test fun giftMutationsRequireWishlistOwner() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
-        val gifts = FakeGiftRepository(FakeDataStore(), session)
+        val store = FakeDataStore()
+        val gifts = FakeGiftRepository(store, session)
 
         assertEquals(AppError.Forbidden, (gifts.createGift(1, "Book", 10.0, null, null) as AppResult.Failure).error)
         assertEquals(AppError.Forbidden, (gifts.updateGift(1, "Changed", null, null, null) as AppResult.Failure).error)
         assertEquals(AppError.Forbidden, (gifts.deleteGift(1) as AppResult.Failure).error)
-        assertEquals("AirPods или похожие", (gifts.getGift(1) as AppResult.Success).data.name)
+        assertEquals(AppError.Forbidden, (gifts.getGift(1) as AppResult.Failure).error)
+        assertEquals("AirPods или похожие", store.wishlists.value.first().gifts.first().name)
     }
 
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
@@ -73,6 +75,6 @@ class FakeRepositoryTest {
         assertEquals(AppError.Conflict, (reservations.reserveGift(1) as AppResult.Failure).error)
         assertTrue(reservations.getMyReservations() is AppResult.Success)
         reservations.cancelReservation(reservation.data.id)
-        assertEquals(GiftStatus.AVAILABLE, (gifts.getGift(1) as AppResult.Success).data.status)
+        assertEquals(GiftStatus.AVAILABLE, store.wishlists.value.first().gifts.first().status)
     }
 }
