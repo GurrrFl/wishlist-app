@@ -58,6 +58,17 @@ class FakeRepositoryTest {
         assertEquals("AirPods или похожие", store.wishlists.value.first().gifts.first().name)
     }
 
+    @Test fun privateAndAnonymousReservationsAreRejected() = runBlocking {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(3, "Guest") }
+        val store = FakeDataStore()
+        val gifts = FakeGiftRepository(store, session)
+        val reservations = FakeReservationRepository(store, gifts, session)
+
+        assertEquals(AppError.Forbidden, (reservations.reserveGift(6) as AppResult.Failure).error)
+        session.clear()
+        assertEquals(AppError.Unauthorized, (reservations.reserveGift(1) as AppResult.Failure).error)
+    }
+
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
