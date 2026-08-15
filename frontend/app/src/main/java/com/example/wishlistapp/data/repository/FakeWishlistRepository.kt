@@ -8,13 +8,13 @@ import com.example.wishlistapp.data.SessionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
 class FakeWishlistRepository(private val store: FakeDataStore, private val sessionManager: SessionManager) : WishlistRepository {
     private val publicWishlist = MutableStateFlow<Wishlist?>(null)
-    override fun observeMyWishlists(): Flow<List<Wishlist>> = store.wishlists.map { lists ->
-        lists.filter { it.ownerId == currentUserId }
+    override fun observeMyWishlists(): Flow<List<Wishlist>> = combine(store.wishlists, sessionManager.userId) { lists, userId ->
+        lists.filter { it.ownerId == userId }
     }
     override fun observePublicWishlist(): Flow<Wishlist?> = publicWishlist.asStateFlow()
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> =
