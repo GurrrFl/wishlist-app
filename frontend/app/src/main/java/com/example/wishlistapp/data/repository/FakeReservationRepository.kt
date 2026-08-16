@@ -6,11 +6,13 @@ import com.example.wishlistapp.domain.model.Reservation
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import java.time.LocalDateTime
 
 class FakeReservationRepository(private val store: FakeDataStore, private val gifts: FakeGiftRepository, private val sessionManager: SessionManager) : ReservationRepository {
-    override fun observeMyReservations(): Flow<List<Reservation>> = store.reservations.map { reservations -> reservations.filter { it.userId == currentUserId } }
+    override fun observeMyReservations(): Flow<List<Reservation>> = combine(store.reservations, sessionManager.userId) { reservations, userId ->
+        reservations.filter { it.userId == userId }
+    }
     override suspend fun reserveGift(giftId: Int): AppResult<Reservation> {
         val userId = sessionManager.getUserId() ?: return AppResult.Failure(AppError.Unauthorized)
         val gift = store.wishlists.value.flatMap { it.gifts }.find { it.id == giftId }
