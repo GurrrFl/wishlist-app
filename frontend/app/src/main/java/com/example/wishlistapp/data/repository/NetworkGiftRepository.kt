@@ -31,7 +31,7 @@ class NetworkGiftRepository(private val api: GiftApi, private val wishlists: Net
     }
 
     override suspend fun deleteGift(giftId: Int): AppResult<Unit> {
-        val wishlistId = wishlists.observeMyWishlists().value.find { list -> list.gifts.any { it.id == giftId } }?.id
+        val wishlistId = wishlists.cachedWishlistIdForGift(giftId)
         val result = remoteCall { api.delete(giftId) }
         if (result is AppResult.Success && wishlistId != null) wishlists.refreshWishlist(wishlistId)
         return result

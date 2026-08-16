@@ -13,13 +13,19 @@ import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
 class NetworkWishlistRepository(private val api: WishlistApi, private val profileApi: AuthApi, private val session: SessionManager) : WishlistRepository {
     private val cache = MutableStateFlow<List<Wishlist>>(emptyList())
     private val publicCache = MutableStateFlow<Wishlist?>(null)
-    override fun observeMyWishlists() = cache.asStateFlow()
+    override fun observeMyWishlists() = combine(cache, session.userId) { lists, userId ->
+        lists.filter { it.ownerId == userId }
+    }
     override fun observePublicWishlist() = publicCache.asStateFlow()
+
+    fun cachedWishlistIdForGift(giftId: Int): Int? = cache.value
+        .find { list -> list.gifts.any { it.id == giftId } }?.id
 
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> {
         val result = remoteCall {
