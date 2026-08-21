@@ -12,17 +12,18 @@ import com.example.wishlistapp.domain.model.publicLinkCode
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
 class NetworkWishlistRepository(private val api: WishlistApi, private val profileApi: AuthApi, private val session: SessionManager) : WishlistRepository {
     private val cache = MutableStateFlow<List<Wishlist>>(emptyList())
-    private val publicCache = MutableStateFlow<Wishlist?>(null)
+    private val publicCache = MutableStateFlow<Pair<Int?, Wishlist>?>(null)
     override fun observeMyWishlists() = combine(cache, session.userId) { lists, userId ->
         lists.filter { it.ownerId == userId }
     }
-    override fun observePublicWishlist() = publicCache.asStateFlow()
+    override fun observePublicWishlist() = combine(publicCache, session.userId) { cached, userId ->
+        cached?.takeIf { it.first == userId }?.second
+    }
 
     fun cachedWishlistIdForGift(giftId: Int): Int? = cache.value
         .find { list -> list.gifts.any { it.id == giftId } }?.id
@@ -48,7 +49,7 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
     }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {
         val result = remoteCall { api.findByPublicLink(publicLinkCode(link)).toDomain() }
-        if (result is AppResult.Success) publicCache.value = result.data
+        if (result is AppResult.Success) publicCache.value = session.getUserId() to result.data
         return result
     }
 
