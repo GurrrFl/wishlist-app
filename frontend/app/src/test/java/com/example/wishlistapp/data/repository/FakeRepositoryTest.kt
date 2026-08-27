@@ -69,6 +69,24 @@ class FakeRepositoryTest {
         assertEquals(AppError.Unauthorized, (reservations.reserveGift(1) as AppResult.Failure).error)
     }
 
+    @Test fun flowsStopShowingPreviousAccountData() = runBlocking {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
+        val store = FakeDataStore()
+        val wishlists = FakeWishlistRepository(store, session)
+        val reservations = FakeReservationRepository(store, FakeGiftRepository(store, session), session)
+
+        assertTrue(wishlists.observeMyWishlists().first().all { it.ownerId == 2 })
+        wishlists.findByPublicLink("53291")
+        assertEquals(1, wishlists.observePublicWishlist().first()?.id)
+        assertTrue(reservations.observeMyReservations().first().all { it.userId == 2 })
+
+        session.saveUser(3, "Guest")
+        assertTrue(wishlists.observeMyWishlists().first().isEmpty())
+        assertEquals(null, wishlists.observePublicWishlist().first())
+        assertTrue(reservations.observeMyReservations().first().isNotEmpty())
+        assertTrue(reservations.observeMyReservations().first().all { it.userId == 3 })
+    }
+
     @Test fun createGiftReserveAndCancelPreserveOwnershipRules() = runBlocking {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
