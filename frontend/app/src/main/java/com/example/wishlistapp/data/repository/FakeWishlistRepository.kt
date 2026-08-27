@@ -7,16 +7,17 @@ import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.data.SessionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 
 class FakeWishlistRepository(private val store: FakeDataStore, private val sessionManager: SessionManager) : WishlistRepository {
-    private val publicWishlist = MutableStateFlow<Wishlist?>(null)
+    private val publicWishlist = MutableStateFlow<Pair<Int?, Wishlist>?>(null)
     override fun observeMyWishlists(): Flow<List<Wishlist>> = combine(store.wishlists, sessionManager.userId) { lists, userId ->
         lists.filter { it.ownerId == userId }
     }
-    override fun observePublicWishlist(): Flow<Wishlist?> = publicWishlist.asStateFlow()
+    override fun observePublicWishlist(): Flow<Wishlist?> = combine(publicWishlist, sessionManager.userId) { cached, userId ->
+        cached?.takeIf { it.first == userId }?.second
+    }
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> =
         AppResult.Success(store.wishlists.value.filter { it.ownerId == currentUserId })
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
@@ -29,7 +30,7 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
         val wishlist = store.wishlists.value.find {
             !it.isPrivate && it.publicLink?.let(::publicLinkCode) == code
         } ?: return AppResult.Failure(AppError.NotFound)
-        publicWishlist.value = wishlist
+        publicWishlist.value = sessionManager.getUserId() to wishlist
         return AppResult.Success(wishlist)
     }
     override suspend fun createWishlist(title: String, eventDate: LocalDate, isPrivate: Boolean): AppResult<Wishlist> {
