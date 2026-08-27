@@ -1,16 +1,19 @@
 package com.example.wishlistapp.data.repository
 
+import com.example.wishlistapp.data.SessionManager
 import com.example.wishlistapp.data.mapper.toDomain
 import com.example.wishlistapp.data.remote.ReservationApi
 import com.example.wishlistapp.data.remote.remoteCall
 import com.example.wishlistapp.domain.model.Reservation
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 
-class NetworkReservationRepository(private val api: ReservationApi) : ReservationRepository {
+class NetworkReservationRepository(private val api: ReservationApi, private val session: SessionManager) : ReservationRepository {
     private val cache = MutableStateFlow<List<Reservation>>(emptyList())
-    override fun observeMyReservations() = cache.asStateFlow()
+    override fun observeMyReservations() = combine(cache, session.userId) { reservations, userId ->
+        reservations.filter { it.userId == userId }
+    }
 
     override suspend fun reserveGift(giftId: Int): AppResult<Reservation> {
         val result = remoteCall { api.reserve(giftId).toDomain() }
