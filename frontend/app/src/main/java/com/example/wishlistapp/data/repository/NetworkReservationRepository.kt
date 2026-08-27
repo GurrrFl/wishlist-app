@@ -17,7 +17,9 @@ class NetworkReservationRepository(private val api: ReservationApi, private val 
 
     override suspend fun reserveGift(giftId: Int): AppResult<Reservation> {
         val result = remoteCall { api.reserve(giftId).toDomain() }
-        if (result is AppResult.Success) cache.value = cache.value + result.data
+        if (result is AppResult.Success) {
+            cache.value = cache.value.filterNot { it.id == result.data.id } + result.data
+        }
         return result
     }
 
