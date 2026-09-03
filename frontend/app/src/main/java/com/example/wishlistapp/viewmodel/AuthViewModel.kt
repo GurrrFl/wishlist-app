@@ -40,7 +40,21 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         if (state == AuthState.Loading) return
         if (login.isBlank() || email.isBlank() || password.isBlank() || repeatPassword.isBlank()) { state = AuthState.RegisterError("Заполните все поля"); return }
         if (password != repeatPassword) { state = AuthState.RegisterError("Пароли не совпадают"); return }
-        viewModelScope.launch { state = AuthState.Loading; runCatching { repository.register(login, email, password) }.onSuccess { isLoggedIn = repository.isLoggedIn(); state = AuthState.Success }.onFailure { state = AuthState.RegisterError("Ошибка регистрации") } }
+        state = AuthState.Loading
+        viewModelScope.launch {
+            try {
+                repository.register(login, email, password)
+                isLoggedIn = repository.isLoggedIn()
+                state = AuthState.Success
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                val mapped = error.toAppError()
+                state = AuthState.RegisterError(
+                    if (mapped == AppError.Conflict) "Пользователь уже существует" else mapped.toUserMessage()
+                )
+            }
+        }
     }
     fun resetState() { state = AuthState.Idle }
 }
