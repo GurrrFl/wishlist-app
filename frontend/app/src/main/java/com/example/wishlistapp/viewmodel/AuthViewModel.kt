@@ -16,7 +16,21 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     var state by mutableStateOf<AuthState>(AuthState.Idle); private set
     var isLoggedIn by mutableStateOf(repository.isLoggedIn()); private set
     fun checkAuthState() { isLoggedIn = repository.isLoggedIn() }
-    fun logout() = viewModelScope.launch { repository.logout(); isLoggedIn = false; state = AuthState.Success }
+    fun logout() {
+        if (state == AuthState.Loading) return
+        state = AuthState.Loading
+        viewModelScope.launch {
+            try {
+                repository.logout()
+                isLoggedIn = false
+                state = AuthState.Success
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                state = AuthState.LoginError(error.toAppError().toUserMessage())
+            }
+        }
+    }
     fun login(email: String, password: String) {
         if (state == AuthState.Loading) return
         if (email.isBlank() || password.isBlank()) { state = AuthState.LoginError("Заполните все поля"); return }
