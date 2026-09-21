@@ -52,8 +52,20 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     fun getGift(id: Int) = getAllGifts().find { it.id == id }
     fun getGiftById(id: Int) = getGift(id)
     fun getGiftsByWishlistId(id: Int) = getWishlist(id)?.gifts.orEmpty()
-    fun loadMyWishlists() = viewModelScope.launch { wishlistsState = LoadState.Loading; when (val r = wishlistRepository.getMyWishlists()) { is AppResult.Success -> wishlistsState = LoadState.Content(r.data); is AppResult.Failure -> wishlistsState = LoadState.Error("Не удалось загрузить списки") } }
-    fun loadWishlist(id: Int) = viewModelScope.launch { wishlistState = LoadState.Loading; when (val r = wishlistRepository.getWishlist(id)) { is AppResult.Success -> wishlistState = LoadState.Content(r.data); is AppResult.Failure -> wishlistState = LoadState.Error("Не удалось загрузить список") } }
+    fun loadMyWishlists() = viewModelScope.launch {
+        wishlistsState = LoadState.Loading
+        when (val result = wishlistRepository.getMyWishlists()) {
+            is AppResult.Success -> wishlistsState = LoadState.Content(result.data)
+            is AppResult.Failure -> wishlistsState = LoadState.Error(result.error.toUserMessage())
+        }
+    }
+    fun loadWishlist(id: Int) = viewModelScope.launch {
+        wishlistState = LoadState.Loading
+        when (val result = wishlistRepository.getWishlist(id)) {
+            is AppResult.Success -> wishlistState = LoadState.Content(result.data)
+            is AppResult.Failure -> wishlistState = LoadState.Error(result.error.toUserMessage())
+        }
+    }
     fun createWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(createWishlistAction(title, isPrivate, eventDate)) }
     fun addWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = createWishlist(title, description, isPrivate, eventDate)
     fun deleteWishlist(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(wishlistRepository.deleteWishlist(id)) }
