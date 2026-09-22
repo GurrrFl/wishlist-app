@@ -52,18 +52,24 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
     fun getGift(id: Int) = getAllGifts().find { it.id == id }
     fun getGiftById(id: Int) = getGift(id)
     fun getGiftsByWishlistId(id: Int) = getWishlist(id)?.gifts.orEmpty()
-    fun loadMyWishlists() = viewModelScope.launch {
+    fun loadMyWishlists() {
+        if (wishlistsState == LoadState.Loading) return
         wishlistsState = LoadState.Loading
-        when (val result = wishlistRepository.getMyWishlists()) {
-            is AppResult.Success -> wishlistsState = LoadState.Content(result.data)
-            is AppResult.Failure -> wishlistsState = LoadState.Error(result.error.toUserMessage())
+        viewModelScope.launch {
+            when (val result = wishlistRepository.getMyWishlists()) {
+                is AppResult.Success -> wishlistsState = LoadState.Content(result.data)
+                is AppResult.Failure -> wishlistsState = LoadState.Error(result.error.toUserMessage())
+            }
         }
     }
-    fun loadWishlist(id: Int) = viewModelScope.launch {
+    fun loadWishlist(id: Int) {
+        if (wishlistState == LoadState.Loading) return
         wishlistState = LoadState.Loading
-        when (val result = wishlistRepository.getWishlist(id)) {
-            is AppResult.Success -> wishlistState = LoadState.Content(result.data)
-            is AppResult.Failure -> wishlistState = LoadState.Error(result.error.toUserMessage())
+        viewModelScope.launch {
+            when (val result = wishlistRepository.getWishlist(id)) {
+                is AppResult.Success -> wishlistState = LoadState.Content(result.data)
+                is AppResult.Failure -> wishlistState = LoadState.Error(result.error.toUserMessage())
+            }
         }
     }
     fun createWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(createWishlistAction(title, isPrivate, eventDate)) }
