@@ -33,11 +33,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.ui.components.AppButton
 import com.example.wishlistapp.ui.components.AppOutlinedTextField
 import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.ui.components.obtainWishlist
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.toUserMessage
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -119,9 +121,13 @@ fun AddWishlistScreen(
             AppButton(stringResource(R.string.done_button), modifier = Modifier.fillMaxWidth().height(56.dp),
                 onClick = {
                 obtainWishlist(context,wishlistName, description, eventDate).fold(
-                        onSuccess = { gift ->
-                            val id = viewModel.addWishlist(title = wishlistName, description = description, isPrivate = isPrivate, eventDate = eventDate)
-                            navController.popBackStack()
+                        onSuccess = {
+                            scope.launch {
+                                when (val result = viewModel.createWishlistAndWait(wishlistName, isPrivate, eventDate)) {
+                                    is AppResult.Success -> navController.popBackStack()
+                                    is AppResult.Failure -> snackbarHostState.showSnackbar(result.error.toUserMessage())
+                                }
+                            }
                         },
                         onFailure = Button@{ error ->
                             scope.launch {
