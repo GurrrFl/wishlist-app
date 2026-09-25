@@ -35,10 +35,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.ui.components.AppButton
 import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.ui.components.obtainGift
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.toUserMessage
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -86,14 +88,18 @@ fun AddGiftScreen(
                         wishlistId = selectedWishlistId
                     ).fold(
                         onSuccess = {
-                            viewModel.addGift(
-                                name = giftName,
-                                price = giftPrice,
-                                link = giftLink,
-                                description = giftDescription,
-                                wishlistId = selectedWishlistId!!
-                            )
-                            navController.popBackStack()
+                            scope.launch {
+                                when (val result = viewModel.addGiftAndWait(
+                                    name = giftName,
+                                    price = giftPrice,
+                                    link = giftLink,
+                                    description = giftDescription,
+                                    wishlistId = selectedWishlistId!!
+                                )) {
+                                    is AppResult.Success -> navController.popBackStack()
+                                    is AppResult.Failure -> snackbarHostState.showSnackbar(result.error.toUserMessage())
+                                }
+                            }
                         },
                         onFailure = { error ->
                             scope.launch {
