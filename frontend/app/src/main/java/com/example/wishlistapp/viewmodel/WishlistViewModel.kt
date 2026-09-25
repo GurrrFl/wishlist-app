@@ -16,6 +16,7 @@ import com.example.wishlistapp.domain.action.ReserveGiftAction
 import com.example.wishlistapp.domain.model.Gift
 import com.example.wishlistapp.domain.model.Reservation
 import com.example.wishlistapp.domain.model.Wishlist
+import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -72,14 +73,26 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
             }
         }
     }
-    fun createWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(createWishlistAction(title, isPrivate, eventDate)) }
+    suspend fun createWishlistAndWait(title: String, isPrivate: Boolean, eventDate: String): AppResult<Wishlist> {
+        if (wishlistsState == LoadState.Loading) return AppResult.Failure(AppError.Conflict)
+        wishlistsState = LoadState.Loading
+        return createWishlistAction(title, isPrivate, eventDate).also(::finish)
+    }
+    fun createWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) =
+        viewModelScope.launch { createWishlistAndWait(title, isPrivate, eventDate) }
     fun addWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = createWishlist(title, description, isPrivate, eventDate)
     fun deleteWishlist(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(wishlistRepository.deleteWishlist(id)) }
     suspend fun findWishlist(link: String): AppResult<Wishlist> {
         val result = wishlistRepository.findByPublicLink(link)
         return result
     }
-    fun addGift(name: String, price: String, link: String, description: String, wishlistId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(addGiftAction(wishlistId, name, price, description, link)) }
+    suspend fun addGiftAndWait(name: String, price: String, link: String, description: String, wishlistId: Int): AppResult<Gift> {
+        if (wishlistsState == LoadState.Loading) return AppResult.Failure(AppError.Conflict)
+        wishlistsState = LoadState.Loading
+        return addGiftAction(wishlistId, name, price, description, link).also(::finish)
+    }
+    fun addGift(name: String, price: String, link: String, description: String, wishlistId: Int) =
+        viewModelScope.launch { addGiftAndWait(name, price, link, description, wishlistId) }
     fun deleteGift(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(giftRepository.deleteGift(id)) }
     fun reserveGift(giftId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(reserveGiftAction(giftId)) }
     fun reserveGift(wishlistId: Int, giftId: Int, userName: String) = reserveGift(giftId)
