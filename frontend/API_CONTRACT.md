@@ -18,4 +18,6 @@ The backend's `GET /wishlists/my` declares a list response but currently returns
 
 The current `WishlistShort` response does not include gifts, so the client fetches full wishlist details for the owner's list. The debug variant defaults to the persistent fake source; set `wishlistNetworkDataSource=true` to exercise the network source. Release uses the network source.
 
-The public-link cache holds only the last opened wishlist in memory. After a restart, reservations on a friend's wishlist may not show their gift details until that public wishlist is opened again. The backend should expose gift details with reservations, or the client needs a persistent lookup keyed by wishlist ID.
+The public-link cache holds only the last opened wishlist in memory and is scoped to the current session. After a restart, reservations on a friend's wishlist remain visible and cancellable, but the app can show only the gift ID until that public wishlist is opened again. `GET /gifts/{id}` is owner-only, so the client cannot recover a friend's gift details through that route. A reservation response containing a gift summary, or an authorized lookup for the reserver, is needed for complete details after restart.
+
+The client clears session data on HTTP 401 and filters in-memory wishlist and reservation Flows by the active user ID. The token still resides in ordinary app preferences; encrypted or Keystore-backed storage remains to be implemented.
