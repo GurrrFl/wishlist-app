@@ -19,7 +19,7 @@ val networkModule = module {
     single<SharedPreferences> {
         androidContext().getSharedPreferences("session_prefs", Context.MODE_PRIVATE)
     }
-    single { SessionManager(get()) }
+    single { SessionManager(get(), allowDemo = !BuildConfig.NETWORK_DATA_SOURCE) }
     single { AuthInterceptor(get()) }
     single { OkHttpClient.Builder().addInterceptor(get<AuthInterceptor>()).build() }
     single {
