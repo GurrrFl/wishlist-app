@@ -1,6 +1,7 @@
 package com.example.wishlistapp.data.repository
 
 import com.example.wishlistapp.data.SessionManager
+import com.example.wishlistapp.data.demo.DemoAccount
 import com.example.wishlistapp.data.model.RegisterRequest
 import com.example.wishlistapp.data.remote.AuthApi
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,8 @@ class AuthRepository(
     }
 
     suspend fun logout() = withContext(Dispatchers.IO) { sessionManager.clear() }
+
+    fun enterDemo(account: DemoAccount) = sessionManager.enterDemo(account)
 
     fun isLoggedIn(): Boolean {
         return sessionManager.isLoggedIn()
