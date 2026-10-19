@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wishlistapp.data.repository.AuthRepository
+import com.example.wishlistapp.data.demo.DemoAccount
 import com.example.wishlistapp.data.remote.toAppError
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.ui.screens.auth.AuthState
@@ -16,6 +17,17 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     var state by mutableStateOf<AuthState>(AuthState.Idle); private set
     var isLoggedIn by mutableStateOf(repository.isLoggedIn()); private set
     fun checkAuthState() { isLoggedIn = repository.isLoggedIn() }
+    fun enterDemo(account: DemoAccount) {
+        if (state == AuthState.Loading) return
+        state = AuthState.Loading
+        try {
+            repository.enterDemo(account)
+            isLoggedIn = repository.isLoggedIn()
+            state = AuthState.Success
+        } catch (error: Exception) {
+            state = AuthState.LoginError(error.toAppError().toUserMessage())
+        }
+    }
     fun logout() {
         if (state == AuthState.Loading) return
         state = AuthState.Loading
