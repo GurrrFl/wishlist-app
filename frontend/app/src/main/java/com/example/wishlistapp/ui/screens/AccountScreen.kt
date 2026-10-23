@@ -136,7 +136,13 @@ fun AccountScreen(
                     icon = Icons.AutoMirrored.Filled.ExitToApp,
                     title = stringResource(R.string.settings_logout),
                     titleColor = MaterialTheme.colorScheme.error,
-                    onClick = { navController.navigate(Screen.Login.route) }
+                    onClick = {
+                        settingsViewModel.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
