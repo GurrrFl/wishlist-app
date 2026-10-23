@@ -45,4 +45,9 @@ class SettingsViewModel(
         return sessionManager.getUserName()
     }
 
+    fun logout() {
+        sessionManager.clear()
+        _startDestination.value = Screen.Login.route
+    }
+
 }
