@@ -142,6 +142,10 @@
     <string name="demo_mode_hint">Без сервера: выбрать тестовый аккаунт</string>
     <string name="demo_aleksandra">Демо: Александра</string>
     <string name="demo_kate">Демо: Катя</string>
+    <string name="wishlist_delete_button">Удалить список</string>
+    <string name="wishlist_delete_confirm_title">Удалить список?</string>
+    <string name="wishlist_delete_confirm_message">Список, его подарки и связанные брони будут удалены.</string>
+    <string name="wishlist_delete_cancel">Отмена</string>
     <string name="reserve_gifts_cancel_dialog_title">Отменить бронь?</string>
     <string name="reserve_gifts_cancel_dialog_message">Бронь подарка «%s» будет отменена.</string>
     <string name="reserve_gifts_cancel_confirm">Отменить бронь</string>

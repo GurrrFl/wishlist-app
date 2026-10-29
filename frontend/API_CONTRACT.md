@@ -3,10 +3,16 @@
 The Retrofit interfaces follow the FastAPI routes under `backend/app/routes`.
 JSON field names are defined in `data/model/dto`; UI screens consume domain models.
 
+## Testing modes
+
+- Debug defaults to fake wishlist, gift, and reservation repositories. Server registration and login still use `API_BASE_URL`; if the server is unavailable, choose one of the explicit demo accounts on the login screen instead. Demo accounts use the bundled fixture owner IDs and do not create or send a JWT.
+- Use Profile → Logout to clear either kind of session and switch demo personas. Fake data is persisted locally, so app restarts do not reset changes to the fixtures.
+- To exercise the backend for both auth and data on an emulator, build debug with `-PwishlistNetworkDataSource=true -PwishlistDebugApiUrl=http://10.0.2.2:8000/` while the API runs on the host. Release uses the network source and has no demo entry.
+
 ## Routes
 
 - Auth: `POST /users/register`, `POST /users/token`, `GET /users/me`.
-- Wishlists: `GET /wishlists/{id}`, `GET /wishlists/link/{link}`, `POST /wishlists/`, `PATCH /wishlists/{id}`, `DELETE /wishlists/{id}`.
+- Wishlists: `GET /wishlists/{id}`, `GET /wishlists/link/{link}`, `POST /wishlists/`, `PATCH /wishlists/{id}`, `POST /wishlists/{id}/regenerate-link`, `DELETE /wishlists/{id}`.
 - Gifts: `GET /gifts/wishlist/{id}`, `GET /gifts/{id}`, `POST /gifts/`, `PATCH /gifts/{id}`, `DELETE /gifts/{id}`.
 - Reservations: `POST /reservations/gift/{id}`, `GET /reservations/my`, `POST /reservations/{id}/cancel`.
 

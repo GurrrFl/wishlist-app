@@ -20,7 +20,7 @@ fun Throwable.toAppError(): AppError = when (this) {
         403 -> AppError.Forbidden
         404 -> AppError.NotFound
         409 -> AppError.Conflict
-        422 -> AppError.Validation("Проверьте введённые данные")
+        400, 422 -> AppError.Validation("Проверьте введённые данные")
         else -> AppError.Unknown("HTTP ${code()}")
     }
     is IOException -> AppError.Network

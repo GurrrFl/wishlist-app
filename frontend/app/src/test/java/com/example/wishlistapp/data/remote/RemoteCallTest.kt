@@ -30,7 +30,9 @@ class RemoteCallTest {
     }
 
     @Test fun mapsValidationAndPreservesCancellation() = runBlocking {
+        val badRequest = HttpException(Response.error<Unit>(400, "".toResponseBody()))
         val validation = HttpException(Response.error<Unit>(422, "".toResponseBody()))
+        assertTrue(badRequest.toAppError() is AppError.Validation)
         assertTrue(validation.toAppError() is AppError.Validation)
         assertTrue((remoteCall<Unit> { throw validation } as AppResult.Failure).error is AppError.Validation)
 

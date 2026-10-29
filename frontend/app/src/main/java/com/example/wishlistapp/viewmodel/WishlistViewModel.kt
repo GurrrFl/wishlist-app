@@ -45,7 +45,11 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
         viewModelScope.launch { reservationRepository.getMyReservations() }
     }
 
-    fun isWishlistOwner(wishlistId: Int) = getWishlist(wishlistId)?.ownerId == sessionManager.getUserId()
+    fun isWishlistOwner(wishlistId: Int): Boolean {
+        val wishlist = getWishlist(wishlistId)
+            ?: publicWishlist.value?.takeIf { it.id == wishlistId }
+        return wishlist != null && wishlist.ownerId == sessionManager.getUserId()
+    }
     fun reservationIdForGift(giftId: Int) = reservedGifts.value.find { it.reservation.giftId == giftId }?.reservation?.id
     fun getWishlists() = wishlists.value
     fun getWishlist(id: Int) = wishlists.value.find { it.id == id }
@@ -74,29 +78,34 @@ class WishlistViewModel(private val wishlistRepository: WishlistRepository, priv
         }
     }
     suspend fun createWishlistAndWait(title: String, isPrivate: Boolean, eventDate: String): AppResult<Wishlist> {
-        if (wishlistsState == LoadState.Loading) return AppResult.Failure(AppError.Conflict)
-        wishlistsState = LoadState.Loading
-        return createWishlistAction(title, isPrivate, eventDate).also(::finish)
+        return mutate { createWishlistAction(title, isPrivate, eventDate) }
     }
     fun createWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) =
         viewModelScope.launch { createWishlistAndWait(title, isPrivate, eventDate) }
     fun addWishlist(title: String, description: String, isPrivate: Boolean, eventDate: String) = createWishlist(title, description, isPrivate, eventDate)
-    fun deleteWishlist(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(wishlistRepository.deleteWishlist(id)) }
+    suspend fun deleteWishlistAndWait(id: Int): AppResult<Unit> = mutate { wishlistRepository.deleteWishlist(id) }
+    fun deleteWishlist(id: Int) = viewModelScope.launch { deleteWishlistAndWait(id) }
     suspend fun findWishlist(link: String): AppResult<Wishlist> {
         val result = wishlistRepository.findByPublicLink(link)
         return result
     }
     suspend fun addGiftAndWait(name: String, price: String, link: String, description: String, wishlistId: Int): AppResult<Gift> {
-        if (wishlistsState == LoadState.Loading) return AppResult.Failure(AppError.Conflict)
-        wishlistsState = LoadState.Loading
-        return addGiftAction(wishlistId, name, price, description, link).also(::finish)
+        return mutate { addGiftAction(wishlistId, name, price, description, link) }
     }
     fun addGift(name: String, price: String, link: String, description: String, wishlistId: Int) =
         viewModelScope.launch { addGiftAndWait(name, price, link, description, wishlistId) }
-    fun deleteGift(id: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(giftRepository.deleteGift(id)) }
-    fun reserveGift(giftId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(reserveGiftAction(giftId)) }
+    suspend fun deleteGiftAndWait(id: Int): AppResult<Unit> = mutate { giftRepository.deleteGift(id) }
+    fun deleteGift(id: Int) = viewModelScope.launch { deleteGiftAndWait(id) }
+    suspend fun reserveGiftAndWait(giftId: Int): AppResult<Reservation> = mutate { reserveGiftAction(giftId) }
+    fun reserveGift(giftId: Int) = viewModelScope.launch { reserveGiftAndWait(giftId) }
     fun reserveGift(wishlistId: Int, giftId: Int, userName: String) = reserveGift(giftId)
-    fun cancelReservation(reservationId: Int) = viewModelScope.launch { wishlistsState = LoadState.Loading; finish(cancelReservationAction(reservationId)) }
+    suspend fun cancelReservationAndWait(reservationId: Int): AppResult<Reservation> = mutate { cancelReservationAction(reservationId) }
+    fun cancelReservation(reservationId: Int) = viewModelScope.launch { cancelReservationAndWait(reservationId) }
+    private suspend fun <T> mutate(action: suspend () -> AppResult<T>): AppResult<T> {
+        if (wishlistsState == LoadState.Loading) return AppResult.Failure(AppError.Conflict)
+        wishlistsState = LoadState.Loading
+        return action().also(::finish)
+    }
     private fun finish(result: AppResult<*>) { wishlistsState = when (result) { is AppResult.Success -> LoadState.Content(wishlists.value); is AppResult.Failure -> LoadState.Error(errorMessage(result)) } }
     private fun errorMessage(result: AppResult.Failure) = result.error.toUserMessage()
 }

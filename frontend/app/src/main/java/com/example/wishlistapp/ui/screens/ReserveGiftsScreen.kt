@@ -21,12 +21,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.RoundedImage
@@ -43,6 +47,9 @@ import com.example.wishlistapp.ui.components.generateRandomColor
 import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
 import com.example.wishlistapp.viewmodel.ReservedGift
+import com.example.wishlistapp.viewmodel.LoadState
+import com.example.wishlistapp.viewmodel.toUserMessage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.format.DateTimeFormatter
 
@@ -54,8 +61,11 @@ fun ReserveGiftsScreen(
     val reservations by viewModel.reservedGifts.collectAsState()
 
     var giftToCancel by remember { mutableStateOf<ReservedGift?>(null) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
-        topBar = { AppHeader(stringResource(R.string.reserve_gifts_title)) }
+        topBar = { AppHeader(stringResource(R.string.reserve_gifts_title)) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -85,9 +95,16 @@ fun ReserveGiftsScreen(
             CancelReservationDialog(
                 giftName = giftToCancel!!.gift?.name
                     ?: stringResource(R.string.reserve_gifts_unknown_gift, giftToCancel!!.reservation.giftId),
+                isBusy = viewModel.wishlistsState == LoadState.Loading,
                 onConfirm = {
-                    viewModel.cancelReservation(giftToCancel!!.reservation.id)
-                    giftToCancel = null
+                    giftToCancel?.let { selected ->
+                        scope.launch {
+                            when (val result = viewModel.cancelReservationAndWait(selected.reservation.id)) {
+                                is AppResult.Success -> giftToCancel = null
+                                is AppResult.Failure -> snackbarHostState.showSnackbar(result.error.toUserMessage())
+                            }
+                        }
+                    }
                 },
                 onDismiss = { giftToCancel = null }
             )
@@ -146,6 +163,7 @@ fun ReservedGiftsList(
 @Composable
 fun CancelReservationDialog(
     giftName: String,
+    isBusy: Boolean,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -158,7 +176,7 @@ fun CancelReservationDialog(
             )
         },
         confirmButton = {
-            Button(onClick = onConfirm) {
+            Button(onClick = onConfirm, enabled = !isBusy) {
                 Text(stringResource(R.string.reserve_gifts_cancel_confirm))
             }
         },

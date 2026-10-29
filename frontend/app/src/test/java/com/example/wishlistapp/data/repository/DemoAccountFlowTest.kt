@@ -30,4 +30,28 @@ class DemoAccountFlowTest {
         assertEquals(1, (lists.findByPublicLink("53291") as AppResult.Success).data.id)
         assertTrue(reservations.reserveGift(1) is AppResult.Success)
     }
+
+    @Test fun privateWishlistCanBecomeFindableAgain() = runBlocking {
+        val session = SessionManager(inMemoryPreferences(), allowDemo = true)
+        session.enterDemo(DemoAccount.ALEKSANDRA)
+        val lists = FakeWishlistRepository(FakeDataStore(), session)
+
+        val updated = lists.updateWishlist(2, null, null, false) as AppResult.Success
+        assertTrue(updated.data.publicLink != null)
+        session.enterDemo(DemoAccount.KATE)
+        assertEquals(2, (lists.findByPublicLink(updated.data.publicLink!!) as AppResult.Success).data.id)
+    }
+
+    @Test fun deletingWishlistAlsoRemovesItsGiftReservations() = runBlocking {
+        val session = SessionManager(inMemoryPreferences(), allowDemo = true)
+        session.enterDemo(DemoAccount.ALEKSANDRA)
+        val store = FakeDataStore()
+        val lists = FakeWishlistRepository(store, session)
+
+        assertTrue(store.reservations.value.any { it.giftId == 2 })
+        assertTrue(lists.deleteWishlist(1) is AppResult.Success)
+        assertTrue(store.wishlists.value.none { it.id == 1 })
+        assertTrue(store.reservations.value.none { it.giftId == 2 })
+        assertTrue(store.reservations.value.any { it.giftId == 16 })
+    }
 }

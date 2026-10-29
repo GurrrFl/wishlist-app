@@ -25,11 +25,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,12 +41,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.data.model.GiftStatus
 import com.example.wishlistapp.ui.components.AppButton
 import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.ui.components.RoundedImage
 import com.example.wishlistapp.ui.components.generateRandomColor
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.LoadState
+import com.example.wishlistapp.viewmodel.toUserMessage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 
@@ -65,13 +72,15 @@ fun GiftDetailsScreen(
     val iconBackgroundColor = remember {
         generateRandomColor().copy(alpha = 0.65f)
     }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
             NestedScreenHeader(
                 stringResource(R.string.gift_details_title)
             ) { navController.navigateUp() }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -113,6 +122,7 @@ fun GiftDetailsScreen(
                 isOwner = isOwner,
                 gift = gift,
                 viewModel = viewModel,
+                snackbarHostState = snackbarHostState,
                 onNavigateUp = { navController.navigateUp() }
             )
         }
@@ -266,8 +276,10 @@ fun ActionButtons(
     isOwner: Boolean,
     gift: com.example.wishlistapp.data.model.Gift,
     viewModel: WishlistViewModel,
+    snackbarHostState: SnackbarHostState,
     onNavigateUp: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,8 +303,8 @@ fun ActionButtons(
         val reservationId = viewModel.reservationIdForGift(gift.id)
         val buttonText = when {
             isOwner -> stringResource(R.string.gift_details_delete)
-            gift.status == GiftStatus.AVAILABLE -> stringResource(R.string.gift_details_reserve)
             reservationId != null -> stringResource(R.string.gift_details_cancel_reservation)
+            gift.status == GiftStatus.AVAILABLE -> stringResource(R.string.gift_details_reserve)
             else -> stringResource(R.string.gift_details_status_reserved)
         }
 
@@ -303,16 +315,19 @@ fun ActionButtons(
             modifier = Modifier.weight(1f),
             buttonColor = buttonColor,
             buttonTextColor = if (isOwner) Color.White else MaterialTheme.colorScheme.onPrimary,
-            enabled = isOwner || gift.status == GiftStatus.AVAILABLE || reservationId != null,
+            enabled = viewModel.wishlistsState != LoadState.Loading &&
+                (isOwner || gift.status == GiftStatus.AVAILABLE || reservationId != null),
             onClick = {
-                if (isOwner) {
-                    viewModel.deleteGift(gift.id)
-                    onNavigateUp()
-                } else {
-                    if (gift.status == GiftStatus.AVAILABLE) {
-                        viewModel.reserveGift(gift.wishlistId, gift.id, "Вы")
-                    } else if (reservationId != null) {
-                        viewModel.cancelReservation(reservationId)
+                scope.launch {
+                    val result: AppResult<*> = when {
+                        isOwner -> viewModel.deleteGiftAndWait(gift.id)
+                        reservationId != null -> viewModel.cancelReservationAndWait(reservationId)
+                        gift.status == GiftStatus.AVAILABLE -> viewModel.reserveGiftAndWait(gift.id)
+                        else -> return@launch
+                    }
+                    when (result) {
+                        is AppResult.Success -> if (isOwner) onNavigateUp()
+                        is AppResult.Failure -> snackbarHostState.showSnackbar(result.error.toUserMessage())
                     }
                 }
             }
