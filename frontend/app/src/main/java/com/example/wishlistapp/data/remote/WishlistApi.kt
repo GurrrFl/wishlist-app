@@ -15,5 +15,6 @@ interface WishlistApi {
     @GET("wishlists/link/{link}") suspend fun findByPublicLink(@Path("link") link: String): WishlistDto
     @POST("wishlists/") suspend fun create(@Body request: CreateWishlistDto): WishlistDto
     @PATCH("wishlists/{id}") suspend fun update(@Path("id") id: Int, @Body request: UpdateWishlistDto): WishlistDto
+    @POST("wishlists/{id}/regenerate-link") suspend fun regenerateLink(@Path("id") id: Int): WishlistDto
     @DELETE("wishlists/{id}") suspend fun delete(@Path("id") id: Int)
 }

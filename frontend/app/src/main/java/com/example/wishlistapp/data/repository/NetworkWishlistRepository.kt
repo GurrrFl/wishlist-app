@@ -61,8 +61,13 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
     }
 
     override suspend fun updateWishlist(id: Int, title: String?, eventDate: LocalDate?, isPrivate: Boolean?): AppResult<Wishlist> {
-        val result = remoteCall { api.update(id, UpdateWishlistDto(title, eventDate?.toString(), isPrivate)).toDomain() }
-        if (result is AppResult.Success) cache.value = cache.value.map { if (it.id == id) result.data else it }
+        val updated = remoteCall { api.update(id, UpdateWishlistDto(title, eventDate?.toString(), isPrivate)).toDomain() }
+        if (updated !is AppResult.Success) return updated
+        val result = if (isPrivate == false && updated.data.publicLink == null) {
+            remoteCall { api.regenerateLink(id).toDomain() }
+        } else updated
+        val visible = (result as? AppResult.Success)?.data ?: updated.data
+        cache.value = cache.value.map { if (it.id == id) visible else it }
         return result
     }
 
