@@ -56,7 +56,7 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
     override suspend fun deleteWishlist(id: Int): AppResult<Unit> {
         val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
         if (wishlist.ownerId != currentUserId) return AppResult.Failure(AppError.Forbidden)
-        store.updateWishlists { it.filterNot { item -> item.id == id } }
+        store.removeWishlistAndReservations(id)
         return AppResult.Success(Unit)
     }
     private val currentUserId get() = sessionManager.getUserId() ?: 0
