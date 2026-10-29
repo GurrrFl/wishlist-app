@@ -41,6 +41,14 @@ class FakeDataStore(private val storage: FakeSnapshotStorage? = null) {
         _reservations.value = transform(_reservations.value).toList()
         persist()
     }
+    fun updateGift(id: Int, transform: (Gift) -> Gift): Gift? {
+        val old = _wishlists.value.asSequence().flatMap { it.gifts.asSequence() }.find { it.id == id } ?: return null
+        val updated = transform(old)
+        updateWishlists { lists -> lists.map { list ->
+            if (list.id == old.wishlistId) list.copy(gifts = list.gifts.map { if (it.id == id) updated else it }) else list
+        } }
+        return updated
+    }
     fun removeWishlistAndReservations(id: Int) {
         val giftIds = _wishlists.value.find { it.id == id }?.gifts?.map { it.id }?.toSet().orEmpty()
         _wishlists.value = _wishlists.value.filterNot { it.id == id }

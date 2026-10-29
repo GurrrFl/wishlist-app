@@ -34,7 +34,7 @@ class WishlistViewModelStartupTest {
             val store = FakeDataStore()
             val wishlists = FakeWishlistRepository(store, session)
             val gifts = FakeGiftRepository(store, session)
-            val reservations = FakeReservationRepository(store, gifts, session)
+            val reservations = FakeReservationRepository(store, session)
 
             val viewModel = WishlistViewModel(
                 wishlists,
@@ -67,7 +67,7 @@ class WishlistViewModelStartupTest {
                     AppResult.Failure(AppError.Network)
             }
             val gifts = FakeGiftRepository(store, session)
-            val reservations = FakeReservationRepository(store, gifts, session)
+            val reservations = FakeReservationRepository(store, session)
 
             val viewModel = WishlistViewModel(
                 failingWishlists,

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import java.time.LocalDateTime
 
-class FakeReservationRepository(private val store: FakeDataStore, private val gifts: FakeGiftRepository, private val sessionManager: SessionManager) : ReservationRepository {
+class FakeReservationRepository(private val store: FakeDataStore, private val sessionManager: SessionManager) : ReservationRepository {
     override fun observeMyReservations(): Flow<List<Reservation>> = combine(store.reservations, sessionManager.userId) { reservations, userId ->
         reservations.filter { it.userId == userId }
     }
@@ -21,13 +21,13 @@ class FakeReservationRepository(private val store: FakeDataStore, private val gi
         if (wishlist.ownerId == userId || wishlist.isPrivate) return AppResult.Failure(AppError.Forbidden)
         if (gift.status == GiftStatus.RESERVED) return AppResult.Failure(AppError.Conflict)
         val reservation = Reservation(store.nextReservationId++, giftId, userId, currentUserName, LocalDateTime.now())
-        gifts.change(giftId) { it.copy(status = GiftStatus.RESERVED, reservedBy = currentUserName) }
+        store.updateGift(giftId) { it.copy(status = GiftStatus.RESERVED, reservedBy = currentUserName) }
         store.updateReservations { it + reservation }
         return AppResult.Success(reservation)
     }
     override suspend fun cancelReservation(reservationId: Int): AppResult<Reservation> {
         val reservation = store.reservations.value.find { it.id == reservationId && it.userId == currentUserId } ?: return AppResult.Failure(AppError.NotFound)
-        gifts.change(reservation.giftId) { it.copy(status = GiftStatus.AVAILABLE, reservedBy = null) }
+        store.updateGift(reservation.giftId) { it.copy(status = GiftStatus.AVAILABLE, reservedBy = null) }
         store.updateReservations { it.filterNot { item -> item.id == reservationId } }
         return AppResult.Success(reservation)
     }

@@ -15,14 +15,23 @@ class FakeWishlistRepository(private val store: FakeDataStore, private val sessi
     override fun observeMyWishlists(): Flow<List<Wishlist>> = combine(store.wishlists, sessionManager.userId) { lists, userId ->
         lists.filter { it.ownerId == userId }
     }
-    override fun observePublicWishlist(): Flow<Wishlist?> = combine(publicWishlist, sessionManager.userId) { cached, userId ->
-        cached?.takeIf { it.first == userId }?.second
+    override fun observePublicWishlist(): Flow<Wishlist?> = combine(publicWishlist, store.wishlists, sessionManager.userId) { cached, lists, userId ->
+        cached?.takeIf { it.first == userId }?.second?.let { selected ->
+            lists.find { it.id == selected.id && !it.isPrivate }
+        }
     }
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> =
         AppResult.Success(store.wishlists.value.filter { it.ownerId == currentUserId })
     override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
         val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
         if (wishlist.ownerId != currentUserId) return AppResult.Failure(AppError.Forbidden)
+        return AppResult.Success(wishlist)
+    }
+    override suspend fun refreshWishlist(id: Int): AppResult<Wishlist> {
+        val wishlist = store.wishlists.value.find { it.id == id } ?: return AppResult.Failure(AppError.NotFound)
+        if (wishlist.ownerId != currentUserId && (wishlist.isPrivate || publicWishlist.value?.second?.id != id)) {
+            return AppResult.Failure(AppError.Forbidden)
+        }
         return AppResult.Success(wishlist)
     }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {

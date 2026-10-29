@@ -32,12 +32,12 @@ val repositoryModule = module {
     }
     single { FakeGiftRepository(get(), get()) }
     single<GiftRepository> {
-        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkGiftRepository(get(), get())
+        if (BuildConfig.NETWORK_DATA_SOURCE) NetworkGiftRepository(get())
         else get<FakeGiftRepository>()
     }
     single<ReservationRepository> {
         if (BuildConfig.NETWORK_DATA_SOURCE) NetworkReservationRepository(get(), get())
-        else FakeReservationRepository(get(), get(), get())
+        else FakeReservationRepository(get(), get())
     }
     factory { CreateWishlistAction(get()) }
     factory { AddGiftAction(get()) }

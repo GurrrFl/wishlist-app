@@ -25,9 +25,6 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
         cached?.takeIf { it.first == userId }?.second
     }
 
-    fun cachedWishlistIdForGift(giftId: Int): Int? = cache.value
-        .find { list -> list.gifts.any { it.id == giftId } }?.id
-
     override suspend fun getMyWishlists(): AppResult<List<Wishlist>> {
         val result = remoteCall {
             profileApi.getProfile().wishlists.map { summary ->
@@ -38,13 +35,21 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
         return result
     }
 
-    override suspend fun getWishlist(id: Int): AppResult<Wishlist> = remoteCall { api.getWishlist(id).toDomain() }
-
-    suspend fun refreshWishlist(id: Int): AppResult<Wishlist> {
-        val result = getWishlist(id)
-        if (result is AppResult.Success) {
-            cache.value = cache.value.map { if (it.id == id) result.data else it }
+    override suspend fun getWishlist(id: Int): AppResult<Wishlist> {
+        val result = remoteCall { api.getWishlist(id).toDomain() }
+        if (result is AppResult.Success && result.data.ownerId == session.getUserId()) {
+            cache.value = cache.value.filterNot { it.id == id } + result.data
         }
+        return result
+    }
+
+    override suspend fun refreshWishlist(id: Int): AppResult<Wishlist> {
+        val public = publicCache.value?.takeIf { it.first == session.getUserId() && it.second.id == id }?.second
+        val result = if (public != null && public.ownerId != session.getUserId()) {
+            val link = public.publicLink ?: return AppResult.Failure(AppError.NotFound)
+            remoteCall { api.findByPublicLink(publicLinkCode(link)).toDomain() }
+        } else getWishlist(id)
+        if (result is AppResult.Success && public != null) publicCache.value = session.getUserId() to result.data
         return result
     }
     override suspend fun findByPublicLink(link: String): AppResult<Wishlist> {

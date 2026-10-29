@@ -36,7 +36,8 @@ class FakeGiftRepository(private val store: FakeDataStore, private val session: 
         store.updateWishlists { lists -> lists.map { list -> if (list.id == gift.wishlistId) list.copy(gifts = list.gifts.filterNot { it.id == giftId }) else list } }
         return AppResult.Success(Unit)
     }
-    suspend fun change(id: Int, transform: (Gift) -> Gift): AppResult<Gift> { val old = findGift(id) ?: return AppResult.Failure(AppError.NotFound); val updated = transform(old); store.updateWishlists { lists -> lists.map { list -> if (list.id == old.wishlistId) list.copy(gifts = list.gifts.map { if (it.id == id) updated else it }) else list } }; return AppResult.Success(updated) }
+    private fun change(id: Int, transform: (Gift) -> Gift): AppResult<Gift> =
+        store.updateGift(id, transform)?.let { AppResult.Success(it) } ?: AppResult.Failure(AppError.NotFound)
     private fun findGift(id: Int): Gift? = store.wishlists.value.flatMap { it.gifts }.find { it.id == id }
     private fun isOwner(gift: Gift): Boolean = store.wishlists.value
         .find { it.id == gift.wishlistId }?.ownerId == session.getUserId()

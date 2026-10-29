@@ -17,7 +17,7 @@ class DemoAccountFlowTest {
         val store = FakeDataStore()
         val lists = FakeWishlistRepository(store, session)
         val gifts = FakeGiftRepository(store, session)
-        val reservations = FakeReservationRepository(store, gifts, session)
+        val reservations = FakeReservationRepository(store, session)
 
         session.enterDemo(DemoAccount.ALEKSANDRA)
         assertEquals(setOf(1, 2, 3), lists.getMyWishlists().let { (it as AppResult.Success).data.map { list -> list.id }.toSet() })

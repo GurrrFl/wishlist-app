@@ -10,6 +10,8 @@ interface WishlistRepository {
     fun observePublicWishlist(): Flow<Wishlist?>
     suspend fun getMyWishlists(): AppResult<List<Wishlist>>
     suspend fun getWishlist(id: Int): AppResult<Wishlist>
+    /** Reload a known owned or publicly opened wishlist after a mutation. */
+    suspend fun refreshWishlist(id: Int): AppResult<Wishlist>
     suspend fun findByPublicLink(link: String): AppResult<Wishlist>
     suspend fun createWishlist(title: String, eventDate: LocalDate, isPrivate: Boolean): AppResult<Wishlist>
     suspend fun updateWishlist(id: Int, title: String?, eventDate: LocalDate?, isPrivate: Boolean?): AppResult<Wishlist>

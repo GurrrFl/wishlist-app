@@ -62,7 +62,7 @@ class FakeRepositoryTest {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(3, "Guest") }
         val store = FakeDataStore()
         val gifts = FakeGiftRepository(store, session)
-        val reservations = FakeReservationRepository(store, gifts, session)
+        val reservations = FakeReservationRepository(store, session)
 
         assertEquals(AppError.Forbidden, (reservations.reserveGift(6) as AppResult.Failure).error)
         session.clear()
@@ -73,7 +73,7 @@ class FakeRepositoryTest {
         val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "kate_rosan") }
         val store = FakeDataStore()
         val wishlists = FakeWishlistRepository(store, session)
-        val reservations = FakeReservationRepository(store, FakeGiftRepository(store, session), session)
+        val reservations = FakeReservationRepository(store, session)
 
         assertTrue(wishlists.observeMyWishlists().first().all { it.ownerId == 2 })
         wishlists.findByPublicLink("53291")
@@ -92,7 +92,7 @@ class FakeRepositoryTest {
         val store = FakeDataStore()
         val lists = FakeWishlistRepository(store, session)
         val gifts = FakeGiftRepository(store, session)
-        val reservations = FakeReservationRepository(store, gifts, session)
+        val reservations = FakeReservationRepository(store, session)
 
         val created = lists.createWishlist("New", LocalDate.of(2026, 6, 1), false) as AppResult.Success
         assertEquals(2, created.data.ownerId)
