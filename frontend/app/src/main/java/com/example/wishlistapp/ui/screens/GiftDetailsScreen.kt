@@ -315,7 +315,7 @@ fun ActionButtons(
             modifier = Modifier.weight(1f),
             buttonColor = buttonColor,
             buttonTextColor = if (isOwner) Color.White else MaterialTheme.colorScheme.onPrimary,
-            enabled = viewModel.wishlistsState != LoadState.Loading &&
+            enabled = !viewModel.isMutating &&
                 (isOwner || gift.status == GiftStatus.AVAILABLE || reservationId != null),
             onClick = {
                 scope.launch {

@@ -23,7 +23,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +57,23 @@ fun WishlistDetailsScreen(
     viewModel: WishlistViewModel = koinViewModel()
 ) {
     val wishlists by viewModel.wishlists.collectAsState()
-    val wishlist = wishlists.find { it.id == wishlistId } ?: return
+    val wishlist = wishlists.find { it.id == wishlistId }
+        ?: (viewModel.wishlistState as? LoadState.Content)?.data?.takeIf { it.id == wishlistId }
+    LaunchedEffect(wishlistId) { if (wishlist == null) viewModel.loadWishlist(wishlistId) }
+    if (wishlist == null) {
+        Scaffold(topBar = { NestedScreenHeader(text = "Список подарков") { navController.popBackStack() } }) { padding ->
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                when (val state = viewModel.wishlistState) {
+                    is LoadState.Error -> Text(state.message)
+                    else -> CircularProgressIndicator()
+                }
+            }
+        }
+        return
+    }
     var showDeleteDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -129,7 +147,7 @@ fun WishlistDetailsScreen(
             item {
                 Button(
                     onClick = { showDeleteDialog = true },
-                    enabled = viewModel.wishlistsState != LoadState.Loading,
+                    enabled = !viewModel.isMutating,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -144,7 +162,7 @@ fun WishlistDetailsScreen(
             title = { Text(stringResource(R.string.wishlist_delete_confirm_title)) },
             text = { Text(stringResource(R.string.wishlist_delete_confirm_message)) },
             confirmButton = {
-                TextButton(enabled = viewModel.wishlistsState != LoadState.Loading, onClick = {
+                TextButton(enabled = !viewModel.isMutating, onClick = {
                     scope.launch {
                         when (val result = viewModel.deleteWishlistAndWait(wishlistId)) {
                             is AppResult.Success -> {

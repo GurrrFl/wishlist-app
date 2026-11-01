@@ -95,7 +95,7 @@ fun ReserveGiftsScreen(
             CancelReservationDialog(
                 giftName = giftToCancel!!.gift?.name
                     ?: stringResource(R.string.reserve_gifts_unknown_gift, giftToCancel!!.reservation.giftId),
-                isBusy = viewModel.wishlistsState == LoadState.Loading,
+                isBusy = viewModel.isMutating,
                 onConfirm = {
                     giftToCancel?.let { selected ->
                         scope.launch {
