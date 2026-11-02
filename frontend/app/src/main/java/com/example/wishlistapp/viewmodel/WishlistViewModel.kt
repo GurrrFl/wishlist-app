@@ -66,6 +66,8 @@ class WishlistViewModel(
     private val searchInProgress = AtomicBoolean(false)
     private var listJob: Job? = null
     private var detailJob: Job? = null
+    private var listGeneration = 0
+    private var detailGeneration = 0
     private var selectedWishlistId: Int? = null
 
     init {
@@ -73,6 +75,8 @@ class WishlistViewModel(
         viewModelScope.launch { reservationRepository.getMyReservations() }
         viewModelScope.launch {
             sessionManager.userId.drop(1).collect {
+                listGeneration++
+                detailGeneration++
                 listJob?.cancel()
                 detailJob?.cancel()
                 wishlistsState = LoadState.Idle
@@ -104,32 +108,36 @@ class WishlistViewModel(
 
     fun loadMyWishlists() {
         if (listJob?.isActive == true) return
+        val generation = ++listGeneration
         wishlistsState = LoadState.Loading
         listJob = viewModelScope.launch {
             try {
-                wishlistsState = when (val result = wishlistRepository.getMyWishlists()) {
+                val loaded = when (val result = wishlistRepository.getMyWishlists()) {
                     is AppResult.Success -> LoadState.Content(result.data)
                     is AppResult.Failure -> LoadState.Error(result.error.toUserMessage())
                 }
+                if (listGeneration == generation) wishlistsState = loaded
             } finally {
-                if (wishlistsState == LoadState.Loading) wishlistsState = LoadState.Idle
+                if (listGeneration == generation && wishlistsState == LoadState.Loading) wishlistsState = LoadState.Idle
             }
         }
     }
 
     fun loadWishlist(id: Int) {
         if (selectedWishlistId == id && detailJob?.isActive == true) return
+        val generation = ++detailGeneration
         detailJob?.cancel()
         selectedWishlistId = id
         wishlistState = LoadState.Loading
         detailJob = viewModelScope.launch {
             try {
-                wishlistState = when (val result = wishlistRepository.getWishlist(id)) {
+                val loaded = when (val result = wishlistRepository.getWishlist(id)) {
                     is AppResult.Success -> LoadState.Content(result.data)
                     is AppResult.Failure -> LoadState.Error(result.error.toUserMessage())
                 }
+                if (detailGeneration == generation) wishlistState = loaded
             } finally {
-                if (selectedWishlistId == id && wishlistState == LoadState.Loading) wishlistState = LoadState.Idle
+                if (detailGeneration == generation && wishlistState == LoadState.Loading) wishlistState = LoadState.Idle
             }
         }
     }
