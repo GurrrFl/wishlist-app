@@ -73,12 +73,18 @@ class NetworkWishlistRepository(private val api: WishlistApi, private val profil
         } else updated
         val visible = (result as? AppResult.Success)?.data ?: updated.data
         cache.value = cache.value.map { if (it.id == id) visible else it }
+        if (publicCache.value?.second?.id == id) {
+            publicCache.value = if (visible.isPrivate) null else session.getUserId() to visible
+        }
         return result
     }
 
     override suspend fun deleteWishlist(id: Int): AppResult<Unit> {
         val result = remoteCall { api.delete(id) }
-        if (result is AppResult.Success) cache.value = cache.value.filterNot { it.id == id }
+        if (result is AppResult.Success) {
+            cache.value = cache.value.filterNot { it.id == id }
+            if (publicCache.value?.second?.id == id) publicCache.value = null
+        }
         return result
     }
 }
