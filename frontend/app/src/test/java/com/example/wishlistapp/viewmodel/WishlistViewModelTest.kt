@@ -10,6 +10,7 @@ import com.example.wishlistapp.domain.action.AddGiftAction
 import com.example.wishlistapp.domain.action.CancelReservationAction
 import com.example.wishlistapp.domain.action.CreateWishlistAction
 import com.example.wishlistapp.domain.action.ReserveGiftAction
+import com.example.wishlistapp.domain.model.GiftStatus
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -55,5 +57,22 @@ class WishlistViewModelTest {
 
         assertTrue(viewModel.wishlistState is LoadState.Content)
         assertTrue(viewModel.wishlistsState is LoadState.Content)
+    }
+
+    @Test fun reservationAndCancellationRefreshPublicGift() = runTest {
+        val viewModel = newViewModel()
+        runCurrent()
+        assertTrue(viewModel.findWishlist("53291") is AppResult.Success)
+        runCurrent()
+
+        val reservation = viewModel.reserveGiftAndWait(1) as AppResult.Success
+        runCurrent()
+        assertEquals(GiftStatus.RESERVED, viewModel.publicWishlist.value?.gifts?.first { it.id == 1 }?.status)
+        assertEquals(reservation.data.id, viewModel.reservationIdForGift(1))
+
+        assertTrue(viewModel.cancelReservationAndWait(reservation.data.id) is AppResult.Success)
+        runCurrent()
+        assertEquals(GiftStatus.AVAILABLE, viewModel.publicWishlist.value?.gifts?.first { it.id == 1 }?.status)
+        assertEquals(null, viewModel.reservationIdForGift(1))
     }
 }
