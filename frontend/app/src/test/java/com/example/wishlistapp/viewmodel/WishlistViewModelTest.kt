@@ -6,13 +6,18 @@ import com.example.wishlistapp.data.repository.FakeDataStore
 import com.example.wishlistapp.data.repository.FakeGiftRepository
 import com.example.wishlistapp.data.repository.FakeReservationRepository
 import com.example.wishlistapp.data.repository.FakeWishlistRepository
+import com.example.wishlistapp.data.repository.GiftRepository
 import com.example.wishlistapp.domain.action.AddGiftAction
 import com.example.wishlistapp.domain.action.CancelReservationAction
 import com.example.wishlistapp.domain.action.CreateWishlistAction
 import com.example.wishlistapp.domain.action.ReserveGiftAction
 import com.example.wishlistapp.domain.model.GiftStatus
+import com.example.wishlistapp.domain.model.Gift
+import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -74,5 +79,35 @@ class WishlistViewModelTest {
         runCurrent()
         assertEquals(GiftStatus.AVAILABLE, viewModel.publicWishlist.value?.gifts?.first { it.id == 1 }?.status)
         assertEquals(null, viewModel.reservationIdForGift(1))
+    }
+
+    @Test fun repeatedMutationIsRejectedWithoutChangingListLoadingState() = runTest {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(2, "Guest") }
+        val store = FakeDataStore()
+        val wishlists = FakeWishlistRepository(store, session)
+        val fakeGifts = FakeGiftRepository(store, session)
+        val gate = CompletableDeferred<Unit>()
+        val gifts = object : GiftRepository by fakeGifts {
+            override suspend fun createGift(wishlistId: Int, name: String, price: Double?, description: String?, link: String?): AppResult<Gift> {
+                gate.await()
+                return fakeGifts.createGift(wishlistId, name, price, description, link)
+            }
+        }
+        val reservations = FakeReservationRepository(store, session)
+        val viewModel = WishlistViewModel(
+            wishlists, gifts, reservations, session, CreateWishlistAction(wishlists),
+            AddGiftAction(gifts), ReserveGiftAction(reservations), CancelReservationAction(reservations)
+        )
+        runCurrent()
+        val first = async { viewModel.addGiftAndWait("Book", "10", "", "", 4) }
+        runCurrent()
+        assertTrue(viewModel.isMutating)
+        assertTrue(viewModel.wishlistsState is LoadState.Content)
+        assertEquals(AppError.Conflict, (viewModel.addGiftAndWait("Second", "10", "", "", 4) as AppResult.Failure).error)
+        gate.complete(Unit)
+        assertTrue(first.await() is AppResult.Success)
+        runCurrent()
+        assertTrue(viewModel.mutationState is LoadState.Content)
+        assertTrue(viewModel.wishlistsState is LoadState.Content)
     }
 }
