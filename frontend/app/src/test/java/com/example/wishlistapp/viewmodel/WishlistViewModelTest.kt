@@ -1,0 +1,59 @@
+package com.example.wishlistapp.viewmodel
+
+import com.example.wishlistapp.data.SessionManager
+import com.example.wishlistapp.data.inMemoryPreferences
+import com.example.wishlistapp.data.repository.FakeDataStore
+import com.example.wishlistapp.data.repository.FakeGiftRepository
+import com.example.wishlistapp.data.repository.FakeReservationRepository
+import com.example.wishlistapp.data.repository.FakeWishlistRepository
+import com.example.wishlistapp.domain.action.AddGiftAction
+import com.example.wishlistapp.domain.action.CancelReservationAction
+import com.example.wishlistapp.domain.action.CreateWishlistAction
+import com.example.wishlistapp.domain.action.ReserveGiftAction
+import com.example.wishlistapp.domain.result.AppResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class WishlistViewModelTest {
+    private val dispatcher = StandardTestDispatcher()
+
+    @Before fun setUp() = Dispatchers.setMain(dispatcher)
+    @After fun tearDown() = Dispatchers.resetMain()
+
+    private fun newViewModel(userId: Int = 2): WishlistViewModel {
+        val session = SessionManager(inMemoryPreferences()).apply { saveUser(userId, "Guest") }
+        val store = FakeDataStore()
+        val wishlists = FakeWishlistRepository(store, session)
+        val gifts = FakeGiftRepository(store, session)
+        val reservations = FakeReservationRepository(store, session)
+        return WishlistViewModel(
+            wishlists, gifts, reservations, session,
+            CreateWishlistAction(wishlists), AddGiftAction(gifts),
+            ReserveGiftAction(reservations), CancelReservationAction(reservations)
+        )
+    }
+
+    @Test fun listAndDetailStatesAreIndependent() = runTest {
+        val viewModel = newViewModel()
+        runCurrent()
+        assertTrue(viewModel.wishlistsState is LoadState.Content)
+
+        viewModel.loadWishlist(4)
+        assertTrue(viewModel.wishlistState == LoadState.Loading)
+        assertTrue(viewModel.wishlistsState is LoadState.Content)
+        runCurrent()
+
+        assertTrue(viewModel.wishlistState is LoadState.Content)
+        assertTrue(viewModel.wishlistsState is LoadState.Content)
+    }
+}
