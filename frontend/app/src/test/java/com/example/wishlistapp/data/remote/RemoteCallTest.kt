@@ -2,6 +2,7 @@ package com.example.wishlistapp.data.remote
 
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
+import com.example.wishlistapp.data.mapper.InvalidDtoException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.CancellationException
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -38,5 +39,13 @@ class RemoteCallTest {
 
         val cancelled = runCatching { remoteCall<Unit> { throw CancellationException("stopped") } }
         assertTrue(cancelled.exceptionOrNull() is CancellationException)
+    }
+
+    @Test fun malformedDtoIsReportedButProgrammingErrorsAreNotSwallowed() = runBlocking {
+        val malformed = remoteCall<Unit> { throw InvalidDtoException("bad status") }
+        assertTrue((malformed as AppResult.Failure).error is AppError.Unknown)
+
+        val defect = runCatching { remoteCall<Unit> { throw IllegalStateException("programming bug") } }
+        assertTrue(defect.exceptionOrNull() is IllegalStateException)
     }
 }
