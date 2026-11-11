@@ -54,6 +54,8 @@ import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.LoadState
+import com.example.wishlistapp.viewmodel.toUserMessage
 import com.example.wishlistapp.domain.result.AppResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -72,7 +74,6 @@ fun SearchScreen(
     val searchHistory by historyStorage.historyFlow.collectAsState(initial = emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val message = stringResource(R.string.search_snackbar_not_found)
 
     Scaffold(
         topBar = {
@@ -145,20 +146,17 @@ fun SearchScreen(
 
                             val wishlist = viewModel.findWishlist(searchQuery)
 
-                            if (wishlist is AppResult.Success) {
-                                if (!searchHistory.contains(searchQuery)) {
-                                    historyStorage.addLink(searchQuery)
-
+                            when (wishlist) {
+                                is AppResult.Success -> {
+                                    if (!searchHistory.contains(searchQuery)) historyStorage.addLink(searchQuery)
+                                    navController.navigate(Screen.FindWishlist.createRoute(wishlist.data.id))
                                 }
-                                navController.navigate(
-                                    Screen.FindWishlist.createRoute(wishlist.data.id)
-                                )
-                            } else {
-                                snackbarHostState.showSnackbar(message)
+                                is AppResult.Failure -> snackbarHostState.showSnackbar(wishlist.error.toUserMessage())
                             }
                         }
                     },
                     modifier = Modifier.height(56.dp),
+                    enabled = viewModel.searchState != LoadState.Loading,
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary

@@ -119,6 +119,7 @@ fun AddWishlistScreen(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 28.dp)
             )
             AppButton(stringResource(R.string.done_button), modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = !viewModel.isMutating,
                 onClick = {
                 obtainWishlist(context,wishlistName, description, eventDate).fold(
                         onSuccess = {

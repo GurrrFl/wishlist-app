@@ -78,6 +78,7 @@ fun AddGiftScreen(
                     .fillMaxWidth()
                     .height(84.dp)
                     .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                enabled = !viewModel.isMutating,
                 onClick = {
                     obtainGift(
                         context = context,
