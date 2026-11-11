@@ -10,7 +10,7 @@ data class WishlistDto(
     @SerializedName("is_private") val isPrivate: Boolean,
     @SerializedName("unique_link") val uniqueLink: String?,
     @SerializedName("created_at") val createdAt: String,
-    @SerializedName("gifts") val gifts: List<GiftDto> = emptyList()
+    @SerializedName("gifts") val gifts: List<GiftDto>? = emptyList()
 )
 
 data class CreateWishlistDto(

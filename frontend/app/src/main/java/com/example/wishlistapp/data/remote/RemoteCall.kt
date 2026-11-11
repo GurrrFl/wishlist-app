@@ -2,6 +2,7 @@ package com.example.wishlistapp.data.remote
 
 import com.example.wishlistapp.domain.result.AppError
 import com.example.wishlistapp.domain.result.AppResult
+import com.example.wishlistapp.data.mapper.InvalidDtoException
 import java.io.IOException
 import com.google.gson.JsonParseException
 import kotlinx.coroutines.CancellationException
@@ -16,6 +17,8 @@ suspend fun <T> remoteCall(block: suspend () -> T): AppResult<T> = try {
 } catch (error: IOException) {
     AppResult.Failure(AppError.Network)
 } catch (error: JsonParseException) {
+    AppResult.Failure(AppError.Unknown("Invalid server response"))
+} catch (error: InvalidDtoException) {
     AppResult.Failure(AppError.Unknown("Invalid server response"))
 } catch (error: java.time.format.DateTimeParseException) {
     AppResult.Failure(AppError.Unknown("Invalid server response"))

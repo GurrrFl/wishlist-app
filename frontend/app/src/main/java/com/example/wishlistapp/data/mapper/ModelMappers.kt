@@ -11,6 +11,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
+class InvalidDtoException(message: String) : IllegalArgumentException(message)
+
 fun WishlistDto.toDomain(ownerName: String? = null): Wishlist = Wishlist(
     id = wishlistId,
     title = name,
@@ -19,7 +21,7 @@ fun WishlistDto.toDomain(ownerName: String? = null): Wishlist = Wishlist(
     eventDate = LocalDate.parse(eventDate),
     isPrivate = isPrivate,
     publicLink = uniqueLink,
-    gifts = gifts.map(GiftDto::toDomain)
+    gifts = gifts.orEmpty().map(GiftDto::toDomain)
 )
 
 fun GiftDto.toDomain(): Gift = Gift(
@@ -32,7 +34,7 @@ fun GiftDto.toDomain(): Gift = Gift(
     status = when (status?.lowercase()) {
         "available" -> GiftStatus.AVAILABLE
         "reserved" -> GiftStatus.RESERVED
-        else -> throw IllegalArgumentException("Unknown gift status: $status")
+        else -> throw InvalidDtoException("Unknown gift status: $status")
     },
     createdAt = createdAt?.let { value ->
         runCatching { OffsetDateTime.parse(value).toLocalDateTime() }
@@ -44,7 +46,9 @@ fun ReservationDto.toDomain(): Reservation = Reservation(
     id = reservationId,
     giftId = giftId,
     userId = userId,
-    reservedAt = runCatching { OffsetDateTime.parse(reservedDate).toLocalDateTime() }
-        .recoverCatching { LocalDateTime.parse(reservedDate) }
-        .getOrNull()
+    reservedAt = try {
+        OffsetDateTime.parse(reservedDate).toLocalDateTime()
+    } catch (error: java.time.format.DateTimeParseException) {
+        LocalDateTime.parse(reservedDate)
+    }
 )
