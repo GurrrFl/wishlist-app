@@ -13,22 +13,39 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.GiftCardNew
 import com.example.wishlistapp.ui.components.NestedScreenHeader
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.LoadState
+import com.example.wishlistapp.viewmodel.toUserMessage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -39,12 +56,33 @@ fun WishlistDetailsScreen(
     wishlistId: Int,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val wishlist = viewModel.getWishlist(wishlistId)!!
+    val wishlists by viewModel.wishlists.collectAsState()
+    val wishlist = wishlists.find { it.id == wishlistId }
+        ?: (viewModel.wishlistState as? LoadState.Content)?.data?.takeIf { it.id == wishlistId }
+    LaunchedEffect(wishlistId) { if (wishlist == null) viewModel.loadWishlist(wishlistId) }
+    if (wishlist == null) {
+        Scaffold(topBar = { NestedScreenHeader(text = "Список подарков") { navController.popBackStack() } }) { padding ->
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                when (val state = viewModel.wishlistState) {
+                    is LoadState.Error -> Text(state.message)
+                    else -> CircularProgressIndicator()
+                }
+            }
+        }
+        return
+    }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
             NestedScreenHeader(text = wishlist.title) { navController.popBackStack() }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -106,6 +144,44 @@ fun WishlistDetailsScreen(
                     }
                 }
             }
+            item {
+                Button(
+                    onClick = { showDeleteDialog = true },
+                    enabled = !viewModel.isMutating,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.wishlist_delete_button))
+                }
+            }
         }
+    }
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.wishlist_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.wishlist_delete_confirm_message)) },
+            confirmButton = {
+                TextButton(enabled = !viewModel.isMutating, onClick = {
+                    scope.launch {
+                        when (val result = viewModel.deleteWishlistAndWait(wishlistId)) {
+                            is AppResult.Success -> {
+                                showDeleteDialog = false
+                                navController.popBackStack()
+                            }
+                            is AppResult.Failure -> {
+                                showDeleteDialog = false
+                                snackbarHostState.showSnackbar(result.error.toUserMessage())
+                            }
+                        }
+                    }
+                }) { Text(stringResource(R.string.wishlist_delete_button)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.wishlist_delete_cancel))
+                }
+            }
+        )
     }
 }

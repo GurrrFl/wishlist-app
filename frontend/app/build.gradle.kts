@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
 }
 
 android {
@@ -19,8 +18,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val debugApiUrl = providers.gradleProperty("wishlistDebugApiUrl")
+        .getOrElse("https://wishlist-app-3owv.onrender.com/")
+    val useNetworkDataSource = providers.gradleProperty("wishlistNetworkDataSource")
+        .map(String::toBoolean)
+        .getOrElse(false)
+
     buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiUrl\"")
+            buildConfigField("boolean", "NETWORK_DATA_SOURCE", useNetworkDataSource.toString())
+        }
         release {
+            buildConfigField("String", "API_BASE_URL", "\"https://wishlist-app-3owv.onrender.com/\"")
+            buildConfigField("boolean", "NETWORK_DATA_SOURCE", "true")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -37,12 +48,10 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 dependencies {
-    implementation(libs.androidx.room)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.ksp)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
@@ -64,6 +73,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.identity.jvm)
     testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

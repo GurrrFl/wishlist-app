@@ -15,10 +15,12 @@ fun AppButton(
     modifier: Modifier = Modifier,
     buttonColor: Color = MaterialTheme.colorScheme.primary,
     buttonTextColor: Color = MaterialTheme.colorScheme.onPrimary,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             contentColor = buttonTextColor,

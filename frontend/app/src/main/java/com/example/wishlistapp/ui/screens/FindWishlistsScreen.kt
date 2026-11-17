@@ -31,6 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,7 +54,11 @@ fun FindWishlistScreen(
     wishlistId: Int,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val wishlist = viewModel.getWishlist(wishlistId) ?: return
+    val wishlists by viewModel.wishlists.collectAsState()
+    val publicWishlist by viewModel.publicWishlist.collectAsState()
+    val wishlist = wishlists.find { it.id == wishlistId }
+        ?: publicWishlist?.takeIf { it.id == wishlistId }
+        ?: return
 
     Scaffold(
         topBar = {NestedScreenHeader(wishlist.title, onClick = {navController.navigateUp()})}
@@ -155,7 +161,7 @@ private fun GiftItemCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = gift.price,
+                    text = gift.price?.toString().orEmpty(),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color(0xFF9C27B0),
                     fontWeight = FontWeight.Medium

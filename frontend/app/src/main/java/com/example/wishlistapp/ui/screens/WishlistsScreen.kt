@@ -1,5 +1,6 @@
 package com.example.wishlistapp.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,10 +30,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -46,7 +51,7 @@ import com.example.wishlistapp.viewmodel.WishlistViewModel
 @Composable
 fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistViewModel ) {
 
-    val wishlists = wishViewModel.getWishlists()
+    val wishlists by wishViewModel.wishlists.collectAsState()
     Scaffold(
         topBar = { AppHeader(stringResource(R.string.wishlists_title)) },
         floatingActionButton = {
@@ -66,32 +71,49 @@ fun WishlistsScreen(navController: NavHostController,  wishViewModel: WishlistVi
         floatingActionButtonPosition = FabPosition.End
 
     ) { paddingValues ->
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.onPrimary)) {
+            Box(modifier = Modifier.padding(paddingValues))  {
+                Image(
+                    painter = painterResource(id = R.drawable.violla),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(top=16.dp)
+                        .fillMaxSize()
+                        .align(Alignment.BottomEnd).height(680.dp).width(660.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp)
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            headerDivider()
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+
+
+                );
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    //.background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                    .padding(paddingValues)
+                    ,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(wishlists) { wishlist ->
-                    WishlistCard(
-                        title = wishlist.title,
-                        date = wishlist.eventDate.toString()
-                    ) {
-                        navController.navigate(
-                            Screen.WishlistDetails.createRoute(wishlist.id)
-                        )
+                headerDivider()
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(wishlists) { wishlist ->
+                        WishlistCard(
+                            title = wishlist.title,
+                            date = wishlist.eventDate.toString()
+                        ) {
+                            navController.navigate(
+                                Screen.WishlistDetails.createRoute(wishlist.id)
+                            )
+                        }
                     }
                 }
-            }
 
+            }
         }
     }
 }
@@ -104,7 +126,8 @@ fun WishlistCard(title: String, date: String, onClick: () -> Unit) {
             .clickable { onClick() }
             .clip(RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        border = CardDefaults.outlinedCardBorder()
     ) {
         Row(
             modifier = Modifier

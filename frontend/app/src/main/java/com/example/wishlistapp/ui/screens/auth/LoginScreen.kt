@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -16,6 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
+import com.example.wishlistapp.BuildConfig
+import com.example.wishlistapp.data.demo.DemoAccount
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.viewmodel.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -52,6 +56,19 @@ fun LoginScreen(
             stringResource(R.string.no_account_label),
             stringResource(R.string.register_label),
         ){ navController.navigate(Screen.Register.route) }
+
+        if (!BuildConfig.NETWORK_DATA_SOURCE) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(stringResource(R.string.demo_mode_hint))
+            OutlinedButton(
+                onClick = { viewModel.enterDemo(DemoAccount.ALEKSANDRA) },
+                enabled = state !is AuthState.Loading
+            ) { Text(stringResource(R.string.demo_aleksandra)) }
+            OutlinedButton(
+                onClick = { viewModel.enterDemo(DemoAccount.KATE) },
+                enabled = state !is AuthState.Loading
+            ) { Text(stringResource(R.string.demo_kate)) }
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
     }

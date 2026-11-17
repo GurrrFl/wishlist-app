@@ -38,10 +38,16 @@ class SettingsViewModel(
         }
     }
     fun editName(newName: String){
-        sessionManager.saveUserName(newName)
+        val id = sessionManager.getUserId() ?: return
+        sessionManager. saveUser(id,newName)
     }
     fun getUserName(): String? {
         return sessionManager.getUserName()
+    }
+
+    fun logout() {
+        sessionManager.clear()
+        _startDestination.value = Screen.Login.route
     }
 
 }

@@ -21,11 +21,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,28 +39,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.wishlistapp.R
-import com.example.wishlistapp.data.model.Gift
-import com.example.wishlistapp.data.model.GiftStatus
+import com.example.wishlistapp.domain.result.AppResult
 import com.example.wishlistapp.navigation.Screen
 import com.example.wishlistapp.ui.components.AppHeader
 import com.example.wishlistapp.ui.components.RoundedImage
 import com.example.wishlistapp.ui.components.generateRandomColor
 import com.example.wishlistapp.ui.components.headerDivider
 import com.example.wishlistapp.viewmodel.WishlistViewModel
+import com.example.wishlistapp.viewmodel.ReservedGift
+import com.example.wishlistapp.viewmodel.LoadState
+import com.example.wishlistapp.viewmodel.toUserMessage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ReserveGiftsScreen(
     navController: NavHostController,
     viewModel: WishlistViewModel = koinViewModel()
 ) {
-    val gifts = viewModel
-        .getAllGifts()
-        .filter { it.status == GiftStatus.RESERVED }
+    val reservations by viewModel.reservedGifts.collectAsState()
 
-    var giftToCancel by remember { mutableStateOf<Gift?>(null) }
+    var giftToCancel by remember { mutableStateOf<ReservedGift?>(null) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
-        topBar = { AppHeader(stringResource(R.string.reserve_gifts_title)) }
+        topBar = { AppHeader(stringResource(R.string.reserve_gifts_title)) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -67,16 +76,16 @@ fun ReserveGiftsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             headerDivider()
-            if (gifts.isEmpty()) {
+            if (reservations.isEmpty()) {
                 EmptyReserveGiftsCard()
             } else {
                 ReservedGiftsList(
-                    gifts = gifts,
-                    onGiftClick = { gift ->
-                        navController.navigate(Screen.GiftDetails.createRoute(gift.id))
+                    reservations = reservations,
+                    onGiftClick = { item ->
+                        item.gift?.let { navController.navigate(Screen.GiftDetails.createRoute(it.id)) }
                     },
-                    onCancelReservation = { gift ->
-                        giftToCancel = gift
+                    onCancelReservation = { item ->
+                        giftToCancel = item
                     }
                 )
             }
@@ -84,10 +93,18 @@ fun ReserveGiftsScreen(
 
         if (giftToCancel != null) {
             CancelReservationDialog(
-                gift = giftToCancel!!,
+                giftName = giftToCancel!!.gift?.name
+                    ?: stringResource(R.string.reserve_gifts_unknown_gift, giftToCancel!!.reservation.giftId),
+                isBusy = viewModel.isMutating,
                 onConfirm = {
-                    viewModel.cancelReservation(giftToCancel!!.id)
-                    giftToCancel = null
+                    giftToCancel?.let { selected ->
+                        scope.launch {
+                            when (val result = viewModel.cancelReservationAndWait(selected.reservation.id)) {
+                                is AppResult.Success -> giftToCancel = null
+                                is AppResult.Failure -> snackbarHostState.showSnackbar(result.error.toUserMessage())
+                            }
+                        }
+                    }
                 },
                 onDismiss = { giftToCancel = null }
             )
@@ -126,18 +143,18 @@ fun EmptyReserveGiftsCard() {
 
 @Composable
 fun ReservedGiftsList(
-    gifts: List<Gift>,
-    onGiftClick: (Gift) -> Unit,
-    onCancelReservation: (Gift) -> Unit
+    reservations: List<ReservedGift>,
+    onGiftClick: (ReservedGift) -> Unit,
+    onCancelReservation: (ReservedGift) -> Unit
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(gifts) { gift ->
+        items(reservations) { item ->
             ReservedGiftCard(
-                gift = gift,
-                onCancelReservation = { onCancelReservation(gift) },
-                onOpenDetails = { onGiftClick(gift) }
+                item = item,
+                onCancelReservation = { onCancelReservation(item) },
+                onOpenDetails = { onGiftClick(item) }
             )
         }
     }
@@ -145,7 +162,8 @@ fun ReservedGiftsList(
 
 @Composable
 fun CancelReservationDialog(
-    gift: Gift,
+    giftName: String,
+    isBusy: Boolean,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -154,11 +172,11 @@ fun CancelReservationDialog(
         title = { Text(stringResource(R.string.reserve_gifts_cancel_dialog_title)) },
         text = {
             Text(
-                stringResource(R.string.reserve_gifts_cancel_dialog_message, gift.name)
+                stringResource(R.string.reserve_gifts_cancel_dialog_message, giftName)
             )
         },
         confirmButton = {
-            Button(onClick = onConfirm) {
+            Button(onClick = onConfirm, enabled = !isBusy) {
                 Text(stringResource(R.string.reserve_gifts_cancel_confirm))
             }
         },
@@ -177,7 +195,7 @@ fun CancelReservationDialog(
 
 @Composable
 fun ReservedGiftCard(
-    gift: Gift,
+    item: ReservedGift,
     onCancelReservation: () -> Unit,
     onOpenDetails: () -> Unit
 ) {
@@ -203,38 +221,38 @@ fun ReservedGiftCard(
                     imageModifier = Modifier.size(32.dp),
                     backgroundColor = iconBackgroundColor,
                     shape = RoundedCornerShape(12.dp),
-                    contentDescription = gift.name
+                    contentDescription = item.gift?.name
                 )
 
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = gift.name,
+                        text = item.gift?.name
+                            ?: stringResource(R.string.reserve_gifts_unknown_gift, item.reservation.giftId),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(
-                        text = gift.price + stringResource(R.string.price),
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 6.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp)
-                        )
+                    item.gift?.price?.let { price ->
                         Text(
-                            text = stringResource(R.string.reserve_gifts_card_reserved, gift.created),
-                            style = MaterialTheme.typography.bodySmall
+                            text = price.toString() + stringResource(R.string.price),
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
                         )
+                    }
+                    item.reservation.reservedAt?.let { reservedAt ->
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 6.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Text(
+                                stringResource(R.string.reserve_gifts_card_reserved, reservedAt.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
             }
@@ -255,7 +273,7 @@ fun ReservedGiftCard(
                     )
                 }
 
-                Button(onClick = onOpenDetails) {
+                Button(onClick = onOpenDetails, enabled = item.gift != null) {
                     Text(
                         stringResource(R.string.reserve_gifts_card_details_button),
                         style = MaterialTheme.typography.bodySmall

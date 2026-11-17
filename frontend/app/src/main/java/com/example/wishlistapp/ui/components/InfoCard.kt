@@ -44,7 +44,7 @@ fun InfoCard(wishlist: Wishlist, isSearched: Boolean = false) {
 
             InfoRow(
                 stringResource(R.string.details_owner_label),
-                wishlist.ownerName
+                wishlist.ownerName.orEmpty()
             )
             InfoRow(
                 stringResource(R.string.details_date_label),

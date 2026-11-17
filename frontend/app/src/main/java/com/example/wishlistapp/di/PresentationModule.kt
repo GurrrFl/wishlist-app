@@ -13,7 +13,7 @@ val presentationModule = module{
         AuthViewModel( get())
     }
     viewModel {
-        WishlistViewModel(get())
+        WishlistViewModel(get(), get(), get(), get(), get(), get(), get(), get())
     }
     viewModel {
         SettingsViewModel(get())

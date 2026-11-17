@@ -92,19 +92,19 @@ fun AccountScreen(
                 SettingsItem(
                     icon = Icons.Default.GridView,
                     title = stringResource(R.string.profile_menu_my_wishlists),
-                    onClick = { /* navigate to wishlists */ }
+                    onClick = { navController.navigate(Screen.Wishlists.route) }
                 )
                 ProfileHorizontalDivider()
                 SettingsItem(
                     icon = Icons.Default.Favorite,
                     title = stringResource(R.string.profile_menu_reserved_gifts),
-                    onClick = { /* navigate to reserved gifts */ }
+                    onClick = {navController.navigate(Screen.ReserveGifts.route) }
                 )
                 ProfileHorizontalDivider()
                 SettingsItem(
                     icon = Icons.Default.CardGiftcard,
                     title = stringResource(R.string.profile_menu_find_by_link),
-                    onClick = { /* navigate to following */ }
+                    onClick = { navController.navigate(Screen.Search.route) }
                 )
             }
 
@@ -136,7 +136,13 @@ fun AccountScreen(
                     icon = Icons.AutoMirrored.Filled.ExitToApp,
                     title = stringResource(R.string.settings_logout),
                     titleColor = MaterialTheme.colorScheme.error,
-                    onClick = { navController.navigate(Screen.Login.route) }
+                    onClick = {
+                        settingsViewModel.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 

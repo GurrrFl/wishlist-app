@@ -8,7 +8,8 @@ fun initKoin(application: Application) {
     startKoin {
         androidContext(application)
         modules(
-            appModule,
+            networkModule,
+            repositoryModule,
             presentationModule
 
         )
